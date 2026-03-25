@@ -83,7 +83,6 @@ export default function CreateEditListingPage() {
         method: "POST",
         body: formData,
         headers,
-        credentials: "include",
       });
 
       if (!response.ok) {

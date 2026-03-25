@@ -8,6 +8,7 @@ import crypto from "crypto";
 import createMemoryStore from "memorystore";
 import { seedDatabase } from "./seed";
 import multer from "multer";
+import cors from "cors";
 import path from "path";
 import fs from "fs";
 
@@ -128,6 +129,14 @@ export async function registerRoutes(
   if (process.env.NODE_ENV === "production") {
     app.set("trust proxy", 1);
   }
+
+  // ---- CORS setup (required for proxy/iframe deployments) ----
+  app.use(cors({
+    origin: true,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }));
 
   // ---- Session setup ----
   const MemoryStore = createMemoryStore(session);
