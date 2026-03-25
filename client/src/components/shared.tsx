@@ -135,6 +135,7 @@ const statusColors: Record<string, string> = {
 };
 
 export function StatusBadge({ status, className }: { status: string; className?: string }) {
+  if (!status) return null;
   const color = statusColors[status] || "bg-gray-100 text-gray-700";
   const label = status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
   return (

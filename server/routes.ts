@@ -7,6 +7,38 @@ import { Strategy as LocalStrategy } from "passport-local";
 import crypto from "crypto";
 import createMemoryStore from "memorystore";
 import { seedDatabase } from "./seed";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
+// ============================================================
+// FILE UPLOAD SETUP
+// ============================================================
+const UPLOAD_DIR = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(UPLOAD_DIR)) {
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+
+const uploadStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname) || ".jpg";
+    cb(null, `${Date.now()}-${crypto.randomBytes(6).toString("hex")}${ext}`);
+  },
+});
+
+const upload = multer({
+  storage: uploadStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+  fileFilter: (_req, file, cb) => {
+    const allowed = /^image\/(jpeg|jpg|png|gif|webp|avif)$/;
+    if (allowed.test(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files (JPEG, PNG, GIF, WebP) are allowed"));
+    }
+  },
+});
 
 // ============================================================
 // PASSWORD HASHING
@@ -116,6 +148,27 @@ export async function registerRoutes(
       done(null, user || false);
     } catch (err) {
       done(err);
+    }
+  });
+
+  // ============================================================
+  // FILE UPLOAD / STATIC SERVING
+  // ============================================================
+  // Serve uploaded files statically
+  const express = await import("express");
+  app.use("/uploads", express.default.static(UPLOAD_DIR));
+
+  // Upload endpoint (up to 5 images)
+  app.post("/api/upload", requireAuth, upload.array("images", 5), (req: Request, res: Response) => {
+    try {
+      const files = req.files as Express.Multer.File[];
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: "No files uploaded" });
+      }
+      const urls = files.map((f) => `/uploads/${f.filename}`);
+      return res.json({ urls });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
     }
   });
 

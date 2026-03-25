@@ -9,14 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { Coins, Upload, Video, X, Save, Send } from "lucide-react";
+import { Coins, Upload, Video, X, Save, Send, ImagePlus, Loader2, Link as LinkIcon } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, getQueryFn } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useParams, useLocation } from "wouter";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import type { Listing } from "@shared/schema";
 
 const CATEGORIES = [
@@ -56,6 +56,68 @@ export default function CreateEditListingPage() {
   const queryClient = useQueryClient();
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [newImageUrl, setNewImageUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = useCallback(async (files: FileList | File[]) => {
+    const fileArray = Array.from(files).filter(f => f.type.startsWith("image/"));
+    if (fileArray.length === 0) {
+      toast({ title: "Invalid files", description: "Please select image files (JPEG, PNG, GIF, WebP)", variant: "destructive" });
+      return;
+    }
+    if (imageUrls.length + fileArray.length > 10) {
+      toast({ title: "Too many images", description: "Maximum 10 images per listing", variant: "destructive" });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      fileArray.slice(0, 5).forEach(file => formData.append("images", file));
+
+      // Use the same API_BASE as apiRequest so uploads work in deployed environment
+      const API_BASE = "__PORT_5000__".startsWith("__") ? "" : "__PORT_5000__";
+      const response = await fetch(`${API_BASE}/api/upload`, {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || "Upload failed");
+      }
+
+      const { urls } = await response.json();
+      setImageUrls(prev => [...prev, ...urls]);
+      toast({ title: `${urls.length} image${urls.length > 1 ? "s" : ""} uploaded` });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }, [imageUrls.length, toast]);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files?.length) {
+      handleFileUpload(e.dataTransfer.files);
+    }
+  }, [handleFileUpload]);
+
+  const handleDrag = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  }, []);
 
   const { data: existingListing } = useQuery<Listing>({
     queryKey: [`/api/listings/${id}`],
@@ -274,27 +336,84 @@ export default function CreateEditListingPage() {
               <CardContent className="space-y-4">
                 <div>
                   <Label>Images</Label>
-                  <div className="flex gap-2 mt-2">
-                    <Input
-                      placeholder="Paste image URL..."
-                      value={newImageUrl}
-                      onChange={(e) => setNewImageUrl(e.target.value)}
-                      className="rounded-xl"
-                      data-testid="image-url-input"
+                  <p className="text-xs text-muted-foreground mt-1 mb-3">Upload up to 10 images. First image will be the cover photo.</p>
+
+                  {/* Upload from computer - drag & drop zone */}
+                  <div
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                    onClick={() => !uploading && fileInputRef.current?.click()}
+                    className={`relative flex flex-col items-center justify-center gap-2 p-8 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${
+                      dragActive
+                        ? "border-primary bg-primary/5"
+                        : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50"
+                    } ${uploading ? "pointer-events-none opacity-60" : ""}`}
+                    data-testid="image-dropzone"
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      accept="image/jpeg,image/png,image/gif,image/webp"
+                      className="hidden"
+                      onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+                      data-testid="image-file-input"
                     />
+                    {uploading ? (
+                      <>
+                        <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                        <span className="text-sm text-muted-foreground">Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <ImagePlus className="h-8 w-8 text-muted-foreground" />
+                        <div className="text-center">
+                          <span className="text-sm font-medium text-primary">Click to upload</span>
+                          <span className="text-sm text-muted-foreground"> or drag and drop</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">JPEG, PNG, GIF, WebP (max 10 MB each)</span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* OR add by URL */}
+                  <div className="flex items-center gap-3 mt-4 mb-2">
+                    <Separator className="flex-1" />
+                    <span className="text-xs text-muted-foreground">or add by URL</span>
+                    <Separator className="flex-1" />
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Paste image URL..."
+                        value={newImageUrl}
+                        onChange={(e) => setNewImageUrl(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addImageUrl())}
+                        className="pl-10 rounded-xl"
+                        data-testid="image-url-input"
+                      />
+                    </div>
                     <Button type="button" onClick={addImageUrl} variant="outline" className="rounded-xl" data-testid="add-image-btn">
-                      <Upload className="h-4 w-4" />
+                      Add
                     </Button>
                   </div>
+
+                  {/* Image thumbnails */}
                   {imageUrls.length > 0 && (
-                    <div className="flex gap-2 mt-3 flex-wrap">
+                    <div className="grid grid-cols-5 gap-2 mt-4">
                       {imageUrls.map((url, i) => (
-                        <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border">
-                          <img src={url} alt="" className="w-full h-full object-cover" />
+                        <div key={i} className="relative aspect-square rounded-lg overflow-hidden border group">
+                          <img src={url} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
+                          {i === 0 && (
+                            <span className="absolute bottom-1 left-1 text-[10px] font-medium bg-primary text-white px-1.5 py-0.5 rounded">Cover</span>
+                          )}
                           <button
                             type="button"
                             onClick={() => removeImage(i)}
-                            className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/50 text-white flex items-center justify-center"
+                            className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                             data-testid={`remove-image-${i}`}
                           >
                             <X className="h-3 w-3" />
