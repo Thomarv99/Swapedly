@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Coins, Upload, Video, X, Save, Send, ImagePlus, Loader2, Link as LinkIcon } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiRequest, getQueryFn, API_BASE } from "@/lib/queryClient";
+import { apiRequest, getQueryFn, API_BASE, getAuthToken } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useParams, useLocation } from "wouter";
@@ -76,9 +76,14 @@ export default function CreateEditListingPage() {
       const formData = new FormData();
       fileArray.slice(0, 5).forEach(file => formData.append("images", file));
 
+      const headers: Record<string, string> = {};
+      const token = getAuthToken();
+      if (token) headers["Authorization"] = `Bearer ${token}`;
       const response = await fetch(`${API_BASE}/api/upload`, {
         method: "POST",
         body: formData,
+        headers,
+        credentials: "include",
       });
 
       if (!response.ok) {

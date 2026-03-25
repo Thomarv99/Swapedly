@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, setAuthToken, getAuthToken } from "@/lib/queryClient";
 import { getQueryFn } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
 
@@ -19,7 +19,14 @@ export function useAuth() {
       return res.json();
     },
     onSuccess: (userData) => {
-      queryClient.setQueryData(["/api/auth/me"], userData);
+      // Extract and store auth token
+      if (userData.token) {
+        setAuthToken(userData.token);
+        const { token: _, ...userWithoutToken } = userData;
+        queryClient.setQueryData(["/api/auth/me"], userWithoutToken);
+      } else {
+        queryClient.setQueryData(["/api/auth/me"], userData);
+      }
     },
   });
 
@@ -29,7 +36,13 @@ export function useAuth() {
       return res.json();
     },
     onSuccess: (userData) => {
-      queryClient.setQueryData(["/api/auth/me"], userData);
+      if (userData.token) {
+        setAuthToken(userData.token);
+        const { token: _, ...userWithoutToken } = userData;
+        queryClient.setQueryData(["/api/auth/me"], userWithoutToken);
+      } else {
+        queryClient.setQueryData(["/api/auth/me"], userData);
+      }
     },
   });
 
@@ -38,6 +51,7 @@ export function useAuth() {
       await apiRequest("POST", "/api/auth/logout");
     },
     onSuccess: () => {
+      setAuthToken(null);
       queryClient.setQueryData(["/api/auth/me"], null);
       queryClient.clear();
     },

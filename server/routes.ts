@@ -70,27 +70,50 @@ function calculateFee(price: number): number {
 }
 
 // ============================================================
-// AUTH MIDDLEWARE
+// TOKEN-BASED AUTH (works in proxy/iframe environments where cookies are stripped)
 // ============================================================
+const tokenStore = new Map<string, number>(); // token -> userId
+
+function generateToken(): string {
+  return crypto.randomBytes(32).toString("hex");
+}
+
+// Middleware: check Bearer token first, fall back to session
 function requireAuth(req: Request, res: Response, next: NextFunction): void {
-  if (!req.isAuthenticated || !req.isAuthenticated()) {
-    res.status(401).json({ message: "Authentication required" });
-    return;
+  const authHeader = req.headers.authorization;
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.slice(7);
+    const userId = tokenStore.get(token);
+    if (userId) {
+      // Attach user to request
+      storage.getUserById(userId).then(user => {
+        if (user) {
+          (req as any).user = user;
+          return next();
+        }
+        res.status(401).json({ message: "Authentication required" });
+      }).catch(() => {
+        res.status(401).json({ message: "Authentication required" });
+      });
+      return;
+    }
   }
-  next();
+  // Fall back to session
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    return next();
+  }
+  res.status(401).json({ message: "Authentication required" });
 }
 
 function requireAdmin(req: Request, res: Response, next: NextFunction): void {
-  if (!req.isAuthenticated || !req.isAuthenticated()) {
-    res.status(401).json({ message: "Authentication required" });
-    return;
-  }
-  const user = req.user as any;
-  if (user.role !== "admin") {
-    res.status(403).json({ message: "Admin access required" });
-    return;
-  }
-  next();
+  requireAuth(req, res, () => {
+    const user = req.user as any;
+    if (user.role !== "admin") {
+      res.status(403).json({ message: "Admin access required" });
+      return;
+    }
+    next();
+  });
 }
 
 // ============================================================
@@ -100,6 +123,11 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+
+  // Trust proxy in production (deployed behind proxy)
+  if (process.env.NODE_ENV === "production") {
+    app.set("trust proxy", 1);
+  }
 
   // ---- Session setup ----
   const MemoryStore = createMemoryStore(session);
@@ -113,8 +141,10 @@ export async function registerRoutes(
       cookie: {
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
         httpOnly: true,
-        secure: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" as const : "lax" as const,
       },
+      proxy: process.env.NODE_ENV === "production",
     })
   );
 
@@ -274,7 +304,9 @@ export async function registerRoutes(
       req.login(user, (err) => {
         if (err) return res.status(500).json({ message: "Login failed after registration" });
         const { password: _, ...safeUser } = user;
-        return res.status(201).json(safeUser);
+        const token = generateToken();
+        tokenStore.set(token, user.id);
+        return res.status(201).json({ ...safeUser, token });
       });
     } catch (err: any) {
       console.error("Registration error:", err);
@@ -289,7 +321,10 @@ export async function registerRoutes(
       req.login(user, (loginErr) => {
         if (loginErr) return res.status(500).json({ message: "Login failed" });
         const { password: _, ...safeUser } = user;
-        return res.json(safeUser);
+        // Generate auth token for proxy/iframe environments where cookies don't work
+        const token = generateToken();
+        tokenStore.set(token, user.id);
+        return res.json({ ...safeUser, token });
       });
     })(req, res, next);
   });
@@ -302,6 +337,22 @@ export async function registerRoutes(
   });
 
   app.get("/api/auth/me", (req: Request, res: Response) => {
+    // Check Bearer token first
+    const authHeader = req.headers.authorization;
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.slice(7);
+      const userId = tokenStore.get(token);
+      if (userId) {
+        return storage.getUserById(userId).then(user => {
+          if (user) {
+            const { password: _, ...safeUser } = user as any;
+            return res.json(safeUser);
+          }
+          return res.status(401).json({ message: "Not authenticated" });
+        }).catch(() => res.status(401).json({ message: "Not authenticated" }));
+      }
+    }
+    // Fall back to session
     if (!req.isAuthenticated || !req.isAuthenticated()) {
       return res.status(401).json({ message: "Not authenticated" });
     }
