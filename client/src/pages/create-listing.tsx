@@ -195,10 +195,15 @@ export default function CreateEditListingPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/listings"] });
       queryClient.invalidateQueries({ queryKey: ["/api/listings/user"] });
       queryClient.invalidateQueries({ queryKey: ["/api/onboarding"] });
-      // Check if user is in onboarding — show share modal then redirect to membership
-      if (onboardingData && !onboardingData.onboardingComplete && onboardingData.step === "listings") {
-        // Show Facebook share modal with the listing they just created
+      // Always show Facebook share modal when publishing (not editing)
+      if (!isEdit && data?.status === "active") {
         setShareModal({ listing: data });
+        return;
+      }
+      // After editing, or saving draft, go to my-listings
+      // After onboarding first listing, go to membership
+      if (onboardingData && !onboardingData.onboardingComplete && onboardingData.step === "listings") {
+        navigate("/membership");
         return;
       }
       navigate("/my-listings");
@@ -589,11 +594,19 @@ export default function CreateEditListingPage() {
           user={user}
           onDone={() => {
             setShareModal(null);
-            navigate("/membership");
+            if (onboardingData && !onboardingData.onboardingComplete) {
+              navigate("/membership");
+            } else {
+              navigate("/my-listings");
+            }
           }}
           onSkip={() => {
             setShareModal(null);
-            navigate("/membership");
+            if (onboardingData && !onboardingData.onboardingComplete) {
+              navigate("/membership");
+            } else {
+              navigate("/my-listings");
+            }
           }}
         />
       )}
