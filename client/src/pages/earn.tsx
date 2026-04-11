@@ -229,9 +229,9 @@ export default function EarnPage() {
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
-              { pack: "100", sb: 100, price: "$1.99", tag: null },
-              { pack: "500", sb: 500, price: "$7.99", tag: "Popular" },
-              { pack: "1000", sb: 1000, price: "$14.99", tag: "Best Value" },
+              { pack: "100", sb: 100, price: "$100.00", tag: null },
+              { pack: "500", sb: 500, price: "$500.00", tag: "Popular" },
+              { pack: "1000", sb: 1000, price: "$1,000.00", tag: "Best Value" },
             ].map((item) => (
               <button
                 key={item.pack}

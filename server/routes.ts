@@ -2075,9 +2075,9 @@ export async function registerRoutes(
 
       const { pack } = req.body; // "100" | "500" | "1000"
       const packMap: Record<string, { sb: number; priceUsd: number; label: string }> = {
-        "100": { sb: 100, priceUsd: 1.99, label: "100 Swap Bucks" },
-        "500": { sb: 500, priceUsd: 7.99, label: "500 Swap Bucks" },
-        "1000": { sb: 1000, priceUsd: 14.99, label: "1,000 Swap Bucks" },
+        "100": { sb: 100, priceUsd: 100.00, label: "100 Swap Bucks" },
+        "500": { sb: 500, priceUsd: 500.00, label: "500 Swap Bucks" },
+        "1000": { sb: 1000, priceUsd: 1000.00, label: "1,000 Swap Bucks" },
       };
       const chosen = packMap[pack];
       if (!chosen) return res.status(400).json({ message: "Invalid pack" });
