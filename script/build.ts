@@ -30,6 +30,9 @@ const allowlist = [
   "zod-validation-error",
 ];
 
+// Native modules that must always be external (compiled for the target platform)
+const nativeModules = ["better-sqlite3", "bufferutil", "utf-8-validate"];
+
 async function buildAll() {
   await rm("dist", { recursive: true, force: true });
 
@@ -42,7 +45,10 @@ async function buildAll() {
     ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.devDependencies || {}),
   ];
-  const externals = allDeps.filter((dep) => !allowlist.includes(dep));
+  const externals = [
+    ...allDeps.filter((dep) => !allowlist.includes(dep)),
+    ...nativeModules,
+  ];
 
   await esbuild({
     entryPoints: ["server/index.ts"],
