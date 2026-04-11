@@ -41,11 +41,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ReactNode, useState, useRef } from "react";
-import { Label } from "@/components/ui/label";
-import { apiRequest, setAuthToken, queryClient } from "@/lib/queryClient";
-import { FcGoogle } from "react-icons/fc";
 import { useOnboarding } from "@/components/onboarding-guard";
+import { ReactNode, useState } from "react";
+import { Label } from "@/components/ui/label";
+import { apiRequest, setAuthToken, queryClient as qc } from "@/lib/queryClient";
+import { FcGoogle } from "react-icons/fc";
 
 // ============================
 // Logo Component
@@ -390,7 +390,7 @@ function LoginModal() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Login failed");
       setAuthToken(data.token);
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      qc.invalidateQueries({ queryKey: ["/api/auth/me"] });
       setOpen(false);
       navigate("/dashboard");
     } catch (e: any) {
