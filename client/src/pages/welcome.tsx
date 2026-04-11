@@ -84,15 +84,11 @@ export default function WelcomePage() {
             <Link href="/pricing">
               <Button variant="ghost" size="sm" className="text-sm hidden sm:flex">Pricing</Button>
             </Link>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-sm"
-              onClick={() => setShowLogin(true)}
-              data-testid="login-link"
-            >
-              Log In
-            </Button>
+            <Link href="/login">
+              <Button variant="ghost" size="sm" className="text-sm" data-testid="login-link">
+                Log In
+              </Button>
+            </Link>
             <Link href="/signup">
               <Button size="sm" className="rounded-xl gap-1.5" data-testid="signup-cta-nav">
                 Get Started Free
@@ -294,7 +290,7 @@ export default function WelcomePage() {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <Logo />
           <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap justify-center">
-            <button onClick={() => setShowLogin(true)} className="hover:text-primary">Sign In</button>
+            <Link href="/login" className="hover:text-primary">Sign In</Link>
             <Link href="/signup" className="hover:text-primary">Sign Up</Link>
             <Link href="/pricing" className="hover:text-primary">Pricing</Link>
             <Link href="/terms" className="hover:text-primary">Terms</Link>

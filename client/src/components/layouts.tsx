@@ -79,7 +79,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             </nav>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/?login=1">
+            <Link href="/login">
               <Button variant="ghost" size="sm" data-testid="signin-nav-btn" className="gap-1.5">
                 <LogIn className="h-4 w-4" />
                 Sign In

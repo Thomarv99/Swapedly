@@ -22,7 +22,7 @@ type OnboardingStatus = {
 const BYPASS_PATHS = [
   "/", "/signup", "/create-listing", "/edit-listing",
   "/membership", "/complete-profile", "/settings",
-  "/notifications", "/listing", "/leaderboard",
+  "/notifications", "/listing", "/leaderboard", "/login",
   "/pricing", "/terms", "/privacy", "/refunds",
 ];
 
