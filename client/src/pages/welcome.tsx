@@ -55,10 +55,10 @@ export default function WelcomePage() {
 
   const { register, handleSubmit, formState: { errors } } = useForm<{ email: string; password: string }>();
 
-  if (isAuthenticated) {
-    navigate("/dashboard");
-    return null;
-  }
+  // If logged in, redirect to dashboard (but don't return null — avoid blank flash)
+  useEffect(() => {
+    if (isAuthenticated) navigate("/dashboard");
+  }, [isAuthenticated]);
 
   const onSubmit = async (data: { email: string; password: string }) => {
     try {
