@@ -16,11 +16,20 @@ import {
   User, Lock, Bell, Link2, Trash2, Camera, Save, Check,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
+import { Instagram, Facebook, Share2, Hash, Plus, X, Loader2 } from "lucide-react";
+import type { SocialAccount } from "@shared/schema";
+
+const SOCIAL_PLATFORMS = [
+  { id: "instagram", name: "Instagram", icon: Instagram, placeholder: "@yourusername", urlPrefix: "https://instagram.com/" },
+  { id: "facebook", name: "Facebook", icon: Facebook, placeholder: "Your name or page", urlPrefix: "https://facebook.com/" },
+  { id: "tiktok", name: "TikTok", icon: Hash, placeholder: "@yourusername", urlPrefix: "https://tiktok.com/@" },
+  { id: "pinterest", name: "Pinterest", icon: Share2, placeholder: "@yourusername", urlPrefix: "https://pinterest.com/" },
+];
 
 type ProfileForm = {
   displayName: string;
@@ -29,6 +38,150 @@ type ProfileForm = {
   location: string;
   avatarUrl: string;
 };
+
+function SocialAccountsSection() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [addingPlatform, setAddingPlatform] = useState<string | null>(null);
+  const [handle, setHandle] = useState("");
+
+  const { data: accounts, isLoading } = useQuery<SocialAccount[]>({
+    queryKey: ["/api/social-accounts"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/social-accounts");
+      return res.json();
+    },
+    enabled: !!user,
+  });
+
+  const addMutation = useMutation({
+    mutationFn: async (data: { platform: string; handle: string; profileUrl: string }) => {
+      const res = await apiRequest("POST", "/api/social-accounts", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Social account linked" });
+      queryClient.invalidateQueries({ queryKey: ["/api/social-accounts"] });
+      setAddingPlatform(null);
+      setHandle("");
+    },
+    onError: (e: Error) => {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/social-accounts/${id}`);
+    },
+    onSuccess: () => {
+      toast({ title: "Social account removed" });
+      queryClient.invalidateQueries({ queryKey: ["/api/social-accounts"] });
+    },
+  });
+
+  const linkedPlatforms = new Set((accounts || []).map((a) => a.platform));
+
+  const handleAdd = (platformId: string) => {
+    if (!handle.trim()) return;
+    const platform = SOCIAL_PLATFORMS.find((p) => p.id === platformId);
+    const cleanHandle = handle.startsWith("@") ? handle.slice(1) : handle;
+    const profileUrl = platform ? platform.urlPrefix + cleanHandle : "";
+    addMutation.mutate({ platform: platformId, handle: handle.trim(), profileUrl });
+  };
+
+  return (
+    <Card className="rounded-xl" data-testid="social-accounts-section">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Share2 className="h-5 w-5" />
+          Social Media Accounts
+        </CardTitle>
+        <CardDescription>
+          Link your social accounts to share listings and earn Swap Bucks
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {SOCIAL_PLATFORMS.map((platform) => {
+          const Icon = platform.icon;
+          const linked = (accounts || []).find((a) => a.platform === platform.id);
+          const isAdding = addingPlatform === platform.id;
+
+          return (
+            <div key={platform.id} className="flex items-center justify-between p-3 rounded-xl border" data-testid={`social-${platform.id}`}>
+              <div className="flex items-center gap-3">
+                <Icon className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="font-medium text-sm">{platform.name}</p>
+                  {linked && (
+                    <p className="text-xs text-muted-foreground">{linked.handle}</p>
+                  )}
+                </div>
+              </div>
+              {linked ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-green-600 flex items-center gap-1">
+                    <Check className="h-3 w-3" /> Linked
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                    onClick={() => deleteMutation.mutate(linked.id)}
+                    data-testid={`remove-social-${platform.id}`}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              ) : isAdding ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    placeholder={platform.placeholder}
+                    value={handle}
+                    onChange={(e) => setHandle(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleAdd(platform.id)}
+                    className="h-8 text-sm rounded-lg w-40"
+                    autoFocus
+                    data-testid={`social-handle-input-${platform.id}`}
+                  />
+                  <Button
+                    size="sm"
+                    className="h-8 rounded-lg"
+                    onClick={() => handleAdd(platform.id)}
+                    disabled={!handle.trim() || addMutation.isPending}
+                    data-testid={`save-social-${platform.id}`}
+                  >
+                    {addMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={() => { setAddingPlatform(null); setHandle(""); }}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-lg gap-1"
+                  onClick={() => { setAddingPlatform(platform.id); setHandle(""); }}
+                  data-testid={`link-social-${platform.id}`}
+                >
+                  <Plus className="h-3 w-3" />
+                  Link
+                </Button>
+              )}
+            </div>
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -266,6 +419,9 @@ export default function SettingsPage() {
             })}
           </CardContent>
         </Card>
+
+        {/* Social Media Accounts */}
+        <SocialAccountsSection />
 
         {/* Danger Zone */}
         <Card className="rounded-xl border-destructive/30">

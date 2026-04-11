@@ -22,6 +22,17 @@ export const users = sqliteTable("users", {
   oauthProvider: text("oauth_provider"), // "google" | "apple" | "facebook" | null
   oauthId: text("oauth_id"),
   notificationPrefs: text("notification_prefs"), // JSON string
+  // Membership
+  membershipTier: text("membership_tier").notNull().default("free"), // "free" | "plus"
+  membershipExpiresAt: text("membership_expires_at"), // ISO string, null = no active subscription
+  highlightsRemaining: integer("highlights_remaining").notNull().default(0), // monthly highlight quota
+  listingCredits: integer("listing_credits").notNull().default(0), // pre-purchased listing credits (free users)
+  paddleCustomerId: text("paddle_customer_id"), // Paddle customer ID for billing
+  paddleSubscriptionId: text("paddle_subscription_id"), // active Paddle subscription ID
+  // Onboarding
+  onboardingComplete: integer("onboarding_complete", { mode: "boolean" }).notNull().default(false),
+  onboardingStep: text("onboarding_step").notNull().default("listings"), // "listings" | "membership" | "profile" | "complete"
+  onboardingListingsCount: integer("onboarding_listings_count").notNull().default(0), // listings created during onboarding
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({
@@ -30,6 +41,15 @@ export const insertUserSchema = createInsertSchema(users).omit({
   referralCode: true,
   isVerified: true,
   role: true,
+  membershipTier: true,
+  membershipExpiresAt: true,
+  highlightsRemaining: true,
+  listingCredits: true,
+  paddleCustomerId: true,
+  paddleSubscriptionId: true,
+  onboardingComplete: true,
+  onboardingStep: true,
+  onboardingListingsCount: true,
 });
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -66,6 +86,8 @@ export const listings = sqliteTable("listings", {
   videoUrl: text("video_url"),
   deliveryOptions: text("delivery_options").notNull(), // JSON: { localPickup: bool, shipping: bool, shippingCost?: number }
   status: text("status").notNull().default("active"), // "active" | "sold" | "draft" | "removed"
+  isHighlighted: integer("is_highlighted", { mode: "boolean" }).notNull().default(false),
+  highlightedAt: text("highlighted_at"), // when it was highlighted
   views: integer("views").notNull().default(0),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
@@ -338,3 +360,46 @@ export const insertFavoriteSchema = createInsertSchema(favorites).omit({
 });
 export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
 export type Favorite = typeof favorites.$inferSelect;
+
+// ============================================================
+// SOCIAL ACCOUNTS (linked social media profiles)
+// ============================================================
+export const socialAccounts = sqliteTable("social_accounts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  platform: text("platform").notNull(), // "instagram" | "facebook" | "tiktok" | "pinterest"
+  handle: text("handle").notNull(), // @username or profile URL
+  profileUrl: text("profile_url"), // full profile URL
+  createdAt: text("created_at").notNull(),
+});
+
+export const insertSocialAccountSchema = createInsertSchema(socialAccounts).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertSocialAccount = z.infer<typeof insertSocialAccountSchema>;
+export type SocialAccount = typeof socialAccounts.$inferSelect;
+
+// ============================================================
+// SOCIAL SHARES (tracks shares for rewards)
+// ============================================================
+export const socialShares = sqliteTable("social_shares", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  listingId: integer("listing_id").notNull(),
+  platform: text("platform").notNull(), // "instagram" | "facebook" | "tiktok" | "pinterest"
+  postUrl: text("post_url").notNull(), // URL of the social media post
+  status: text("status").notNull().default("pending"), // "pending" | "verified" | "rejected"
+  reward: real("reward").notNull().default(5), // SB reward amount
+  rewardPaid: integer("reward_paid", { mode: "boolean" }).notNull().default(false),
+  createdAt: text("created_at").notNull(),
+});
+
+export const insertSocialShareSchema = createInsertSchema(socialShares).omit({
+  id: true,
+  status: true,
+  rewardPaid: true,
+  createdAt: true,
+});
+export type InsertSocialShare = z.infer<typeof insertSocialShareSchema>;
+export type SocialShare = typeof socialShares.$inferSelect;

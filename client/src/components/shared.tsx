@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { resolveImageUrl } from "@/lib/queryClient";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -159,6 +160,7 @@ export function ListingCard({
     condition: string;
     images?: string | null;
     status?: string;
+    isHighlighted?: boolean;
   };
   seller?: {
     id?: number;
@@ -170,14 +172,26 @@ export function ListingCard({
 }) {
   const [liked, setLiked] = useState(false);
   const images = listing.images ? JSON.parse(listing.images) : [];
-  const thumbUrl = images[0] || "https://placehold.co/400x300/e2e8f0/94a3b8?text=No+Image";
+  const thumbUrl = images[0] ? resolveImageUrl(images[0]) : "https://placehold.co/400x300/e2e8f0/94a3b8?text=No+Image";
+  const highlighted = listing.isHighlighted;
 
   return (
-    <Card className="group overflow-hidden rounded-xl border hover:shadow-lg transition-shadow" data-testid="listing-card">
+    <Card
+      className={cn(
+        "group overflow-hidden rounded-xl border hover:shadow-lg transition-shadow",
+        highlighted && "ring-2 ring-yellow-400 border-yellow-300 shadow-md shadow-yellow-100"
+      )}
+      data-testid="listing-card"
+    >
       <Link href={`/listing/${listing.id}`} className="block">
         <div className="relative aspect-[4/3] overflow-hidden bg-muted">
           <img src={thumbUrl} alt={listing.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300" />
           <StatusBadge status={listing.condition} className="absolute top-2 left-2" />
+          {highlighted && (
+            <span className="absolute top-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-amber-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-sm" data-testid="featured-badge">
+              FEATURED
+            </span>
+          )}
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); setLiked(!liked); }}

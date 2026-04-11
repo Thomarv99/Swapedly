@@ -52,6 +52,9 @@ export function seedDatabase() {
     isVerified: true,
     referralCode: "ADMIN001",
     referredBy: null,
+    onboardingComplete: true,
+    onboardingStep: "complete",
+    onboardingListingsCount: 3,
   }).returning().get();
 
   const user1 = db.insert(users).values({
@@ -67,6 +70,9 @@ export function seedDatabase() {
     isVerified: true,
     referralCode: generateReferralCode(),
     referredBy: null,
+    onboardingComplete: true,
+    onboardingStep: "complete",
+    onboardingListingsCount: 3,
   }).returning().get();
 
   const user2 = db.insert(users).values({
@@ -82,6 +88,9 @@ export function seedDatabase() {
     isVerified: true,
     referralCode: generateReferralCode(),
     referredBy: user1.id,
+    onboardingComplete: true,
+    onboardingStep: "complete",
+    onboardingListingsCount: 3,
   }).returning().get();
 
   const user3 = db.insert(users).values({
@@ -97,6 +106,9 @@ export function seedDatabase() {
     isVerified: false,
     referralCode: generateReferralCode(),
     referredBy: null,
+    onboardingComplete: true,
+    onboardingStep: "complete",
+    onboardingListingsCount: 3,
   }).returning().get();
 
   // ===== WALLETS =====

@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: swapedly
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    plan: starter
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+    disk:
+      name: swapedly-data
+      mountPath: /data
+      sizeGB: 1

@@ -1,5 +1,6 @@
 import { PublicLayout } from "@/components/layouts";
 import { SwapBucksAmount, StatusBadge, UserAvatar, RatingStars, DeliveryBadge, VerifiedBadge } from "@/components/shared";
+import { resolveImageUrl } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -9,7 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { ChevronLeft, ChevronRight, Clock, Coins, MessageSquare, ShoppingCart, Star, Send } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Coins, MessageSquare, ShoppingCart, Star, Send, Share2 } from "lucide-react";
+import { ShareDialog } from "@/pages/share-earn";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getQueryFn, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -118,7 +120,7 @@ export default function ListingDetailPage() {
           <div>
             <div className="relative aspect-square rounded-2xl overflow-hidden bg-muted mb-3">
               <img
-                src={images[selectedImage] || "https://placehold.co/600x600/e2e8f0/94a3b8?text=No+Image"}
+                src={images[selectedImage] ? resolveImageUrl(images[selectedImage]) : "https://placehold.co/600x600/e2e8f0/94a3b8?text=No+Image"}
                 alt={listing.title}
                 className="object-cover w-full h-full"
               />
@@ -152,7 +154,7 @@ export default function ListingDetailPage() {
                     }`}
                     data-testid={`thumbnail-${i}`}
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <img src={resolveImageUrl(img)} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -251,6 +253,16 @@ export default function ListingDetailPage() {
                   <MessageSquare className="h-5 w-5" />
                 </Button>
               </Link>
+              {user && (
+                <ShareDialog
+                  listingId={listing.id}
+                  trigger={
+                    <Button variant="outline" className="rounded-xl h-12" data-testid="share-listing-btn">
+                      <Share2 className="h-5 w-5" />
+                    </Button>
+                  }
+                />
+              )}
             </div>
           </div>
         </div>

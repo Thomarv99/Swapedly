@@ -14,12 +14,21 @@ import {
   type EarnTask, type InsertEarnTask, earnTasks,
   type EarnCompletion, type InsertEarnCompletion, earnCompletions,
   type Favorite, type InsertFavorite, favorites,
+  type SocialAccount, type InsertSocialAccount, socialAccounts,
+  type SocialShare, type InsertSocialShare, socialShares,
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import Database from "better-sqlite3";
 import { eq, and, or, like, desc, asc, sql, gte, lte, count } from "drizzle-orm";
+import { mkdirSync } from "fs";
+import { join } from "path";
 
-const sqlite = new Database("data.db");
+// Use /data on Render (persistent disk) or local directory otherwise
+const DATA_DIR = process.env.RENDER ? "/data" : ".";
+try { mkdirSync(DATA_DIR, { recursive: true }); } catch {}
+
+const DB_PATH = join(DATA_DIR, "data.db");
+const sqlite = new Database(DB_PATH);
 sqlite.pragma("journal_mode = WAL");
 
 export const db = drizzle(sqlite);
@@ -120,6 +129,20 @@ export interface IStorage {
   removeFavorite(userId: number, listingId: number): Promise<void>;
   getFavoritesByUserId(userId: number): Promise<Favorite[]>;
   isFavorited(userId: number, listingId: number): Promise<boolean>;
+
+  // Social Accounts
+  createSocialAccount(account: InsertSocialAccount): Promise<SocialAccount>;
+  getSocialAccountsByUserId(userId: number): Promise<SocialAccount[]>;
+  getSocialAccountByPlatform(userId: number, platform: string): Promise<SocialAccount | undefined>;
+  deleteSocialAccount(id: number): Promise<void>;
+  updateSocialAccount(id: number, data: Partial<SocialAccount>): Promise<SocialAccount | undefined>;
+
+  // Social Shares
+  createSocialShare(share: InsertSocialShare): Promise<SocialShare>;
+  getSocialSharesByUserId(userId: number): Promise<SocialShare[]>;
+  getSocialSharesByListingId(listingId: number): Promise<SocialShare[]>;
+  hasUserSharedOnPlatform(userId: number, listingId: number, platform: string): Promise<boolean>;
+  updateSocialShareStatus(id: number, data: Partial<SocialShare>): Promise<SocialShare | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -578,6 +601,71 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(favorites.userId, userId), eq(favorites.listingId, listingId)))
       .get();
     return !!result;
+  }
+
+  // ===== SOCIAL ACCOUNTS =====
+  async createSocialAccount(account: InsertSocialAccount): Promise<SocialAccount> {
+    return db.insert(socialAccounts).values({
+      ...account,
+      createdAt: new Date().toISOString(),
+    }).returning().get();
+  }
+
+  async getSocialAccountsByUserId(userId: number): Promise<SocialAccount[]> {
+    return db.select().from(socialAccounts)
+      .where(eq(socialAccounts.userId, userId))
+      .orderBy(asc(socialAccounts.platform))
+      .all();
+  }
+
+  async getSocialAccountByPlatform(userId: number, platform: string): Promise<SocialAccount | undefined> {
+    return db.select().from(socialAccounts)
+      .where(and(eq(socialAccounts.userId, userId), eq(socialAccounts.platform, platform)))
+      .get();
+  }
+
+  async deleteSocialAccount(id: number): Promise<void> {
+    db.delete(socialAccounts).where(eq(socialAccounts.id, id)).run();
+  }
+
+  async updateSocialAccount(id: number, data: Partial<SocialAccount>): Promise<SocialAccount | undefined> {
+    return db.update(socialAccounts).set(data).where(eq(socialAccounts.id, id)).returning().get();
+  }
+
+  // ===== SOCIAL SHARES =====
+  async createSocialShare(share: InsertSocialShare): Promise<SocialShare> {
+    return db.insert(socialShares).values({
+      ...share,
+      createdAt: new Date().toISOString(),
+    }).returning().get();
+  }
+
+  async getSocialSharesByUserId(userId: number): Promise<SocialShare[]> {
+    return db.select().from(socialShares)
+      .where(eq(socialShares.userId, userId))
+      .orderBy(desc(socialShares.createdAt))
+      .all();
+  }
+
+  async getSocialSharesByListingId(listingId: number): Promise<SocialShare[]> {
+    return db.select().from(socialShares)
+      .where(eq(socialShares.listingId, listingId))
+      .all();
+  }
+
+  async hasUserSharedOnPlatform(userId: number, listingId: number, platform: string): Promise<boolean> {
+    const result = db.select().from(socialShares)
+      .where(and(
+        eq(socialShares.userId, userId),
+        eq(socialShares.listingId, listingId),
+        eq(socialShares.platform, platform)
+      ))
+      .get();
+    return !!result;
+  }
+
+  async updateSocialShareStatus(id: number, data: Partial<SocialShare>): Promise<SocialShare | undefined> {
+    return db.update(socialShares).set(data).where(eq(socialShares.id, id)).returning().get();
   }
 }
 

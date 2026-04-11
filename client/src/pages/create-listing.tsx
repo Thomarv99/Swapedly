@@ -9,12 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { Coins, Upload, Video, X, Save, Send, ImagePlus, Loader2, Link as LinkIcon } from "lucide-react";
+import { Coins, Upload, Video, X, Save, Send, ImagePlus, Loader2, Link as LinkIcon, Star, StarOff, Sparkles } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiRequest, getQueryFn, API_BASE, getAuthToken } from "@/lib/queryClient";
+import { apiRequest, getQueryFn, API_BASE, getAuthToken, resolveImageUrl } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useOnboarding } from "@/components/onboarding-guard";
 import { useParams, useLocation } from "wouter";
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { Listing } from "@shared/schema";
@@ -59,6 +60,7 @@ export default function CreateEditListingPage() {
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { data: onboardingData } = useOnboarding();
 
   const handleFileUpload = useCallback(async (files: FileList | File[]) => {
     const fileArray = Array.from(files).filter(f => f.type.startsWith("image/"));
@@ -187,9 +189,33 @@ export default function CreateEditListingPage() {
     onSuccess: () => {
       toast({ title: isEdit ? "Listing updated!" : "Listing created!" });
       queryClient.invalidateQueries({ queryKey: ["/api/listings"] });
-      navigate("/dashboard");
+      queryClient.invalidateQueries({ queryKey: ["/api/listings/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/onboarding"] });
+      // Check if user is in onboarding — redirect to appropriate step
+      if (onboardingData && !onboardingData.onboardingComplete) {
+        const newCount = (onboardingData.listingsCreated || 0) + 1;
+        if (newCount >= 3) {
+          navigate("/membership");
+        } else {
+          // Stay on create-listing for more listings — reset form
+          toast({ title: `Listing ${newCount} of 3 created!`, description: `Create ${3 - newCount} more to continue` });
+          reset({ condition: "good", localPickup: true, shipping: false });
+          setImageUrls([]);
+        }
+        return;
+      }
+      navigate("/my-listings");
     },
     onError: (e: Error) => {
+      if (e.message.includes("Listing credit required") || e.message.includes("402")) {
+        toast({
+          title: "Listing Credit Required",
+          description: "Free accounts need listing credits to publish. Buy credits or upgrade to Swapedly Plus for unlimited listings.",
+          variant: "destructive",
+        });
+        navigate("/membership");
+        return;
+      }
       toast({ title: "Error", description: e.message, variant: "destructive" });
     },
   });
@@ -208,10 +234,34 @@ export default function CreateEditListingPage() {
   const onPublish = handleSubmit((data) => mutation.mutate({ ...data, status: "active" }));
   const onSaveDraft = handleSubmit((data) => mutation.mutate({ ...data, status: "draft" }));
 
+  const inOnboarding = onboardingData && !onboardingData.onboardingComplete && onboardingData.step === "listings";
+
   return (
     <AuthenticatedLayout>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">{isEdit ? "Edit Listing" : "Create New Listing"}</h1>
+        {/* Onboarding progress banner */}
+        {inOnboarding && (
+          <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-xl p-4" data-testid="onboarding-banner">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold text-sm">Welcome to Swapedly! Create your first listings</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Add {3 - (onboardingData?.listingsCreated || 0)} more listing{(3 - (onboardingData?.listingsCreated || 0)) !== 1 ? "s" : ""} to continue
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className={`h-3 w-3 rounded-full ${i < (onboardingData?.listingsCreated || 0) ? "bg-primary" : "bg-muted"}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <h1 className="text-2xl font-bold">{isEdit ? "Edit Listing" : (inOnboarding ? `Create Listing ${(onboardingData?.listingsCreated || 0) + 1} of 3` : "Create New Listing")}</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Form */}
@@ -407,7 +457,7 @@ export default function CreateEditListingPage() {
                     <div className="grid grid-cols-5 gap-2 mt-4">
                       {imageUrls.map((url, i) => (
                         <div key={i} className="relative aspect-square rounded-lg overflow-hidden border group">
-                          <img src={url} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
+                          <img src={resolveImageUrl(url)} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
                           {i === 0 && (
                             <span className="absolute bottom-1 left-1 text-[10px] font-medium bg-primary text-white px-1.5 py-0.5 rounded">Cover</span>
                           )}
@@ -467,6 +517,51 @@ export default function CreateEditListingPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Highlight toggle (edit mode, active listing, Plus user) */}
+            {isEdit && existingListing?.status === "active" && (user as any)?.membershipTier === "plus" && (
+              <Card className={`rounded-xl ${existingListing?.isHighlighted ? "border-yellow-300 bg-gradient-to-r from-yellow-50 to-amber-50" : ""}`}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${existingListing?.isHighlighted ? "bg-gradient-to-br from-yellow-400 to-amber-500" : "bg-muted"}`}>
+                        <Sparkles className={`h-4 w-4 ${existingListing?.isHighlighted ? "text-white" : "text-muted-foreground"}`} />
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">Product Highlight</p>
+                        <p className="text-xs text-muted-foreground">
+                          {existingListing?.isHighlighted ? "This listing is featured in the marketplace" : "Feature this listing to stand out"}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant={existingListing?.isHighlighted ? "default" : "outline"}
+                      size="sm"
+                      className={`rounded-lg gap-1.5 ${existingListing?.isHighlighted ? "bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 border-0" : ""}`}
+                      onClick={async () => {
+                        try {
+                          if (existingListing?.isHighlighted) {
+                            await apiRequest("DELETE", `/api/listings/${id}/highlight`);
+                            toast({ title: "Highlight removed" });
+                          } else {
+                            await apiRequest("POST", `/api/listings/${id}/highlight`);
+                            toast({ title: "Listing featured!", description: "Your listing is now highlighted in the marketplace" });
+                          }
+                          queryClient.invalidateQueries({ queryKey: [`/api/listings/${id}`] });
+                          queryClient.invalidateQueries({ queryKey: ["/api/membership"] });
+                        } catch (err: any) {
+                          toast({ title: "Error", description: err.message, variant: "destructive" });
+                        }
+                      }}
+                      data-testid="toggle-highlight-btn"
+                    >
+                      {existingListing?.isHighlighted ? <><StarOff className="h-3.5 w-3.5" /> Remove</> : <><Star className="h-3.5 w-3.5" /> Feature</>}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Actions */}
             <div className="flex gap-3">

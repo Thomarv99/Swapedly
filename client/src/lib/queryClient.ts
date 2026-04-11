@@ -2,6 +2,19 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 export const API_BASE = "__PORT_5000__".startsWith("__") ? "" : "__PORT_5000__";
 
+/**
+ * Resolve an image URL — prepends API_BASE for server-relative paths
+ * like /uploads/... so they route through the port proxy when deployed.
+ */
+export function resolveImageUrl(url: string): string {
+  if (!url) return url;
+  // Only rewrite server-relative paths (e.g. /uploads/...)
+  if (url.startsWith("/uploads/")) {
+    return `${API_BASE}${url}`;
+  }
+  return url;
+}
+
 // In-memory auth token (survives SPA navigation, lost on full page reload)
 let authToken: string | null = null;
 

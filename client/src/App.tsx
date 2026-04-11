@@ -14,13 +14,18 @@ import UserProfilePage from "@/pages/user-profile";
 import DashboardPage from "@/pages/dashboard";
 import WalletPage from "@/pages/wallet";
 import CreateEditListingPage from "@/pages/create-listing";
+import MyListingsPage from "@/pages/my-listings";
 import MessagesPage from "@/pages/messages";
 import EarnPage from "@/pages/earn";
+import ShareEarnPage from "@/pages/share-earn";
+import MembershipPage from "@/pages/membership";
 import DisputesPage from "@/pages/disputes";
 import SettingsPage from "@/pages/settings";
 import NotificationsPage from "@/pages/notifications";
 import AdminPage from "@/pages/admin";
+import CompleteProfilePage from "@/pages/complete-profile";
 import NotFound from "@/pages/not-found";
+import { OnboardingGuard } from "@/components/onboarding-guard";
 
 function AppRouter() {
   return (
@@ -35,11 +40,15 @@ function AppRouter() {
       {/* Authenticated */}
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/wallet" component={WalletPage} />
+      <Route path="/my-listings" component={MyListingsPage} />
       <Route path="/create-listing" component={CreateEditListingPage} />
       <Route path="/edit-listing/:id" component={CreateEditListingPage} />
       <Route path="/messages" component={MessagesPage} />
       <Route path="/messages/:conversationId" component={MessagesPage} />
       <Route path="/earn" component={EarnPage} />
+      <Route path="/share-earn" component={ShareEarnPage} />
+      <Route path="/membership" component={MembershipPage} />
+      <Route path="/complete-profile" component={CompleteProfilePage} />
       <Route path="/disputes" component={DisputesPage} />
       <Route path="/settings" component={SettingsPage} />
       <Route path="/notifications" component={NotificationsPage} />
@@ -57,7 +66,9 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router hook={useHashLocation}>
-          <AppRouter />
+          <OnboardingGuard>
+            <AppRouter />
+          </OnboardingGuard>
         </Router>
       </TooltipProvider>
     </QueryClientProvider>

@@ -15,7 +15,9 @@ import fs from "fs";
 // ============================================================
 // FILE UPLOAD SETUP
 // ============================================================
-const UPLOAD_DIR = path.join(process.cwd(), "uploads");
+// Use persistent disk on Render (/data/uploads) or local uploads/ otherwise
+const DATA_BASE = process.env.RENDER ? "/data" : process.cwd();
+const UPLOAD_DIR = path.join(DATA_BASE, "uploads");
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
@@ -68,6 +70,33 @@ function generateReferralCode(): string {
 function calculateFee(price: number): number {
   const fee = price * 0.1;
   return Math.min(fee, 20);
+}
+
+// ============================================================
+// MEMBERSHIP CONSTANTS
+// ============================================================
+const MEMBERSHIP = {
+  PLUS_PRICE_USD: 9.99,
+  LISTING_CREDIT_PRICE_USD: 0.49,
+  MIN_CREDIT_PURCHASE: 10, // minimum 10 credits ($4.90, ~$5)
+  PLUS_HIGHLIGHTS_PER_MONTH: 5,
+  SB_MULTIPLIER_FREE: 1.0,
+  SB_MULTIPLIER_PLUS: 1.5,
+};
+
+function getSbMultiplier(user: any): number {
+  if (user.membershipTier === "plus" && user.membershipExpiresAt) {
+    if (new Date(user.membershipExpiresAt) > new Date()) {
+      return MEMBERSHIP.SB_MULTIPLIER_PLUS;
+    }
+  }
+  return MEMBERSHIP.SB_MULTIPLIER_FREE;
+}
+
+function isPlus(user: any): boolean {
+  return user.membershipTier === "plus" &&
+    user.membershipExpiresAt &&
+    new Date(user.membershipExpiresAt) > new Date();
 }
 
 // ============================================================
@@ -463,20 +492,54 @@ export async function registerRoutes(
   app.post("/api/listings", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
+      const fullUser = await storage.getUserById(user.id);
+      if (!fullUser) return res.status(401).json({ message: "User not found" });
+
+      const publishingActive = req.body.status === "active";
+      const userIsPlus = isPlus(fullUser);
+      const inOnboarding = !fullUser.onboardingComplete;
+
+      // Free users must spend a listing credit to publish (not for drafts)
+      // Exception: users in onboarding get their first 3 listings free
+      if (publishingActive && !userIsPlus && !inOnboarding) {
+        if ((fullUser.listingCredits || 0) < 1) {
+          return res.status(402).json({
+            message: "Listing credit required",
+            code: "LISTING_CREDIT_REQUIRED",
+            creditsNeeded: 1,
+            creditsAvailable: fullUser.listingCredits || 0,
+          });
+        }
+        // Deduct one listing credit
+        await storage.updateUser(user.id, { listingCredits: (fullUser.listingCredits || 0) - 1 });
+      }
+
       const listing = await storage.createListing({
         ...req.body,
         sellerId: user.id,
       });
 
-      // Credit 5 SB listing bonus
-      await storage.creditWallet(user.id, 5);
+      // Credit SB listing bonus (with multiplier)
+      const multiplier = getSbMultiplier(fullUser);
+      const sbReward = Math.round(5 * multiplier * 10) / 10;
+      await storage.creditWallet(user.id, sbReward);
       await storage.createLedgerEntry({
         userId: user.id,
-        amount: 5,
+        amount: sbReward,
         type: "listing_credit",
-        description: `Listing credit for creating "${listing.title}"`,
+        description: `Listing credit for creating "${listing.title}"${multiplier > 1 ? " (Plus bonus)" : ""}`,
         relatedListingId: listing.id,
       });
+
+      // Track onboarding progress
+      if (!fullUser.onboardingComplete) {
+        const newCount = (fullUser.onboardingListingsCount || 0) + 1;
+        const updates: any = { onboardingListingsCount: newCount };
+        if (newCount >= 3 && fullUser.onboardingStep === "listings") {
+          updates.onboardingStep = "membership";
+        }
+        await storage.updateUser(user.id, updates);
+      }
 
       return res.status(201).json(listing);
     } catch (err: any) {
@@ -1213,13 +1276,16 @@ export async function registerRoutes(
       // Create completion
       await storage.createEarnCompletion({ userId: user.id, taskId });
 
-      // Credit wallet
-      await storage.creditWallet(user.id, task.reward);
+      // Credit wallet (with Plus multiplier)
+      const fullUser = await storage.getUserById(user.id);
+      const multiplier = fullUser ? getSbMultiplier(fullUser) : 1;
+      const earnAmount = Math.round(task.reward * multiplier * 10) / 10;
+      await storage.creditWallet(user.id, earnAmount);
       await storage.createLedgerEntry({
         userId: user.id,
-        amount: task.reward,
+        amount: earnAmount,
         type: "earn_task",
-        description: `Earned ${task.reward} SB for completing "${task.title}"`,
+        description: `Earned ${earnAmount} SB for completing "${task.title}"${multiplier > 1 ? " (Plus bonus)" : ""}`,
       });
 
       // Notify
@@ -1227,7 +1293,7 @@ export async function registerRoutes(
         userId: user.id,
         type: "earn_reward",
         title: "Reward Earned!",
-        body: `You earned ${task.reward} SB for completing "${task.title}"`,
+        body: `You earned ${earnAmount} SB for completing "${task.title}"`,
         link: "/earn",
       });
 
@@ -1490,6 +1556,461 @@ export async function registerRoutes(
       const updated = await storage.updateEarnTask(id, req.body);
       if (!updated) return res.status(404).json({ message: "Task not found" });
       return res.json(updated);
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ============================================================
+  // SOCIAL ACCOUNTS
+  // ============================================================
+  app.get("/api/social-accounts", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const accounts = await storage.getSocialAccountsByUserId(user.id);
+      return res.json(accounts);
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/social-accounts", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { platform, handle, profileUrl } = req.body;
+      if (!platform || !handle) {
+        return res.status(400).json({ message: "Platform and handle are required" });
+      }
+      // Check if user already linked this platform
+      const existing = await storage.getSocialAccountByPlatform(user.id, platform);
+      if (existing) {
+        // Update instead of create
+        const updated = await storage.updateSocialAccount(existing.id, { handle, profileUrl });
+        return res.json(updated);
+      }
+      const account = await storage.createSocialAccount({
+        userId: user.id,
+        platform,
+        handle,
+        profileUrl: profileUrl || null,
+      });
+      return res.status(201).json(account);
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.delete("/api/social-accounts/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id as string);
+      await storage.deleteSocialAccount(id);
+      return res.json({ success: true });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ============================================================
+  // SOCIAL SHARES (Share & Earn)
+  // ============================================================
+  // Generate share content for a listing
+  app.get("/api/share/generate/:listingId", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const listingId = parseInt(req.params.listingId as string);
+      const listing = await storage.getListingById(listingId);
+      if (!listing) return res.status(404).json({ message: "Listing not found" });
+
+      const images = listing.images ? JSON.parse(listing.images) : [];
+      const tags = listing.tags ? JSON.parse(listing.tags) : [];
+      const coverImage = images[0] || null;
+
+      // Generate hashtags based on category + tags
+      const baseHashtags = ["#Swapedly", "#SwapBucks", "#TradeSmarter", "#SwapDontShop"];
+      const categoryTag = `#${listing.category.replace(/[^a-zA-Z0-9]/g, "")}`;
+      const itemTags = tags.slice(0, 3).map((t: string) => `#${t.replace(/[^a-zA-Z0-9]/g, "")}`);
+      const allHashtags = [...baseHashtags, categoryTag, ...itemTags];
+
+      // Generate captions per platform
+      const caption = `Check out this ${listing.title} on Swapedly! 🔄\n\nSwap it for just ${listing.price} Swap Bucks — no cash needed. Trade goods, earn rewards, and discover amazing items.\n\nJoin Swapedly today and get 10 free Swap Bucks to start trading!`;
+
+      const shortCaption = `${listing.title} — ${listing.price} Swap Bucks on @Swapedly 🔄 Trade smarter, swap better!`;
+
+      return res.json({
+        listing: {
+          id: listing.id,
+          title: listing.title,
+          price: listing.price,
+          category: listing.category,
+          condition: listing.condition,
+          coverImage,
+        },
+        captions: {
+          instagram: `${caption}\n\n${allHashtags.join(" ")}`,
+          facebook: `${caption}\n\n${allHashtags.join(" ")}`,
+          tiktok: `${shortCaption}\n\n${allHashtags.join(" ")}`,
+          pinterest: `${listing.title} | ${listing.price} Swap Bucks on Swapedly\n\n${caption}`,
+        },
+        hashtags: allHashtags,
+        coverImage,
+      });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Submit a share claim (user provides post URL to earn SB)
+  app.post("/api/share/claim", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { listingId, platform, postUrl } = req.body;
+      if (!listingId || !platform || !postUrl) {
+        return res.status(400).json({ message: "listingId, platform, and postUrl are required" });
+      }
+
+      // Validate the listing exists
+      const listing = await storage.getListingById(listingId);
+      if (!listing) return res.status(404).json({ message: "Listing not found" });
+
+      // Check if already shared on this platform for this listing
+      const alreadyShared = await storage.hasUserSharedOnPlatform(user.id, listingId, platform);
+      if (alreadyShared) {
+        return res.status(400).json({ message: "You already earned rewards for sharing this listing on " + platform });
+      }
+
+      // Create the share record
+      const share = await storage.createSocialShare({
+        userId: user.id,
+        listingId,
+        platform,
+        postUrl,
+        reward: 5,
+      });
+
+      // Auto-verify and pay reward (with Plus multiplier)
+      const fullUser = await storage.getUserById(user.id);
+      const multiplier = fullUser ? getSbMultiplier(fullUser) : 1;
+      const sbReward = Math.round(5 * multiplier * 10) / 10;
+      await storage.updateSocialShareStatus(share.id, { status: "verified", rewardPaid: true, reward: sbReward });
+
+      await storage.creditWallet(user.id, sbReward);
+      await storage.createLedgerEntry({
+        userId: user.id,
+        amount: sbReward,
+        type: "social_share",
+        description: `Share reward: ${listing.title} on ${platform}${multiplier > 1 ? " (Plus bonus)" : ""}`,
+        relatedListingId: listing.id,
+      });
+
+      // Notify user
+      await storage.createNotification({
+        userId: user.id,
+        type: "earn_reward",
+        title: "Share Reward Earned!",
+        body: `You earned ${sbReward} SB for sharing "${listing.title}" on ${platform}.`,
+        link: "/share-earn",
+      });
+
+      return res.status(201).json({ ...share, status: "verified", rewardPaid: true });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Get user's share history
+  app.get("/api/share/history", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const shares = await storage.getSocialSharesByUserId(user.id);
+      return res.json(shares);
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Get shareable listings for current user (their active listings)
+  app.get("/api/share/listings", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      // Return all active listings (user can share any listing, not just their own)
+      const result = await storage.getListings({ status: "active", limit: 50 });
+      return res.json(result.listings);
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ============================================================
+  // MEMBERSHIP
+  // ============================================================
+
+  // Get membership info + pricing constants
+  app.get("/api/membership", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const fullUser = await storage.getUserById(user.id);
+      if (!fullUser) return res.status(401).json({ message: "User not found" });
+
+      return res.json({
+        tier: fullUser.membershipTier,
+        isPlus: isPlus(fullUser),
+        expiresAt: fullUser.membershipExpiresAt,
+        highlightsRemaining: fullUser.highlightsRemaining,
+        listingCredits: fullUser.listingCredits,
+        pricing: MEMBERSHIP,
+        multiplier: getSbMultiplier(fullUser),
+      });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Upgrade to Plus (simulated — in production this would be a Paddle checkout callback)
+  app.post("/api/membership/upgrade", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      // In production, this would be triggered by Paddle webhook after successful payment
+      // For now, simulate the upgrade
+      const expiresAt = new Date();
+      expiresAt.setMonth(expiresAt.getMonth() + 1);
+
+      await storage.updateUser(user.id, {
+        membershipTier: "plus",
+        membershipExpiresAt: expiresAt.toISOString(),
+        highlightsRemaining: MEMBERSHIP.PLUS_HIGHLIGHTS_PER_MONTH,
+      });
+
+      await storage.createNotification({
+        userId: user.id,
+        type: "system",
+        title: "Welcome to Swapedly Plus!",
+        body: "You now earn 1.5x SB on all rewards, get 5 highlighted listings/month, and unlimited free listings.",
+        link: "/membership",
+      });
+
+      return res.json({ success: true, tier: "plus", expiresAt: expiresAt.toISOString() });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Cancel Plus (downgrade to free)
+  app.post("/api/membership/cancel", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      await storage.updateUser(user.id, {
+        membershipTier: "free",
+        membershipExpiresAt: null,
+        highlightsRemaining: 0,
+      });
+      return res.json({ success: true, tier: "free" });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Purchase listing credits (for free users)
+  app.post("/api/membership/buy-credits", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { quantity } = req.body;
+      if (!quantity || quantity < MEMBERSHIP.MIN_CREDIT_PURCHASE) {
+        return res.status(400).json({
+          message: `Minimum purchase is ${MEMBERSHIP.MIN_CREDIT_PURCHASE} credits ($${(MEMBERSHIP.MIN_CREDIT_PURCHASE * MEMBERSHIP.LISTING_CREDIT_PRICE_USD).toFixed(2)})`,
+        });
+      }
+
+      // In production, this would process payment through Paddle first
+      // For now, simulate the purchase
+      const fullUser = await storage.getUserById(user.id);
+      if (!fullUser) return res.status(401).json({ message: "User not found" });
+
+      const newCredits = (fullUser.listingCredits || 0) + quantity;
+      await storage.updateUser(user.id, { listingCredits: newCredits });
+
+      const totalUsd = (quantity * MEMBERSHIP.LISTING_CREDIT_PRICE_USD).toFixed(2);
+      await storage.createNotification({
+        userId: user.id,
+        type: "system",
+        title: "Listing Credits Purchased",
+        body: `You purchased ${quantity} listing credits for $${totalUsd}.`,
+        link: "/my-listings",
+      });
+
+      return res.json({ success: true, credits: newCredits, purchased: quantity });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Highlight a listing (Plus members only)
+  app.post("/api/listings/:id/highlight", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const id = parseInt(req.params.id as string);
+
+      const fullUser = await storage.getUserById(user.id);
+      if (!fullUser) return res.status(401).json({ message: "User not found" });
+
+      if (!isPlus(fullUser)) {
+        return res.status(403).json({ message: "Swapedly Plus membership required to highlight listings" });
+      }
+
+      if ((fullUser.highlightsRemaining || 0) <= 0) {
+        return res.status(400).json({ message: "No highlight credits remaining this month" });
+      }
+
+      const listing = await storage.getListingById(id);
+      if (!listing) return res.status(404).json({ message: "Listing not found" });
+      if (listing.sellerId !== user.id) return res.status(403).json({ message: "Not your listing" });
+      if (listing.isHighlighted) return res.status(400).json({ message: "Listing is already highlighted" });
+
+      await storage.updateListing(id, {
+        isHighlighted: true,
+        highlightedAt: new Date().toISOString(),
+      });
+
+      await storage.updateUser(user.id, {
+        highlightsRemaining: (fullUser.highlightsRemaining || 0) - 1,
+      });
+
+      return res.json({ success: true, highlightsRemaining: (fullUser.highlightsRemaining || 0) - 1 });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Remove highlight from a listing
+  app.delete("/api/listings/:id/highlight", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const id = parseInt(req.params.id as string);
+
+      const listing = await storage.getListingById(id);
+      if (!listing) return res.status(404).json({ message: "Listing not found" });
+      if (listing.sellerId !== user.id) return res.status(403).json({ message: "Not your listing" });
+
+      await storage.updateListing(id, { isHighlighted: false, highlightedAt: null });
+
+      // Refund the highlight credit
+      const fullUser = await storage.getUserById(user.id);
+      if (fullUser && isPlus(fullUser)) {
+        await storage.updateUser(user.id, {
+          highlightsRemaining: (fullUser.highlightsRemaining || 0) + 1,
+        });
+      }
+
+      return res.json({ success: true });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ============================================================
+  // ONBOARDING
+  // ============================================================
+
+  // Get onboarding status
+  app.get("/api/onboarding", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const fullUser = await storage.getUserById(user.id);
+      if (!fullUser) return res.status(401).json({ message: "User not found" });
+
+      const wallet = await storage.getWalletByUserId(user.id);
+      const sbBalance = wallet?.balance || 0;
+      const userIsPlus = isPlus(fullUser);
+      const hasCredits = (fullUser.listingCredits || 0) > 0;
+      const hasMembership = userIsPlus || hasCredits;
+
+      return res.json({
+        onboardingComplete: fullUser.onboardingComplete,
+        step: fullUser.onboardingStep,
+        listingsCreated: fullUser.onboardingListingsCount || 0,
+        listingsRequired: 3,
+        hasMembership,
+        isPlus: userIsPlus,
+        listingCredits: fullUser.listingCredits || 0,
+        sbBalance,
+        sbRequired: 30,
+        canAccessMarketplace: fullUser.onboardingComplete || sbBalance >= 30,
+        hasProfileImage: !!fullUser.avatarUrl,
+      });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Advance onboarding step
+  app.post("/api/onboarding/advance", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { step } = req.body;
+      const fullUser = await storage.getUserById(user.id);
+      if (!fullUser) return res.status(401).json({ message: "User not found" });
+
+      if (step === "profile" && fullUser.onboardingStep === "membership") {
+        await storage.updateUser(user.id, { onboardingStep: "profile" });
+      } else if (step === "complete") {
+        await storage.updateUser(user.id, { onboardingStep: "complete", onboardingComplete: true });
+      }
+
+      return res.json({ success: true, step });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Upload profile image
+  app.post("/api/profile/avatar", requireAuth, upload.single("avatar"), async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const file = req.file as Express.Multer.File;
+      if (!file) return res.status(400).json({ message: "No file uploaded" });
+
+      const avatarUrl = `/uploads/${file.filename}`;
+      await storage.updateUser(user.id, { avatarUrl });
+
+      // Award 2 SB if first profile image upload during onboarding
+      const fullUser = await storage.getUserById(user.id);
+      if (fullUser && !fullUser.onboardingComplete) {
+        const multiplier = getSbMultiplier(fullUser);
+        const reward = Math.round(2 * multiplier * 10) / 10;
+        await storage.creditWallet(user.id, reward);
+        await storage.createLedgerEntry({
+          userId: user.id,
+          amount: reward,
+          type: "earn_task",
+          description: "Profile picture uploaded" + (multiplier > 1 ? " (Plus bonus)" : ""),
+        });
+      }
+
+      return res.json({ avatarUrl });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Claim video post reward (20 SB)
+  app.post("/api/onboarding/claim-video", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { postUrl } = req.body;
+      if (!postUrl) return res.status(400).json({ message: "Post URL required" });
+
+      const fullUser = await storage.getUserById(user.id);
+      if (!fullUser) return res.status(401).json({ message: "User not found" });
+
+      const multiplier = getSbMultiplier(fullUser);
+      const reward = Math.round(20 * multiplier * 10) / 10;
+      await storage.creditWallet(user.id, reward);
+      await storage.createLedgerEntry({
+        userId: user.id,
+        amount: reward,
+        type: "social_share",
+        description: "Video post about Swapedly" + (multiplier > 1 ? " (Plus bonus)" : ""),
+      });
+
+      return res.json({ success: true, reward });
     } catch (err: any) {
       return res.status(500).json({ message: err.message });
     }

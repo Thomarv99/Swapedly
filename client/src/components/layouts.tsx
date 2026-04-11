@@ -30,6 +30,8 @@ import {
   HelpCircle,
   UserPlus,
   LogIn,
+  Share2,
+  Crown,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -140,8 +142,10 @@ const sidebarItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/messages", label: "Messages", icon: Mail, badgeKey: "unreadMessages" as const },
   { href: "/wallet", label: "Wallet", icon: Wallet },
-  { href: "/create-listing", label: "My Listings", icon: Package },
+  { href: "/my-listings", label: "My Listings", icon: Package },
   { href: "/earn", label: "Earn Swap Bucks", icon: Coins },
+  { href: "/share-earn", label: "Share & Earn", icon: Share2 },
+  { href: "/membership", label: "Membership", icon: Crown },
   { href: "/disputes", label: "Disputes", icon: Scale },
   { href: "/settings", label: "Settings", icon: Settings },
   { href: "/admin", label: "Admin Console", icon: Shield, adminOnly: true },
@@ -296,7 +300,12 @@ export function AuthenticatedLayout({ children }: { children: ReactNode }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <div className="px-2 py-1.5">
-                <p className="text-sm font-medium">{user?.displayName || user?.username}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-medium">{user?.displayName || user?.username}</p>
+                  {(user as any)?.membershipTier === "plus" && (
+                    <span className="bg-gradient-to-r from-yellow-400 to-amber-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">PLUS</span>
+                  )}
+                </div>
                 <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
               <DropdownMenuSeparator />
