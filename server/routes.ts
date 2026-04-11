@@ -303,7 +303,9 @@ export async function registerRoutes(
         const token = crypto.randomBytes(32).toString("hex");
         tokenStore.set(token, user.id);
         setTimeout(() => tokenStore.delete(token), 7 * 24 * 60 * 60 * 1000);
-        res.redirect(`/#/oauth-callback?token=${token}&userId=${user.id}`);
+        // Redirect to the frontend domain (custom domain if set, otherwise APP_URL)
+        const frontendBase = process.env.FRONTEND_URL || process.env.APP_URL || "https://www.swapedly.com";
+        res.redirect(`${frontendBase}/#/oauth-callback?token=${token}&userId=${user.id}`);
       }
     )(req, res, next);
   });
