@@ -310,6 +310,9 @@ export interface IStorage {
   // Paddle / Stripe
   getUserByPaddleCustomerId(customerId: string): Promise<User | undefined>;
 
+  // Leaderboard
+  getLeaderboard(limit: number): Promise<Array<{ userId: number; username: string; displayName: string | null; avatarUrl: string | null; membershipTier: string; totalEarned: number; balance: number }>>;
+
   // Referral tracking
   trackReferralClick(data: InsertReferralClick): Promise<ReferralClick>;
   markReferralConverted(referralCode: string, convertedUserId: number): Promise<void>;
@@ -780,6 +783,26 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(favorites)
       .where(eq(favorites.userId, userId))
       .orderBy(desc(favorites.createdAt))
+      .all();
+  }
+
+  // ===== LEADERBOARD =====
+  async getLeaderboard(limit: number): Promise<Array<{ userId: number; username: string; displayName: string | null; avatarUrl: string | null; membershipTier: string; totalEarned: number; balance: number }>> {
+    return db
+      .select({
+        userId: users.id,
+        username: users.username,
+        displayName: users.displayName,
+        avatarUrl: users.avatarUrl,
+        membershipTier: users.membershipTier,
+        totalEarned: wallets.totalEarned,
+        balance: wallets.balance,
+      })
+      .from(wallets)
+      .innerJoin(users, eq(wallets.userId, users.id))
+      .where(eq(users.role, "user"))
+      .orderBy(desc(wallets.totalEarned))
+      .limit(limit)
       .all();
   }
 

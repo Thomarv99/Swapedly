@@ -2096,6 +2096,19 @@ export async function registerRoutes(
   });
 
   // ============================================================
+  // LEADERBOARD
+  // ============================================================
+  app.get("/api/leaderboard", async (req: Request, res: Response) => {
+    try {
+      const limit = Math.min(parseInt(req.query.limit as string || "50"), 100);
+      const rows = await storage.getLeaderboard(limit);
+      return res.json(rows);
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ============================================================
   // REFERRAL TRACKING
   // ============================================================
 

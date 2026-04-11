@@ -25,6 +25,7 @@ import NotificationsPage from "@/pages/notifications";
 import AdminPage from "@/pages/admin";
 import CompleteProfilePage from "@/pages/complete-profile";
 import PricingPage from "@/pages/pricing";
+import LeaderboardPage from "@/pages/leaderboard";
 import TermsPage from "@/pages/terms";
 import PrivacyPage from "@/pages/privacy";
 import RefundsPage from "@/pages/refunds";
@@ -37,6 +38,7 @@ function AppRouter() {
       {/* Public */}
       <Route path="/" component={WelcomePage} />
       <Route path="/pricing" component={PricingPage} />
+      <Route path="/leaderboard" component={LeaderboardPage} />
       <Route path="/terms" component={TermsPage} />
       <Route path="/privacy" component={PrivacyPage} />
       <Route path="/refunds" component={RefundsPage} />

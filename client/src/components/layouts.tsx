@@ -32,6 +32,7 @@ import {
   LogIn,
   Share2,
   Crown,
+  Trophy,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -144,6 +145,7 @@ const sidebarItems = [
   { href: "/wallet", label: "Wallet", icon: Wallet },
   { href: "/my-listings", label: "My Listings", icon: Package },
   { href: "/earn", label: "Earn Swap Bucks", icon: Coins },
+  { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
   { href: "/share-earn", label: "Share & Earn", icon: Share2 },
   { href: "/membership", label: "Membership", icon: Crown },
   { href: "/disputes", label: "Disputes", icon: Scale },
