@@ -25,7 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useOnboarding } from "@/components/onboarding-guard";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 // Stripe checkout — redirects to Stripe hosted page
 function useStripeCheckout() {
   const { data: stripeConfig } = useQuery({
@@ -93,12 +93,23 @@ export default function MembershipPage() {
   const { data: onboardingData } = useOnboarding();
   const { openCheckout, prices } = useStripeCheckout();
 
+  // Show onboarding nudge when arriving from listing creation
+  const [showOnboardingNudge, setShowOnboardingNudge] = useState(
+    () => !!(onboardingData && !onboardingData?.onboardingComplete && onboardingData?.step === "membership")
+  );
+
+  // Keep nudge in sync once onboarding data loads
+  useEffect(() => {
+    if (onboardingData && !onboardingData.onboardingComplete && onboardingData.step === "membership") {
+      setShowOnboardingNudge(true);
+    }
+  }, [onboardingData?.step]);
+
   // Handle redirect back from Stripe checkout
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("success") === "true") {
       toast({ title: "Payment successful!", description: "Your account is being updated — this may take a moment." });
-      // Remove the query param and refresh membership data
       window.history.replaceState({}, "", window.location.pathname + window.location.hash);
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ["/api/membership"] });
@@ -161,6 +172,41 @@ export default function MembershipPage() {
   return (
     <AuthenticatedLayout>
       <div className="space-y-6">
+
+        {/* Onboarding nudge popup */}
+        {showOnboardingNudge && (
+          <div className="rounded-xl border-2 border-primary bg-primary/5 p-5 relative" data-testid="onboarding-nudge">
+            <button
+              onClick={() => setShowOnboardingNudge(false)}
+              className="absolute top-3 right-3 text-muted-foreground hover:text-foreground text-lg leading-none"
+            >
+              &times;
+            </button>
+            <div className="flex items-start gap-4">
+              <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
+                <CreditCard className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-base">One more step to publish your listing!</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  To list your product on Swapedly, you'll need either:
+                </p>
+                <ul className="mt-2 space-y-1.5">
+                  <li className="flex items-center gap-2 text-sm">
+                    <span className="h-5 w-5 rounded-full bg-yellow-100 text-yellow-700 flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                    <span><strong>Buy Listing Credits</strong> — $0.49 per listing, minimum $5 purchase</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <span className="h-5 w-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                    <span><strong>Swapedly Plus</strong> — $9.99/month for unlimited free listings + bonus perks</span>
+                  </li>
+                </ul>
+                <p className="text-xs text-muted-foreground mt-3">Choose an option below to complete your listing and start selling.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div>
           <h1 className="text-2xl font-bold" data-testid="membership-title">
