@@ -518,7 +518,9 @@ export async function registerRoutes(
         const newCount = (fullUser.onboardingListingsCount || 0) + 1;
         const updates: any = { onboardingListingsCount: newCount };
         if (newCount >= 1 && fullUser.onboardingStep === "listings") {
-          updates.onboardingStep = "membership";
+          // Move past the listings gate — membership/profile are optional from here
+          updates.onboardingStep = "complete";
+          updates.onboardingComplete = true;
         }
         await storage.updateUser(user.id, updates);
       }

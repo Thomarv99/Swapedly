@@ -22,7 +22,8 @@ type OnboardingStatus = {
 const BYPASS_PATHS = [
   "/", "/signup", "/create-listing", "/edit-listing",
   "/membership", "/complete-profile", "/settings",
-  "/notifications",
+  "/notifications", "/marketplace", "/listing", "/leaderboard",
+  "/pricing", "/terms", "/privacy", "/refunds",
 ];
 
 function shouldBypass(path: string): boolean {
@@ -52,36 +53,16 @@ export function OnboardingGuard({ children }: { children: ReactNode }) {
     if (onboarding.onboardingComplete) return;
     if (shouldBypass(location)) return;
 
-    // Route based on onboarding step
+    // Only gate on the "listings" step — once they've created their first listing,
+    // they can freely navigate anywhere (membership/profile are optional nudges, not walls)
     switch (onboarding.step) {
       case "listings":
-        // Need to create 3 listings first
+        // Haven't created a listing yet — send them to create one
         if (location !== "/create-listing") {
           navigate("/create-listing");
         }
         break;
-      case "membership":
-        // Need to get membership or credits
-        if (location !== "/membership") {
-          navigate("/membership");
-        }
-        break;
-      case "profile":
-        // Need to complete profile tasks
-        if (location !== "/complete-profile") {
-          navigate("/complete-profile");
-        }
-        break;
-      // "complete" means done
-    }
-  }, [isAuthenticated, onboarding, location, navigate]);
-
-  // For marketplace specifically, check the 30 SB gate
-  useEffect(() => {
-    if (!isAuthenticated || !onboarding) return;
-    if (onboarding.onboardingComplete) return;
-    if (location === "/marketplace" && !onboarding.canAccessMarketplace) {
-      navigate("/complete-profile");
+      // "membership", "profile", and "complete" are all free to browse
     }
   }, [isAuthenticated, onboarding, location, navigate]);
 
