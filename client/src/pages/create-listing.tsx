@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { Coins, Upload, Video, X, Save, Send, ImagePlus, Loader2, Link as LinkIcon, Star, StarOff, Sparkles } from "lucide-react";
+import { Coins, Upload, Video, X, Save, Send, ImagePlus, Loader2, Link as LinkIcon, Star, StarOff, Sparkles, Facebook, Copy, Check, ArrowRight } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, getQueryFn, API_BASE, getAuthToken, resolveImageUrl } from "@/lib/queryClient";
@@ -19,6 +19,7 @@ import { useOnboarding } from "@/components/onboarding-guard";
 import { useParams, useLocation } from "wouter";
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { Listing } from "@shared/schema";
+import { resolveImageUrl } from "@/lib/queryClient";
 
 const CATEGORIES = [
   "Electronics", "Gaming", "Fashion", "Home & Garden", "Sports & Outdoors",
@@ -61,6 +62,7 @@ export default function CreateEditListingPage() {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: onboardingData } = useOnboarding();
+  const [shareModal, setShareModal] = useState<{ listing: any } | null>(null);
 
   const handleFileUpload = useCallback(async (files: FileList | File[]) => {
     const fileArray = Array.from(files).filter(f => f.type.startsWith("image/"));
@@ -181,27 +183,22 @@ export default function CreateEditListingPage() {
         status: data.status,
       };
       if (isEdit) {
-        await apiRequest("PUT", `/api/listings/${id}`, body);
+        const res = await apiRequest("PUT", `/api/listings/${id}`, body);
+        return res.json();
       } else {
-        await apiRequest("POST", "/api/listings", body);
+        const res = await apiRequest("POST", "/api/listings", body);
+        return res.json();
       }
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       toast({ title: isEdit ? "Listing updated!" : "Listing created!" });
       queryClient.invalidateQueries({ queryKey: ["/api/listings"] });
       queryClient.invalidateQueries({ queryKey: ["/api/listings/user"] });
       queryClient.invalidateQueries({ queryKey: ["/api/onboarding"] });
-      // Check if user is in onboarding — redirect to appropriate step
-      if (onboardingData && !onboardingData.onboardingComplete) {
-        const newCount = (onboardingData.listingsCreated || 0) + 1;
-        if (newCount >= 3) {
-          navigate("/membership");
-        } else {
-          // Stay on create-listing for more listings — reset form
-          toast({ title: `Listing ${newCount} of 3 created!`, description: `Create ${3 - newCount} more to continue` });
-          reset({ condition: "good", localPickup: true, shipping: false });
-          setImageUrls([]);
-        }
+      // Check if user is in onboarding — show share modal then redirect to membership
+      if (onboardingData && !onboardingData.onboardingComplete && onboardingData.step === "listings") {
+        // Show Facebook share modal with the listing they just created
+        setShareModal({ listing: data });
         return;
       }
       navigate("/my-listings");
@@ -244,24 +241,15 @@ export default function CreateEditListingPage() {
           <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-xl p-4" data-testid="onboarding-banner">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-semibold text-sm">Welcome to Swapedly! Create your first listings</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Add {3 - (onboardingData?.listingsCreated || 0)} more listing{(3 - (onboardingData?.listingsCreated || 0)) !== 1 ? "s" : ""} to continue
-                </p>
+                <p className="font-semibold text-sm">Welcome to Swapedly! List your first item</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Create 1 listing to continue setting up your account</p>
               </div>
-              <div className="flex items-center gap-2">
-                {[0, 1, 2].map((i) => (
-                  <div
-                    key={i}
-                    className={`h-3 w-3 rounded-full ${i < (onboardingData?.listingsCreated || 0) ? "bg-primary" : "bg-muted"}`}
-                  />
-                ))}
-              </div>
+              <div className="h-3 w-3 rounded-full bg-muted" />
             </div>
           </div>
         )}
 
-        <h1 className="text-2xl font-bold">{isEdit ? "Edit Listing" : (inOnboarding ? `Create Listing ${(onboardingData?.listingsCreated || 0) + 1} of 3` : "Create New Listing")}</h1>
+        <h1 className="text-2xl font-bold">{isEdit ? "Edit Listing" : (inOnboarding ? "List Your First Item" : "Create New Listing")}</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Form */}
@@ -593,6 +581,302 @@ export default function CreateEditListingPage() {
           </div>
         </div>
       </div>
+
+      {/* Facebook Share Modal */}
+      {shareModal && (
+        <FacebookShareModal
+          listing={shareModal.listing}
+          user={user}
+          onDone={() => {
+            setShareModal(null);
+            navigate("/membership");
+          }}
+          onSkip={() => {
+            setShareModal(null);
+            navigate("/membership");
+          }}
+        />
+      )}
     </AuthenticatedLayout>
+  );
+}
+
+// ============================
+// Facebook Share Modal
+// ============================
+function FacebookShareModal({
+  listing,
+  user,
+  onDone,
+  onSkip,
+}: {
+  listing: any;
+  user: any;
+  onDone: () => void;
+  onSkip: () => void;
+}) {
+  const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
+  const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
+  const [generatingImage, setGeneratingImage] = useState(false);
+
+  const referralCode = user?.referralCode || "";
+  const referralLink = `https://www.swapedly.com/?ref=${referralCode}`;
+  const images = listing?.images ? JSON.parse(listing.images) : [];
+  const coverImage = images[0] ? resolveImageUrl(images[0]) : null;
+  const title = listing?.title || "My Item";
+
+  // Facebook share text
+  const shareText = `I Just listed "${title}" on Swapedly! 🔄\n\nJoin me on Swapedly and we'll both get 10 Bonus Swap Bucks you can use right away!\n\n👉 ${referralLink}`;
+
+  // Facebook share URL (opens FB share dialog)
+  const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}&quote=${encodeURIComponent(shareText)}`;
+
+  // Generate the share card image
+  useEffect(() => {
+    generateShareCard();
+  }, []);
+
+  async function generateShareCard() {
+    setGeneratingImage(true);
+    try {
+      const W = 1200;
+      const H = 630; // Facebook OG ratio
+      const canvas = document.createElement("canvas");
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext("2d")!;
+
+      // Background gradient
+      const grad = ctx.createLinearGradient(0, 0, W, H);
+      grad.addColorStop(0, "#5A45FF");
+      grad.addColorStop(1, "#FF4D6D");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+
+      // Load product image on left half
+      if (coverImage) {
+        try {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          await new Promise<void>((resolve, reject) => {
+            img.onload = () => resolve();
+            img.onerror = () => reject();
+            img.src = coverImage;
+          });
+          const imgW = W * 0.5;
+          const scale = Math.max(imgW / img.width, H / img.height);
+          const sw = imgW / scale;
+          const sh = H / scale;
+          const sx = (img.width - sw) / 2;
+          const sy = (img.height - sh) / 2;
+          ctx.drawImage(img, sx, sy, sw, sh, 0, 0, imgW, H);
+
+          // Dark overlay on image for readability
+          ctx.fillStyle = "rgba(0,0,0,0.35)";
+          ctx.fillRect(0, 0, imgW, H);
+        } catch { /* use gradient bg */ }
+      }
+
+      // Right panel white background
+      ctx.fillStyle = "rgba(255,255,255,0.95)";
+      const panelX = W * 0.5 + 1;
+      ctx.fillRect(panelX, 0, W - panelX, H);
+
+      // Swapedly logo text (right panel)
+      ctx.fillStyle = "#5A45FF";
+      ctx.font = "bold 28px Inter, system-ui, sans-serif";
+      ctx.fillText("Swapedly", panelX + 40, 70);
+
+      // "I Just Listed" headline
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 36px Inter, system-ui, sans-serif";
+      const headline = "I Just Listed";
+      ctx.fillText(headline, panelX + 40, 140);
+
+      // Product title (word-wrapped)
+      ctx.fillStyle = "#5A45FF";
+      ctx.font = "bold 32px Inter, system-ui, sans-serif";
+      const maxW = W * 0.5 - 80;
+      const words = `"${title}"`.split(" ");
+      let line = "";
+      let lineY = 195;
+      for (const word of words) {
+        const test = line + (line ? " " : "") + word;
+        if (ctx.measureText(test).width > maxW && line) {
+          ctx.fillText(line, panelX + 40, lineY);
+          line = word;
+          lineY += 44;
+        } else {
+          line = test;
+        }
+      }
+      ctx.fillText(line, panelX + 40, lineY);
+
+      // "on Swapedly" sub
+      ctx.fillStyle = "#64748b";
+      ctx.font = "24px Inter, system-ui, sans-serif";
+      ctx.fillText("on Swapedly", panelX + 40, lineY + 44);
+
+      // Divider
+      ctx.fillStyle = "#e2e8f0";
+      ctx.fillRect(panelX + 40, lineY + 68, W * 0.5 - 80, 2);
+
+      // CTA text
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 22px Inter, system-ui, sans-serif";
+      const ctaY = lineY + 115;
+      ctx.fillText("Join me on Swapedly!", panelX + 40, ctaY);
+
+      ctx.fillStyle = "#64748b";
+      ctx.font = "18px Inter, system-ui, sans-serif";
+      ctx.fillText("We'll both get 10 Bonus Swap Bucks", panelX + 40, ctaY + 34);
+      ctx.fillText("you can use right away.", panelX + 40, ctaY + 60);
+
+      // Referral link box
+      const boxY = ctaY + 100;
+      ctx.fillStyle = "#f1f5f9";
+      ctx.beginPath();
+      ctx.roundRect(panelX + 40, boxY, W * 0.5 - 80, 44, 8);
+      ctx.fill();
+      ctx.fillStyle = "#5A45FF";
+      ctx.font = "14px Inter, system-ui, sans-serif";
+      const shortLink = `swapedly.com/?ref=${referralCode}`;
+      ctx.fillText(shortLink, panelX + 56, boxY + 28);
+
+      // Left panel overlay text
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 32px Inter, system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("I Just Listed", W * 0.25, H * 0.4);
+      ctx.font = "bold 28px Inter, system-ui, sans-serif";
+      ctx.fillStyle = "#fbbf24";
+      // Word wrap title on left
+      const leftWords = `"${title}"`.split(" ");
+      let leftLine = "";
+      let leftY = H * 0.5;
+      for (const word of leftWords) {
+        const test = leftLine + (leftLine ? " " : "") + word;
+        if (ctx.measureText(test).width > W * 0.45 && leftLine) {
+          ctx.fillText(leftLine, W * 0.25, leftY);
+          leftLine = word;
+          leftY += 38;
+        } else {
+          leftLine = test;
+        }
+      }
+      ctx.fillText(leftLine, W * 0.25, leftY);
+      ctx.textAlign = "start";
+
+      setImageDataUrl(canvas.toDataURL("image/png"));
+    } catch (e) {
+      console.error("Share card error:", e);
+    } finally {
+      setGeneratingImage(false);
+    }
+  }
+
+  const handleDownload = () => {
+    if (!imageDataUrl) return;
+    const a = document.createElement("a");
+    a.download = `swapedly-share-${title.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase()}.png`;
+    a.href = imageDataUrl;
+    a.click();
+    toast({ title: "Image downloaded!", description: "Upload it to your Facebook post" });
+  };
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(shareText);
+    } catch {
+      const el = document.createElement("textarea");
+      el.value = shareText;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+    }
+    setCopied(true);
+    toast({ title: "Copied!" });
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-1">
+            <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center">
+              <Facebook className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h2 className="font-bold text-lg">Share on Facebook</h2>
+              <p className="text-xs text-muted-foreground">Earn 10 SB when a friend joins using your link</p>
+            </div>
+          </div>
+
+          {/* Share card preview */}
+          <div className="mt-4 rounded-xl overflow-hidden border bg-muted aspect-[1.9] flex items-center justify-center">
+            {generatingImage ? (
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-6 w-6 animate-spin" />
+                <p className="text-xs">Generating share image...</p>
+              </div>
+            ) : imageDataUrl ? (
+              <img src={imageDataUrl} alt="Share card" className="w-full h-full object-cover" />
+            ) : null}
+          </div>
+
+          {/* Download button */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full mt-2 rounded-xl gap-2"
+            onClick={handleDownload}
+            disabled={!imageDataUrl}
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            Download Share Image
+          </Button>
+
+          {/* Post text */}
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-xs font-medium text-muted-foreground">Post caption (includes your referral link)</p>
+              <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={handleCopy}>
+                {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+                {copied ? "Copied" : "Copy"}
+              </Button>
+            </div>
+            <div className="bg-muted/50 rounded-xl p-3 text-xs whitespace-pre-wrap text-muted-foreground">
+              {shareText}
+            </div>
+          </div>
+
+          {/* Share button */}
+          <Button
+            className="w-full mt-4 rounded-xl gap-2 bg-blue-600 hover:bg-blue-700"
+            onClick={() => { window.open(facebookShareUrl, "_blank"); }}
+          >
+            <Facebook className="h-4 w-4" />
+            Share to Facebook
+          </Button>
+
+          {/* Skip */}
+          <div className="flex items-center justify-between mt-3">
+            <button
+              onClick={onSkip}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Skip for now
+            </button>
+            <Button size="sm" className="rounded-xl gap-1.5 text-xs" onClick={onDone}>
+              Continue <ArrowRight className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

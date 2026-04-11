@@ -536,7 +536,7 @@ export async function registerRoutes(
       if (!fullUser.onboardingComplete) {
         const newCount = (fullUser.onboardingListingsCount || 0) + 1;
         const updates: any = { onboardingListingsCount: newCount };
-        if (newCount >= 3 && fullUser.onboardingStep === "listings") {
+        if (newCount >= 1 && fullUser.onboardingStep === "listings") {
           updates.onboardingStep = "membership";
         }
         await storage.updateUser(user.id, updates);
@@ -1927,7 +1927,7 @@ export async function registerRoutes(
         onboardingComplete: fullUser.onboardingComplete,
         step: fullUser.onboardingStep,
         listingsCreated: fullUser.onboardingListingsCount || 0,
-        listingsRequired: 3,
+        listingsRequired: 1,
         hasMembership,
         isPlus: userIsPlus,
         listingCredits: fullUser.listingCredits || 0,
