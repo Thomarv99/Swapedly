@@ -2096,6 +2096,57 @@ export async function registerRoutes(
   });
 
   // ============================================================
+  // ANALYTICS
+  // ============================================================
+
+  // In-memory active sessions (heartbeat-based online user count)
+  const activeSessions = new Map<string, number>(); // sessionId -> lastSeen timestamp
+  const ONLINE_TIMEOUT_MS = 90 * 1000; // 90 seconds
+
+  function getOnlineCount(): number {
+    const now = Date.now();
+    for (const [id, ts] of activeSessions.entries()) {
+      if (now - ts > ONLINE_TIMEOUT_MS) activeSessions.delete(id);
+    }
+    return activeSessions.size;
+  }
+
+  // Heartbeat endpoint — called every 30s by frontend
+  app.post("/api/analytics/heartbeat", (req: Request, res: Response) => {
+    const { sessionId } = req.body;
+    if (sessionId) activeSessions.set(sessionId, Date.now());
+    return res.json({ online: getOnlineCount() });
+  });
+
+  // Track a page view (called from frontend on every route change)
+  app.post("/api/analytics/pageview", async (req: Request, res: Response) => {
+    try {
+      const { path, referrer, sessionId } = req.body;
+      const userId = (req as any).user?.id || null;
+      const ua = req.headers["user-agent"] || "";
+      // Fire and forget — don't await
+      storage.trackPageView({ path, referrer, userAgent: ua, sessionId, userId }).catch(() => {});
+      return res.status(200).json({ ok: true });
+    } catch {
+      return res.status(200).json({ ok: true }); // Never fail on analytics
+    }
+  });
+
+  // Get analytics data (admin only)
+  app.get("/api/admin/analytics", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const fullUser = await storage.getUserById(user.id);
+      if (fullUser?.role !== "admin") return res.status(403).json({ message: "Admin only" });
+      const days = parseInt(req.query.days as string || "30");
+      const data = await storage.getAnalytics(days);
+      return res.json({ ...data, onlineUsers: getOnlineCount() });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ============================================================
   // LEADERBOARD
   // ============================================================
   app.get("/api/leaderboard", async (req: Request, res: Response) => {

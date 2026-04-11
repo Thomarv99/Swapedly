@@ -17,6 +17,7 @@ import {
   type SocialAccount, type InsertSocialAccount, socialAccounts,
   type SocialShare, type InsertSocialShare, socialShares,
   type ReferralClick, type InsertReferralClick, referralClicks,
+  type PageView, type InsertPageView, pageViews,
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import Database from "better-sqlite3";
@@ -197,6 +198,16 @@ sqlite.exec(`
     reward_paid INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS page_views (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    path TEXT NOT NULL,
+    referrer TEXT,
+    user_agent TEXT,
+    country TEXT,
+    session_id TEXT,
+    user_id INTEGER,
+    created_at TEXT NOT NULL
+  );
   CREATE TABLE IF NOT EXISTS referral_clicks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     referrer_id INTEGER NOT NULL,
@@ -309,6 +320,17 @@ export interface IStorage {
 
   // Paddle / Stripe
   getUserByPaddleCustomerId(customerId: string): Promise<User | undefined>;
+
+  // Analytics
+  trackPageView(data: InsertPageView): Promise<void>;
+  getAnalytics(days: number): Promise<{
+    totalViews: number;
+    uniqueSessions: number;
+    topPages: Array<{ path: string; views: number }>;
+    viewsByDay: Array<{ date: string; views: number }>;
+    topReferrers: Array<{ referrer: string; views: number }>;
+    newUsersByDay: Array<{ date: string; signups: number }>;
+  }>;
 
   // Leaderboard
   getLeaderboard(limit: number): Promise<Array<{ userId: number; username: string; displayName: string | null; avatarUrl: string | null; membershipTier: string; totalEarned: number; balance: number }>>;
@@ -784,6 +806,73 @@ export class DatabaseStorage implements IStorage {
       .where(eq(favorites.userId, userId))
       .orderBy(desc(favorites.createdAt))
       .all();
+  }
+
+  // ===== ANALYTICS =====
+  async trackPageView(data: InsertPageView): Promise<void> {
+    db.insert(pageViews).values({
+      ...data,
+      createdAt: new Date().toISOString(),
+    }).run();
+  }
+
+  async getAnalytics(days: number): Promise<{
+    totalViews: number;
+    uniqueSessions: number;
+    topPages: Array<{ path: string; views: number }>;
+    viewsByDay: Array<{ date: string; views: number }>;
+    topReferrers: Array<{ referrer: string; views: number }>;
+    newUsersByDay: Array<{ date: string; signups: number }>;
+  }> {
+    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+    const all = db.select().from(pageViews).where(gte(pageViews.createdAt, since)).all();
+
+    const totalViews = all.length;
+    const uniqueSessions = new Set(all.map(v => v.sessionId).filter(Boolean)).size;
+
+    // Top pages
+    const pageCounts: Record<string, number> = {};
+    for (const v of all) { pageCounts[v.path] = (pageCounts[v.path] || 0) + 1; }
+    const topPages = Object.entries(pageCounts)
+      .map(([path, views]) => ({ path, views }))
+      .sort((a, b) => b.views - a.views)
+      .slice(0, 10);
+
+    // Views by day
+    const dayCounts: Record<string, number> = {};
+    for (const v of all) {
+      const day = v.createdAt.slice(0, 10);
+      dayCounts[day] = (dayCounts[day] || 0) + 1;
+    }
+    const viewsByDay = Object.entries(dayCounts)
+      .map(([date, views]) => ({ date, views }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    // Top referrers
+    const refCounts: Record<string, number> = {};
+    for (const v of all) {
+      if (v.referrer) {
+        const ref = v.referrer.replace(/^https?:\/\//, "").split("/")[0];
+        refCounts[ref] = (refCounts[ref] || 0) + 1;
+      }
+    }
+    const topReferrers = Object.entries(refCounts)
+      .map(([referrer, views]) => ({ referrer, views }))
+      .sort((a, b) => b.views - a.views)
+      .slice(0, 10);
+
+    // New users by day
+    const allUsers = db.select().from(users).where(gte(users.joinedAt, since)).all();
+    const signupCounts: Record<string, number> = {};
+    for (const u of allUsers) {
+      const day = u.joinedAt.slice(0, 10);
+      signupCounts[day] = (signupCounts[day] || 0) + 1;
+    }
+    const newUsersByDay = Object.entries(signupCounts)
+      .map(([date, signups]) => ({ date, signups }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    return { totalViews, uniqueSessions, topPages, viewsByDay, topReferrers, newUsersByDay };
   }
 
   // ===== LEADERBOARD =====

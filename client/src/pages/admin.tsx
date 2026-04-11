@@ -17,12 +17,17 @@ import {
 import {
   Shield, Users, Package, Scale, Coins, Search, Ban,
   CheckCircle, Crown, Trash2, Eye, Star, PlusCircle, Share2, MousePointer, UserPlus,
+  BarChart3, TrendingUp, Globe, Activity, RefreshCw,
 } from "lucide-react";
+import {
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
+  ResponsiveContainer, Legend,
+} from "recharts";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getQueryFn, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import type { User, Listing, Dispute, EarnTask } from "@shared/schema";
@@ -209,6 +214,7 @@ export default function AdminPage() {
             <TabsTrigger value="disputes" className="rounded-lg" data-testid="admin-disputes-tab">Disputes</TabsTrigger>
             <TabsTrigger value="tasks" className="rounded-lg" data-testid="admin-tasks-tab">Earn Tasks</TabsTrigger>
             <TabsTrigger value="referrals" className="rounded-lg" data-testid="admin-referrals-tab">Referrals</TabsTrigger>
+            <TabsTrigger value="analytics" className="rounded-lg" data-testid="admin-analytics-tab">Analytics</TabsTrigger>
           </TabsList>
 
           {/* Users Tab */}
@@ -500,6 +506,11 @@ export default function AdminPage() {
           <TabsContent value="referrals" className="mt-6">
             <ReferralStatsTab />
           </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="mt-6">
+            <AnalyticsTab />
+          </TabsContent>
         </Tabs>
       </div>
     </AuthenticatedLayout>
@@ -600,6 +611,289 @@ function ReferralStatsTab() {
                 ))}
               </TableBody>
             </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ============================================================
+// ANALYTICS TAB
+// ============================================================
+
+type AnalyticsData = {
+  totalViews: number;
+  uniqueSessions: number;
+  onlineUsers: number;
+  topPages: Array<{ path: string; views: number }>;
+  viewsByDay: Array<{ date: string; views: number }>;
+  topReferrers: Array<{ referrer: string; views: number }>;
+  newUsersByDay: Array<{ date: string; signups: number }>;
+};
+
+function AnalyticsTab() {
+  const [days, setDays] = useState(30);
+
+  const { data, isLoading, refetch, isFetching } = useQuery<AnalyticsData>({
+    queryKey: ["/api/admin/analytics", days],
+    queryFn: async () => {
+      const res = await apiRequest("GET", `/api/admin/analytics?days=${days}`);
+      return res.json();
+    },
+    refetchInterval: 60_000, // auto-refresh every 60s
+  });
+
+  // Live online users — poll every 15s
+  const [onlineUsers, setOnlineUsers] = useState<number>(0);
+  useEffect(() => {
+    const poll = async () => {
+      try {
+        const res = await apiRequest("GET", `/api/admin/analytics?days=1`);
+        const d = await res.json();
+        setOnlineUsers(d.onlineUsers ?? 0);
+      } catch {}
+    };
+    poll();
+    const interval = setInterval(poll, 15_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const totalViews = data?.totalViews ?? 0;
+  const uniqueSessions = data?.uniqueSessions ?? 0;
+  const viewsByDay = data?.viewsByDay ?? [];
+  const newUsersByDay = data?.newUsersByDay ?? [];
+  const topPages = data?.topPages ?? [];
+  const topReferrers = data?.topReferrers ?? [];
+
+  // Merge viewsByDay + newUsersByDay for the combined chart
+  const combinedByDay = (() => {
+    const dateMap: Record<string, { date: string; views: number; signups: number }> = {};
+    for (const v of viewsByDay) {
+      dateMap[v.date] = { date: v.date, views: v.views, signups: 0 };
+    }
+    for (const s of newUsersByDay) {
+      if (!dateMap[s.date]) dateMap[s.date] = { date: s.date, views: 0, signups: 0 };
+      dateMap[s.date].signups = s.signups;
+    }
+    return Object.values(dateMap).sort((a, b) => a.date.localeCompare(b.date));
+  })();
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="h-5 w-5 text-primary" />
+          <h2 className="font-semibold text-lg">Site Analytics</h2>
+        </div>
+        <div className="flex items-center gap-3">
+          <Select value={String(days)} onValueChange={(v) => setDays(Number(v))}>
+            <SelectTrigger className="w-36 rounded-xl" data-testid="analytics-days-select">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">Last 7 days</SelectItem>
+              <SelectItem value="30">Last 30 days</SelectItem>
+              <SelectItem value="90">Last 90 days</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-xl"
+            onClick={() => refetch()}
+            disabled={isFetching}
+            data-testid="analytics-refresh-btn"
+            title="Refresh"
+          >
+            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+          </Button>
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="rounded-xl border-2 border-green-100 bg-green-50/40">
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl flex items-center justify-center bg-green-100">
+              <Activity className="h-6 w-6 text-green-600" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Online Now</p>
+              <p className="text-3xl font-bold text-green-600" data-testid="analytics-online">{onlineUsers}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="rounded-xl">
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl flex items-center justify-center bg-blue-50">
+              <TrendingUp className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Page Views</p>
+              <p className="text-3xl font-bold" data-testid="analytics-total-views">{totalViews.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">Last {days} days</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="rounded-xl">
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl flex items-center justify-center bg-purple-50">
+              <Users className="h-6 w-6 text-purple-600" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Unique Sessions</p>
+              <p className="text-3xl font-bold" data-testid="analytics-unique-sessions">{uniqueSessions.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">Last {days} days</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Traffic Chart */}
+      <Card className="rounded-xl">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <TrendingUp className="h-4 w-4" />
+            Traffic & Signups Over Time
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="h-56 flex items-center justify-center text-muted-foreground text-sm">Loading...</div>
+          ) : combinedByDay.length === 0 ? (
+            <div className="h-56 flex items-center justify-center text-muted-foreground text-sm">No data for this period</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={combinedByDay} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={(d) => {
+                    const dt = new Date(d + "T00:00:00");
+                    return `${dt.getMonth() + 1}/${dt.getDate()}`;
+                  }}
+                />
+                <YAxis tick={{ fontSize: 11 }} />
+                <RechartsTooltip
+                  formatter={(value: number, name: string) => [value, name === "views" ? "Page Views" : "New Signups"]}
+                  labelFormatter={(label) => `Date: ${label}`}
+                />
+                <Legend formatter={(v) => v === "views" ? "Page Views" : "New Signups"} />
+                <Line type="monotone" dataKey="views" stroke="#5A45FF" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+                <Line type="monotone" dataKey="signups" stroke="#FF4D6D" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Top Pages + Top Referrers */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card className="rounded-xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Globe className="h-4 w-4" />
+              Top Pages
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            ) : topPages.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No page view data yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {topPages.map((p, i) => (
+                  <div key={p.path} className="flex items-center gap-3">
+                    <span className="text-xs text-muted-foreground w-5 text-right">{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate" title={p.path}>{p.path || "/"}</p>
+                      <div className="h-1.5 rounded-full bg-muted mt-1">
+                        <div
+                          className="h-1.5 rounded-full bg-primary"
+                          style={{ width: `${Math.round((p.views / (topPages[0]?.views || 1)) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                    <span className="text-sm font-semibold tabular-nums">{p.views.toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Share2 className="h-4 w-4" />
+              Top Referrers
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            ) : topReferrers.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No referrer data yet. Most traffic is direct.</p>
+            ) : (
+              <div className="space-y-2">
+                {topReferrers.map((r, i) => (
+                  <div key={r.referrer} className="flex items-center gap-3">
+                    <span className="text-xs text-muted-foreground w-5 text-right">{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate" title={r.referrer}>{r.referrer}</p>
+                      <div className="h-1.5 rounded-full bg-muted mt-1">
+                        <div
+                          className="h-1.5 rounded-full bg-secondary"
+                          style={{ width: `${Math.round((r.views / (topReferrers[0]?.views || 1)) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                    <span className="text-sm font-semibold tabular-nums">{r.views.toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* New Users Bar Chart */}
+      <Card className="rounded-xl">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <UserPlus className="h-4 w-4" />
+            New Signups by Day
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">Loading...</div>
+          ) : newUsersByDay.length === 0 ? (
+            <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">No signup data yet.</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={newUsersByDay} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={(d) => {
+                    const dt = new Date(d + "T00:00:00");
+                    return `${dt.getMonth() + 1}/${dt.getDate()}`;
+                  }}
+                />
+                <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                <RechartsTooltip
+                  formatter={(value: number) => [value, "New Signups"]}
+                  labelFormatter={(label) => `Date: ${label}`}
+                />
+                <Bar dataKey="signups" fill="#FF4D6D" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           )}
         </CardContent>
       </Card>

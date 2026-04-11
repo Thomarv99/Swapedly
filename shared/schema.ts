@@ -423,3 +423,24 @@ export const insertReferralClickSchema = createInsertSchema(referralClicks).omit
 });
 export type InsertReferralClick = z.infer<typeof insertReferralClickSchema>;
 export type ReferralClick = typeof referralClicks.$inferSelect;
+
+// ============================================================
+// PAGE VIEWS (analytics tracking)
+// ============================================================
+export const pageViews = sqliteTable("page_views", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  path: text("path").notNull(),
+  referrer: text("referrer"),
+  userAgent: text("user_agent"),
+  country: text("country"),
+  sessionId: text("session_id"),
+  userId: integer("user_id"), // null = anonymous
+  createdAt: text("created_at").notNull(),
+});
+
+export const insertPageViewSchema = createInsertSchema(pageViews).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertPageView = z.infer<typeof insertPageViewSchema>;
+export type PageView = typeof pageViews.$inferSelect;
