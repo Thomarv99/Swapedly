@@ -49,6 +49,9 @@ export default function WelcomePage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Logo />
           <div className="flex items-center gap-3">
+            <Link href="/pricing">
+              <Button variant="ghost" size="sm" className="text-sm hidden sm:flex">Pricing</Button>
+            </Link>
             <Button
               variant="ghost"
               size="sm"

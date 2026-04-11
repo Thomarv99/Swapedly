@@ -24,6 +24,7 @@ import SettingsPage from "@/pages/settings";
 import NotificationsPage from "@/pages/notifications";
 import AdminPage from "@/pages/admin";
 import CompleteProfilePage from "@/pages/complete-profile";
+import PricingPage from "@/pages/pricing";
 import NotFound from "@/pages/not-found";
 import { OnboardingGuard } from "@/components/onboarding-guard";
 
@@ -32,6 +33,7 @@ function AppRouter() {
     <Switch>
       {/* Public */}
       <Route path="/" component={WelcomePage} />
+      <Route path="/pricing" component={PricingPage} />
       <Route path="/signup" component={SignUpPage} />
       <Route path="/marketplace" component={MarketplacePage} />
       <Route path="/listing/:id" component={ListingDetailPage} />
