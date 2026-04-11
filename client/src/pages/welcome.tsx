@@ -20,7 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { Listing } from "@shared/schema";
 
 export default function WelcomePage() {
-  const { login, loginPending, isAuthenticated } = useAuth();
+  const { login, loginPending, isAuthenticated, isLoading: authLoading } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [showLogin, setShowLogin] = useState(false);
@@ -51,10 +51,10 @@ export default function WelcomePage() {
 
   const { register, handleSubmit, formState: { errors } } = useForm<{ email: string; password: string }>();
 
-  // If logged in, redirect to dashboard (but don't return null — avoid blank flash)
+  // Only redirect once auth has confirmed the user is logged in (not during loading)
   useEffect(() => {
-    if (isAuthenticated) navigate("/dashboard");
-  }, [isAuthenticated]);
+    if (!authLoading && isAuthenticated) navigate("/dashboard");
+  }, [isAuthenticated, authLoading]);
 
   const onSubmit = async (data: { email: string; password: string }) => {
     try {
