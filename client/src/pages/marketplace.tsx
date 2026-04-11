@@ -1,4 +1,4 @@
-import { PublicLayout } from "@/components/layouts";
+import { AuthenticatedLayout } from "@/components/layouts";
 import { SwapBucksAmount } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,13 +60,14 @@ function FeedCard({ listing }: { listing: Listing & { seller?: User } }) {
       onMouseLeave={() => { setHovered(false); setImgIndex(0); }}
       data-testid={`feed-card-${listing.id}`}
     >
-      {/* Image / slideshow area */}
-      <div className="relative aspect-square overflow-hidden bg-muted">
-        <img
-          src={currentSrc}
-          alt={listing.title}
-          className="w-full h-full object-cover transition-all duration-300"
-        />
+      {/* Image / slideshow area — entire image is a link */}
+      <Link href={`/listing/${listing.id}`}>
+        <div className="relative aspect-square overflow-hidden bg-muted cursor-pointer">
+          <img
+            src={currentSrc}
+            alt={listing.title}
+            className="w-full h-full object-cover transition-all duration-300"
+          />
 
         {/* Multi-image indicator dots */}
         {images.length > 1 && (
@@ -117,20 +118,8 @@ function FeedCard({ listing }: { listing: Listing & { seller?: User } }) {
           </div>
         )}
 
-        {/* View Listing overlay button — always visible at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 z-10 p-3 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <Link href={`/listing/${listing.id}`}>
-            <Button
-              size="sm"
-              className="w-full rounded-xl bg-white text-slate-900 hover:bg-white/90 font-semibold gap-1.5 shadow-md"
-              data-testid={`view-listing-btn-${listing.id}`}
-            >
-              <Eye className="h-3.5 w-3.5" />
-              View Listing
-            </Button>
-          </Link>
         </div>
-      </div>
+      </Link>
 
       {/* Card info */}
       <div className="p-3">
@@ -205,7 +194,7 @@ export default function MarketplacePage() {
   const catScrollRef = useRef<HTMLDivElement>(null);
 
   return (
-    <PublicLayout>
+    <AuthenticatedLayout>
       <div className="max-w-5xl mx-auto px-4 pb-10">
         {/* ── Sticky filter bar ── */}
         <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-slate-100 pt-4 pb-3 mb-6 -mx-4 px-4">
@@ -331,6 +320,6 @@ export default function MarketplacePage() {
           </div>
         )}
       </div>
-    </PublicLayout>
+    </AuthenticatedLayout>
   );
 }
