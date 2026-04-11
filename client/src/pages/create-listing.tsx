@@ -814,23 +814,61 @@ function FacebookShareModal({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const [downloaded, setDownloaded] = useState(false);
+
+  const handleDownloadWithState = () => {
+    handleDownload();
+    setDownloaded(true);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-1">
-            <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[92vh] overflow-y-auto">
+        <div className="p-6 space-y-5">
+
+          {/* ── Big incentive header ── */}
+          <div className="text-center bg-gradient-to-r from-[#5A45FF] to-[#FF4D6D] rounded-xl p-4">
+            <p className="text-white font-black text-xl leading-tight">
+              🎉 Earn Swap Bucks Every Time<br />Someone Joins via Your Link!
+            </p>
+            <p className="text-white/90 text-sm mt-1.5 font-medium">
+              Share your post on Facebook → Friends sign up → You earn 1 SB per referral. It adds up fast!
+            </p>
+          </div>
+
+          {/* Facebook icon + title */}
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
               <Facebook className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h2 className="font-bold text-lg">Share on Facebook</h2>
-              <p className="text-xs text-muted-foreground">Earn 10 SB when a friend joins using your link</p>
+              <h2 className="font-bold text-lg leading-tight">Share on Facebook</h2>
+              <p className="text-xs text-muted-foreground">Your referral link is automatically included</p>
             </div>
           </div>
 
-          {/* Share card preview */}
-          <div className="mt-4 rounded-xl overflow-hidden border bg-muted aspect-[1.9] flex items-center justify-center">
+          {/* Numbered steps */}
+          <div className="bg-blue-50 rounded-xl p-4 space-y-3">
+            <p className="text-sm font-semibold text-blue-900 mb-1">How to share in 3 easy steps:</p>
+            {[
+              { n: "1", label: "Download the photo", sub: "Tap the button below to save the share image to your device", done: downloaded },
+              { n: "2", label: "Copy the caption text", sub: "Hit \"Copy\" to grab the caption — it includes your referral link", done: copied },
+              { n: "3", label: "Post to Facebook", sub: "Open Facebook, create a new post, upload the photo, paste the caption, and post!" },
+            ].map((step) => (
+              <div key={step.n} className="flex items-start gap-3">
+                <div className={`h-6 w-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold ${step.done ? "bg-green-500 text-white" : "bg-blue-600 text-white"}`}>
+                  {step.done ? "✓" : step.n}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">{step.label}</p>
+                  <p className="text-xs text-slate-500">{step.sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Share image preview */}
+          <div className="rounded-xl overflow-hidden border bg-muted aspect-[1.9] flex items-center justify-center">
             {generatingImage ? (
               <div className="flex flex-col items-center gap-2 text-muted-foreground">
                 <Loader2 className="h-6 w-6 animate-spin" />
@@ -841,50 +879,47 @@ function FacebookShareModal({
             ) : null}
           </div>
 
-          {/* Download button */}
+          {/* Step 1: Download */}
           <Button
-            variant="outline"
-            size="sm"
-            className="w-full mt-2 rounded-xl gap-2"
-            onClick={handleDownload}
+            className={`w-full rounded-xl gap-2 ${downloaded ? "bg-green-600 hover:bg-green-700" : ""}`}
+            onClick={handleDownloadWithState}
             disabled={!imageDataUrl}
+            data-testid="download-share-image"
           >
-            <Sparkles className="h-3.5 w-3.5" />
-            Download Share Image
+            <Sparkles className="h-4 w-4" />
+            {downloaded ? "✓ Photo Downloaded!" : "Step 1: Download Share Photo"}
           </Button>
 
-          {/* Post text */}
-          <div className="mt-4">
+          {/* Step 2: Copy */}
+          <div>
             <div className="flex items-center justify-between mb-1.5">
-              <p className="text-xs font-medium text-muted-foreground">Post caption (includes your referral link)</p>
-              <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={handleCopy}>
+              <p className="text-xs font-semibold text-slate-700">Step 2: Copy this caption</p>
+              <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={handleCopy} data-testid="copy-caption-btn">
                 {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-                {copied ? "Copied" : "Copy"}
+                {copied ? "Copied!" : "Copy"}
               </Button>
             </div>
-            <div className="bg-muted/50 rounded-xl p-3 text-xs whitespace-pre-wrap text-muted-foreground">
+            <div className="bg-slate-50 rounded-xl p-3 text-xs whitespace-pre-wrap text-slate-600 border border-slate-200">
               {shareText}
             </div>
           </div>
 
-          {/* Share button */}
+          {/* Step 3: Open Facebook */}
           <Button
-            className="w-full mt-4 rounded-xl gap-2 bg-blue-600 hover:bg-blue-700"
+            className="w-full rounded-xl gap-2 bg-blue-600 hover:bg-blue-700"
             onClick={() => { window.open(facebookShareUrl, "_blank"); }}
+            data-testid="open-facebook-btn"
           >
             <Facebook className="h-4 w-4" />
-            Share to Facebook
+            Step 3: Open Facebook & Post
           </Button>
 
-          {/* Skip */}
-          <div className="flex items-center justify-between mt-3">
-            <button
-              onClick={onSkip}
-              className="text-xs text-muted-foreground hover:text-foreground"
-            >
+          {/* Footer */}
+          <div className="flex items-center justify-between pt-1">
+            <button onClick={onSkip} className="text-xs text-muted-foreground hover:text-foreground">
               Skip for now
             </button>
-            <Button size="sm" className="rounded-xl gap-1.5 text-xs" onClick={onDone}>
+            <Button size="sm" className="rounded-xl gap-1.5 text-xs" onClick={onDone} data-testid="share-done-btn">
               Continue <ArrowRight className="h-3 w-3" />
             </Button>
           </div>

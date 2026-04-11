@@ -1,230 +1,335 @@
 import { PublicLayout } from "@/components/layouts";
-import { ListingCard, SwapBucksAmount } from "@/components/shared";
+import { SwapBucksAmount } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, MapPin, X, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getQueryFn } from "@/lib/queryClient";
-import { useState } from "react";
+import { resolveImageUrl } from "@/lib/queryClient";
+import { useState, useEffect, useRef } from "react";
+import { Link } from "wouter";
 import type { Listing, User } from "@shared/schema";
 
 const CATEGORIES = [
-  "Electronics", "Gaming", "Fashion", "Home & Garden", "Sports & Outdoors",
-  "Books & Media", "Toys & Hobbies", "Auto & Parts", "Musical Instruments",
-  "Art & Collectibles", "Services", "Other",
+  "All",
+  "Electronics",
+  "Gaming",
+  "Fashion",
+  "Home & Garden",
+  "Sports & Outdoors",
+  "Books & Media",
+  "Toys & Hobbies",
+  "Auto & Parts",
+  "Musical Instruments",
+  "Art & Collectibles",
+  "Services",
+  "Other",
 ];
 
-const CONDITIONS = ["New", "Like New", "Good", "Fair", "Poor"];
+// ─── Feed Card ────────────────────────────────────────────────────────────────
+function FeedCard({ listing }: { listing: Listing & { seller?: User } }) {
+  const images: string[] = listing.images ? JSON.parse(listing.images) : [];
+  const [imgIndex, setImgIndex] = useState(0);
+  const [hovered, setHovered] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-const PRICE_RANGES = [
-  { label: "Any Price", value: "any" },
-  { label: "Under 50 SB", value: "0-50" },
-  { label: "50 - 200 SB", value: "50-200" },
-  { label: "200 - 500 SB", value: "200-500" },
-  { label: "500+ SB", value: "500-999999" },
-];
+  // Auto-cycle images when hovered (simulates video) — only if multiple images
+  useEffect(() => {
+    if (hovered && images.length > 1) {
+      intervalRef.current = setInterval(() => {
+        setImgIndex((p) => (p + 1) % images.length);
+      }, 800);
+    } else {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    }
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [hovered, images.length]);
 
+  const currentSrc = images[imgIndex]
+    ? resolveImageUrl(images[imgIndex])
+    : "https://placehold.co/600x600/e2e8f0/94a3b8?text=No+Image";
+
+  const sellerName = listing.seller?.displayName || listing.seller?.username || "Seller";
+
+  return (
+    <div
+      className="relative rounded-2xl overflow-hidden bg-white shadow-sm border border-slate-100 group"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => { setHovered(false); setImgIndex(0); }}
+      data-testid={`feed-card-${listing.id}`}
+    >
+      {/* Image / slideshow area */}
+      <div className="relative aspect-square overflow-hidden bg-muted">
+        <img
+          src={currentSrc}
+          alt={listing.title}
+          className="w-full h-full object-cover transition-all duration-300"
+        />
+
+        {/* Multi-image indicator dots */}
+        {images.length > 1 && (
+          <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 z-10">
+            {images.map((_, i) => (
+              <span
+                key={i}
+                className={`block w-1.5 h-1.5 rounded-full transition-all ${
+                  i === imgIndex ? "bg-white scale-125" : "bg-white/50"
+                }`}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Image nav arrows (visible on hover) */}
+        {images.length > 1 && hovered && (
+          <>
+            <button
+              onClick={(e) => { e.preventDefault(); setImgIndex((p) => (p - 1 + images.length) % images.length); }}
+              className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/60 z-10"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={(e) => { e.preventDefault(); setImgIndex((p) => (p + 1) % images.length); }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/60 z-10"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </>
+        )}
+
+        {/* Highlighted badge */}
+        {listing.isHighlighted && (
+          <div className="absolute top-2 left-2 z-10">
+            <span className="inline-flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+              ⭐ FEATURED
+            </span>
+          </div>
+        )}
+
+        {/* "Playing" animation indicator for multi-image when hovered */}
+        {images.length > 1 && hovered && (
+          <div className="absolute top-2 right-2 z-10 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded-full flex items-center gap-1">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+            {images.length} photos
+          </div>
+        )}
+
+        {/* View Listing overlay button — always visible at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 z-10 p-3 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <Link href={`/listing/${listing.id}`}>
+            <Button
+              size="sm"
+              className="w-full rounded-xl bg-white text-slate-900 hover:bg-white/90 font-semibold gap-1.5 shadow-md"
+              data-testid={`view-listing-btn-${listing.id}`}
+            >
+              <Eye className="h-3.5 w-3.5" />
+              View Listing
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Card info */}
+      <div className="p-3">
+        <Link href={`/listing/${listing.id}`}>
+          <h3 className="font-semibold text-sm line-clamp-1 hover:text-primary transition-colors">
+            {listing.title}
+          </h3>
+        </Link>
+        <div className="flex items-center justify-between mt-1">
+          <SwapBucksAmount amount={listing.price} size="sm" />
+          {listing.views > 0 && (
+            <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+              <Eye className="h-3 w-3" />{listing.views}
+            </span>
+          )}
+        </div>
+        {/* Seller + delivery */}
+        <div className="flex items-center justify-between mt-1.5">
+          <span className="text-[11px] text-muted-foreground truncate max-w-[60%]">by {sellerName}</span>
+          {listing.deliveryOptions && (() => {
+            try {
+              const opts = JSON.parse(listing.deliveryOptions);
+              return opts.localPickup ? (
+                <span className="inline-flex items-center gap-0.5 text-[10px] text-green-600 font-medium">
+                  <MapPin className="h-2.5 w-2.5" />Local pickup
+                </span>
+              ) : null;
+            } catch { return null; }
+          })()}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Marketplace Page ───────────────────────────────────────────────────
 export default function MarketplacePage() {
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState("newest");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState("any");
-  const [showFilters, setShowFilters] = useState(false);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [localOnly, setLocalOnly] = useState(false);
+  const [sortBy] = useState("newest");
+
+  // Debounce search
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
+  }, [search]);
 
   const queryParams = new URLSearchParams();
-  if (search) queryParams.set("search", search);
+  if (debouncedSearch) queryParams.set("search", debouncedSearch);
   if (sortBy) queryParams.set("sort", sortBy);
-  if (selectedCategories.length) queryParams.set("categories", selectedCategories.join(","));
-  if (selectedConditions.length) queryParams.set("conditions", selectedConditions.join(","));
-  if (priceRange !== "any") {
-    const [min, max] = priceRange.split("-");
-    queryParams.set("minPrice", min);
-    queryParams.set("maxPrice", max);
-  }
+  if (selectedCategory && selectedCategory !== "All") queryParams.set("categories", selectedCategory);
 
   const { data, isLoading } = useQuery<{ listings: (Listing & { seller?: User })[] }>({
     queryKey: ["/api/listings?" + queryParams.toString()],
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
 
-  const listings = data?.listings || (Array.isArray(data) ? data : []);
+  let listings = data?.listings || (Array.isArray(data) ? data : []);
 
-  const toggleCategory = (cat: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
-    );
-  };
+  // Client-side local filter (delivery options check)
+  if (localOnly) {
+    listings = listings.filter((l) => {
+      try {
+        const opts = JSON.parse(l.deliveryOptions || "{}");
+        return opts.localPickup === true;
+      } catch { return false; }
+    });
+  }
 
-  const toggleCondition = (cond: string) => {
-    setSelectedConditions((prev) =>
-      prev.includes(cond) ? prev.filter((c) => c !== cond) : [...prev, cond]
-    );
-  };
-
-  const activeFilters = [
-    ...selectedCategories.map((c) => ({ label: c, clear: () => toggleCategory(c) })),
-    ...selectedConditions.map((c) => ({ label: c, clear: () => toggleCondition(c) })),
-    ...(priceRange !== "any"
-      ? [{ label: PRICE_RANGES.find((p) => p.value === priceRange)?.label || priceRange, clear: () => setPriceRange("any") }]
-      : []),
-  ];
-
-  const clearAll = () => {
-    setSelectedCategories([]);
-    setSelectedConditions([]);
-    setPriceRange("any");
-    setSearch("");
-  };
+  const catScrollRef = useRef<HTMLDivElement>(null);
 
   return (
     <PublicLayout>
-      <div className="container mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">Marketplace</h1>
-            <p className="text-sm text-muted-foreground">
-              {isLoading ? "Loading..." : `${listings.length} items available`}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="relative flex-1 min-w-[200px]">
+      <div className="max-w-5xl mx-auto px-4 pb-10">
+        {/* ── Sticky filter bar ── */}
+        <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-slate-100 pt-4 pb-3 mb-6 -mx-4 px-4">
+          {/* Search row */}
+          <div className="flex items-center gap-2 mb-3">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="Search items..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 rounded-xl"
+                className="pl-10 rounded-xl h-10 bg-slate-50 border-slate-200"
                 data-testid="marketplace-search"
               />
+              {search && (
+                <button
+                  onClick={() => setSearch("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-40 rounded-xl" data-testid="sort-select">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest First</SelectItem>
-                <SelectItem value="price-low">Price: Low to High</SelectItem>
-                <SelectItem value="price-high">Price: High to Low</SelectItem>
-                <SelectItem value="popular">Most Popular</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button
-              variant="outline"
-              size="icon"
-              className="lg:hidden rounded-xl"
-              onClick={() => setShowFilters(!showFilters)}
-              data-testid="filter-toggle"
+            {/* Local toggle */}
+            <button
+              onClick={() => setLocalOnly((v) => !v)}
+              className={`flex items-center gap-1.5 px-3 h-10 rounded-xl border text-sm font-medium transition-all shrink-0 ${
+                localOnly
+                  ? "bg-green-600 text-white border-green-600 shadow-sm"
+                  : "bg-white text-slate-600 border-slate-200 hover:border-green-500 hover:text-green-600"
+              }`}
+              data-testid="local-filter-btn"
             >
-              <SlidersHorizontal className="h-4 w-4" />
-            </Button>
+              <MapPin className="h-3.5 w-3.5" />
+              Local
+            </button>
+          </div>
+
+          {/* Category pills — horizontally scrollable */}
+          <div
+            ref={catScrollRef}
+            className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide"
+            style={{ scrollbarWidth: "none" }}
+            data-testid="category-pills"
+          >
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
+                  selectedCategory === cat
+                    ? "bg-primary text-white border-primary shadow-sm"
+                    : "bg-white text-slate-600 border-slate-200 hover:border-primary hover:text-primary"
+                }`}
+                data-testid={`category-pill-${cat}`}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Active filters */}
-        {activeFilters.length > 0 && (
+        {/* ── Active filter chips ── */}
+        {(selectedCategory !== "All" || localOnly) && (
           <div className="flex items-center gap-2 mb-4 flex-wrap">
-            {activeFilters.map((f, i) => (
-              <Badge key={i} variant="secondary" className="gap-1 rounded-lg">
-                {f.label}
-                <button onClick={f.clear} data-testid={`clear-filter-${i}`}>
+            {selectedCategory !== "All" && (
+              <Badge variant="secondary" className="gap-1 rounded-lg text-xs">
+                {selectedCategory}
+                <button onClick={() => setSelectedCategory("All")} data-testid="clear-category">
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
-            ))}
-            <button onClick={clearAll} className="text-xs text-primary hover:underline" data-testid="clear-all-filters">
+            )}
+            {localOnly && (
+              <Badge variant="secondary" className="gap-1 rounded-lg text-xs">
+                <MapPin className="h-3 w-3" />Local Pickup
+                <button onClick={() => setLocalOnly(false)} data-testid="clear-local">
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            )}
+            <button
+              onClick={() => { setSelectedCategory("All"); setLocalOnly(false); setSearch(""); }}
+              className="text-xs text-primary hover:underline"
+              data-testid="clear-all-filters"
+            >
               Clear all
             </button>
           </div>
         )}
 
-        <div className="flex gap-6">
-          {/* Sidebar filters */}
-          <aside className={`w-64 shrink-0 space-y-6 ${showFilters ? "block" : "hidden lg:block"}`}>
-            <div>
-              <h3 className="font-semibold text-sm mb-3">Category</h3>
-              <div className="space-y-2">
-                {CATEGORIES.map((cat) => (
-                  <div key={cat} className="flex items-center gap-2">
-                    <Checkbox
-                      id={`cat-${cat}`}
-                      checked={selectedCategories.includes(cat)}
-                      onCheckedChange={() => toggleCategory(cat)}
-                      data-testid={`category-${cat}`}
-                    />
-                    <Label htmlFor={`cat-${cat}`} className="text-sm font-normal">{cat}</Label>
-                  </div>
-                ))}
-              </div>
-            </div>
+        {/* ── Result count ── */}
+        <p className="text-sm text-muted-foreground mb-5">
+          {isLoading ? "Loading..." : `${listings.length} item${listings.length !== 1 ? "s" : ""} available`}
+        </p>
 
-            <div>
-              <h3 className="font-semibold text-sm mb-3">Price Range (SB)</h3>
-              <RadioGroup value={priceRange} onValueChange={setPriceRange}>
-                {PRICE_RANGES.map((pr) => (
-                  <div key={pr.value} className="flex items-center gap-2">
-                    <RadioGroupItem value={pr.value} id={`price-${pr.value}`} data-testid={`price-${pr.value}`} />
-                    <Label htmlFor={`price-${pr.value}`} className="text-sm font-normal">{pr.label}</Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-sm mb-3">Condition</h3>
-              <div className="space-y-2">
-                {CONDITIONS.map((cond) => (
-                  <div key={cond} className="flex items-center gap-2">
-                    <Checkbox
-                      id={`cond-${cond}`}
-                      checked={selectedConditions.includes(cond.toLowerCase().replace(" ", "_"))}
-                      onCheckedChange={() => toggleCondition(cond.toLowerCase().replace(" ", "_"))}
-                      data-testid={`condition-${cond}`}
-                    />
-                    <Label htmlFor={`cond-${cond}`} className="text-sm font-normal">{cond}</Label>
-                  </div>
-                ))}
+        {/* ── Feed grid ── */}
+        {isLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="rounded-2xl border overflow-hidden">
+                <Skeleton className="aspect-square" />
+                <div className="p-3 space-y-2">
+                  <Skeleton className="h-3.5 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
               </div>
-            </div>
-          </aside>
-
-          {/* Grid */}
-          <div className="flex-1">
-            {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="rounded-xl border p-3">
-                    <Skeleton className="aspect-[4/3] rounded-lg mb-3" />
-                    <Skeleton className="h-4 w-3/4 mb-2" />
-                    <Skeleton className="h-4 w-1/3" />
-                  </div>
-                ))}
-              </div>
-            ) : listings.length === 0 ? (
-              <div className="text-center py-20">
-                <p className="text-muted-foreground">No listings found. Try adjusting your filters.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {listings.map((listing: any) => (
-                  <ListingCard
-                    key={listing.id}
-                    listing={listing}
-                    seller={listing.seller}
-                  />
-                ))}
-              </div>
-            )}
+            ))}
           </div>
-        </div>
+        ) : listings.length === 0 ? (
+          <div className="text-center py-24">
+            <p className="text-muted-foreground text-sm">No listings found.</p>
+            <button onClick={() => { setSelectedCategory("All"); setLocalOnly(false); setSearch(""); }} className="text-primary text-sm mt-2 hover:underline">
+              Clear filters
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {listings.map((listing: any) => (
+              <FeedCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+        )}
       </div>
     </PublicLayout>
   );

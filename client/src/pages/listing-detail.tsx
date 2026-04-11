@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { ChevronLeft, ChevronRight, Clock, Coins, MessageSquare, ShoppingCart, Star, Send, Share2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Coins, MessageSquare, ShoppingCart, Star, Send, Share2, HelpCircle, CheckCircle2, Eye } from "lucide-react";
 import { ShareDialog } from "@/pages/share-earn";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getQueryFn, apiRequest } from "@/lib/queryClient";
@@ -61,6 +61,8 @@ export default function ListingDetailPage() {
       queryClient.invalidateQueries({ queryKey: [`/api/listings/${id}`] });
     },
   });
+
+  const isSeller = user && listing && listing.seller?.id === user.id;
 
   if (isLoading) {
     return (
@@ -173,6 +175,11 @@ export default function ListingDetailPage() {
             </div>
 
             <h1 className="text-2xl font-bold">{listing.title}</h1>
+            {listing.views > 0 && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <Eye className="h-3.5 w-3.5" />{listing.views.toLocaleString()} views
+              </p>
+            )}
 
             <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-center gap-3">
               <Coins className="h-8 w-8 text-yellow-600" />
@@ -268,41 +275,16 @@ export default function ListingDetailPage() {
         </div>
 
         {/* Q&A */}
-        <div className="mt-12">
-          <h2 className="text-xl font-bold mb-4">Questions & Answers</h2>
-          {questions.length === 0 && (
-            <p className="text-sm text-muted-foreground mb-4">No questions yet. Be the first to ask!</p>
-          )}
-          <div className="space-y-4 mb-6">
-            {questions.map((q: Question) => (
-              <Card key={q.id} className="rounded-xl">
-                <CardContent className="p-4">
-                  <p className="font-medium text-sm">Q: {q.question}</p>
-                  {q.answer && <p className="text-sm text-muted-foreground mt-2">A: {q.answer}</p>}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          {user && (
-            <div className="flex gap-2">
-              <Textarea
-                placeholder="Ask a question about this item..."
-                value={newQuestion}
-                onChange={(e) => setNewQuestion(e.target.value)}
-                className="rounded-xl"
-                data-testid="question-input"
-              />
-              <Button
-                onClick={() => askMutation.mutate()}
-                disabled={!newQuestion.trim() || askMutation.isPending}
-                className="rounded-xl"
-                data-testid="ask-question-btn"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-        </div>
+        <QASection
+          listingId={Number(id)}
+          sellerId={listing.seller?.id}
+          questions={questions}
+          user={user}
+          newQuestion={newQuestion}
+          setNewQuestion={setNewQuestion}
+          askMutation={askMutation}
+          queryClient={queryClient}
+        />
 
         {/* Reviews */}
         <div className="mt-12">
@@ -329,5 +311,177 @@ export default function ListingDetailPage() {
         </div>
       </div>
     </PublicLayout>
+  );
+}
+
+// ─── Q&A Section ─────────────────────────────────────────────────────────────
+function QASection({
+  listingId,
+  sellerId,
+  questions,
+  user,
+  newQuestion,
+  setNewQuestion,
+  askMutation,
+  queryClient,
+}: {
+  listingId: number;
+  sellerId?: number;
+  questions: any[];
+  user: any;
+  newQuestion: string;
+  setNewQuestion: (v: string) => void;
+  askMutation: any;
+  queryClient: any;
+}) {
+  const { toast } = useToast();
+  const [answeringId, setAnsweringId] = useState<number | null>(null);
+  const [answerText, setAnswerText] = useState("");
+
+  const isSeller = user?.id === sellerId;
+
+  const answerMutation = useMutation({
+    mutationFn: async ({ questionId, answer }: { questionId: number; answer: string }) => {
+      await apiRequest("PUT", `/api/questions/${questionId}/answer`, { answer });
+    },
+    onSuccess: () => {
+      toast({ title: "Answer posted!" });
+      setAnsweringId(null);
+      setAnswerText("");
+      queryClient.invalidateQueries({ queryKey: [`/api/listings/${listingId}`] });
+    },
+    onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+
+  return (
+    <div className="mt-12">
+      <div className="flex items-center gap-2 mb-6">
+        <HelpCircle className="h-5 w-5 text-primary" />
+        <h2 className="text-xl font-bold">Questions & Answers</h2>
+        {questions.length > 0 && (
+          <span className="text-sm text-muted-foreground">({questions.length})</span>
+        )}
+      </div>
+
+      {questions.length === 0 && (
+        <div className="bg-slate-50 rounded-xl p-6 text-center mb-6">
+          <HelpCircle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">No questions yet. Be the first to ask!</p>
+        </div>
+      )}
+
+      <div className="space-y-4 mb-6">
+        {questions.map((q: any) => (
+          <Card key={q.id} className="rounded-xl overflow-hidden">
+            <CardContent className="p-0">
+              {/* Question */}
+              <div className="p-4 flex items-start gap-3">
+                <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-primary font-bold text-xs">Q</span>
+                </div>
+                <p className="text-sm font-medium flex-1">{q.question}</p>
+              </div>
+
+              {/* Answer */}
+              {q.answer ? (
+                <div className="bg-green-50 border-t border-green-100 p-4 flex items-start gap-3">
+                  <div className="h-7 w-7 rounded-full bg-green-600 flex items-center justify-center shrink-0 mt-0.5">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-green-700 font-semibold mb-0.5">Seller's Answer</p>
+                    <p className="text-sm text-slate-700">{q.answer}</p>
+                  </div>
+                </div>
+              ) : isSeller ? (
+                answeringId === q.id ? (
+                  <div className="border-t p-4 space-y-2">
+                    <Textarea
+                      placeholder="Write your answer..."
+                      value={answerText}
+                      onChange={(e) => setAnswerText(e.target.value)}
+                      className="rounded-xl text-sm"
+                      rows={2}
+                      data-testid={`answer-input-${q.id}`}
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        className="rounded-xl gap-1"
+                        onClick={() => answerMutation.mutate({ questionId: q.id, answer: answerText })}
+                        disabled={!answerText.trim() || answerMutation.isPending}
+                        data-testid={`submit-answer-${q.id}`}
+                      >
+                        <Send className="h-3 w-3" />
+                        Post Answer
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="rounded-xl text-xs"
+                        onClick={() => { setAnsweringId(null); setAnswerText(""); }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border-t p-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-xl text-xs gap-1 text-green-700 border-green-200 hover:bg-green-50"
+                      onClick={() => setAnsweringId(q.id)}
+                      data-testid={`answer-btn-${q.id}`}
+                    >
+                      <CheckCircle2 className="h-3 w-3" />
+                      Answer this question
+                    </Button>
+                  </div>
+                )
+              ) : (
+                <div className="bg-slate-50 border-t px-4 py-2.5">
+                  <p className="text-xs text-muted-foreground italic">Awaiting seller's answer</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Ask a question form */}
+      {user ? (
+        <div className="bg-slate-50 rounded-xl p-4">
+          <p className="text-sm font-medium mb-3 flex items-center gap-1.5">
+            <HelpCircle className="h-4 w-4 text-primary" />
+            Ask the seller a question
+          </p>
+          <div className="flex gap-2">
+            <Textarea
+              placeholder="e.g. Does this include all accessories?"
+              value={newQuestion}
+              onChange={(e) => setNewQuestion(e.target.value)}
+              className="rounded-xl text-sm flex-1"
+              rows={2}
+              data-testid="question-input"
+            />
+            <Button
+              onClick={() => askMutation.mutate()}
+              disabled={!newQuestion.trim() || askMutation.isPending}
+              className="rounded-xl self-end"
+              data-testid="ask-question-btn"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-slate-50 rounded-xl p-4 text-center">
+          <p className="text-sm text-muted-foreground">
+            <a href="/#/signup" className="text-primary hover:underline font-medium">Sign in</a> to ask the seller a question
+          </p>
+        </div>
+      )}
+    </div>
   );
 }

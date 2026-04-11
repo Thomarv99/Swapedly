@@ -38,6 +38,11 @@ import {
   StarOff,
   Crown,
   Sparkles,
+  Share2,
+  Facebook,
+  Copy,
+  Check,
+  ArrowRight,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, getQueryFn, resolveImageUrl } from "@/lib/queryClient";
@@ -53,6 +58,7 @@ function ListingRow({
   onDelete,
   onStatusChange,
   onToggleHighlight,
+  onShare,
   isPlus,
   highlightPending,
 }: {
@@ -60,6 +66,7 @@ function ListingRow({
   onDelete: (id: number) => void;
   onStatusChange: (id: number, status: string) => void;
   onToggleHighlight: (id: number, isHighlighted: boolean) => void;
+  onShare: (listing: ListingWithStatus) => void;
   isPlus: boolean;
   highlightPending: boolean;
 }) {
@@ -162,6 +169,18 @@ function ListingRow({
               >
                 {listing.isHighlighted ? <StarOff className="h-3 w-3" /> : <Star className="h-3 w-3" />}
                 {listing.isHighlighted ? "Unfeature" : "Feature"}
+              </Button>
+            )}
+            {listing.status === "active" && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-lg gap-1.5 text-xs text-blue-600 border-blue-200 hover:bg-blue-50 hidden sm:flex"
+                onClick={() => onShare(listing)}
+                data-testid={`share-listing-${listing.id}`}
+              >
+                <Share2 className="h-3 w-3" />
+                Share
               </Button>
             )}
             <Link href={`/edit-listing/${listing.id}`}>
@@ -314,6 +333,7 @@ export default function MyListingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
+  const [shareModal, setShareModal] = useState<{ listing: any } | null>(null);
   const queryClient = useQueryClient();
 
   const {
@@ -437,6 +457,10 @@ export default function MyListingsPage() {
 
   const handleToggleHighlight = (id: number, isHighlighted: boolean) => {
     highlightMutation.mutate({ id, isHighlighted });
+  };
+
+  const handleShare = (listing: any) => {
+    setShareModal({ listing });
   };
 
   return (
@@ -601,6 +625,7 @@ export default function MyListingsPage() {
                   onDelete={handleDelete}
                   onStatusChange={handleStatusChange}
                   onToggleHighlight={handleToggleHighlight}
+                  onShare={handleShare}
                   isPlus={userIsPlus}
                   highlightPending={highlightMutation.isPending}
                 />
@@ -628,6 +653,7 @@ export default function MyListingsPage() {
                   onDelete={handleDelete}
                   onStatusChange={handleStatusChange}
                   onToggleHighlight={handleToggleHighlight}
+                  onShare={handleShare}
                   isPlus={userIsPlus}
                   highlightPending={highlightMutation.isPending}
                 />
@@ -654,6 +680,7 @@ export default function MyListingsPage() {
                   onDelete={handleDelete}
                   onStatusChange={handleStatusChange}
                   onToggleHighlight={handleToggleHighlight}
+                  onShare={handleShare}
                   isPlus={userIsPlus}
                   highlightPending={highlightMutation.isPending}
                 />
@@ -662,6 +689,220 @@ export default function MyListingsPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Facebook Share Modal */}
+      {shareModal && (
+        <MyListingsFacebookShareModal
+          listing={shareModal.listing}
+          user={user}
+          onDone={() => setShareModal(null)}
+          onSkip={() => setShareModal(null)}
+        />
+      )}
     </AuthenticatedLayout>
+  );
+}
+
+// ─── Improved Facebook Share Modal (My Listings) ─────────────────────────────
+
+function MyListingsFacebookShareModal({
+  listing,
+  user,
+  onDone,
+  onSkip,
+}: {
+  listing: any;
+  user: any;
+  onDone: () => void;
+  onSkip: () => void;
+}) {
+  const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
+  const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
+  const [generatingImage, setGeneratingImage] = useState(false);
+  const [downloaded, setDownloaded] = useState(false);
+
+  const referralCode = user?.referralCode || "";
+  const referralLink = `https://www.swapedly.com/?ref=${referralCode}`;
+  const images = listing?.images ? JSON.parse(listing.images) : [];
+  const coverImage = images[0] ? resolveImageUrl(images[0]) : null;
+  const title = listing?.title || "My Item";
+
+  const shareText = `I just listed "${title}" on Swapedly! 🔄\n\nJoin me and we'll both get bonus Swap Bucks to use right away!\n\n👉 ${referralLink}`;
+
+  const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}&quote=${encodeURIComponent(shareText)}`;
+
+  useEffect(() => { generateShareCard(); }, []);
+
+  async function generateShareCard() {
+    setGeneratingImage(true);
+    try {
+      const W = 1200, H = 630;
+      const canvas = document.createElement("canvas");
+      canvas.width = W; canvas.height = H;
+      const ctx = canvas.getContext("2d")!;
+      const grad = ctx.createLinearGradient(0, 0, W, H);
+      grad.addColorStop(0, "#5A45FF"); grad.addColorStop(1, "#FF4D6D");
+      ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+      if (coverImage) {
+        try {
+          const img = new Image(); img.crossOrigin = "anonymous";
+          await new Promise<void>((res, rej) => { img.onload = () => res(); img.onerror = () => rej(); img.src = coverImage; });
+          const imgW = W * 0.5, scale = Math.max(imgW / img.width, H / img.height);
+          const sw = imgW / scale, sh = H / scale, sx = (img.width - sw) / 2, sy = (img.height - sh) / 2;
+          ctx.drawImage(img, sx, sy, sw, sh, 0, 0, imgW, H);
+          ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fillRect(0, 0, imgW, H);
+        } catch {}
+      }
+      const panelX = W * 0.5 + 1;
+      ctx.fillStyle = "rgba(255,255,255,0.97)"; ctx.fillRect(panelX, 0, W - panelX, H);
+      ctx.fillStyle = "#5A45FF"; ctx.font = "bold 28px Inter,system-ui,sans-serif"; ctx.fillText("Swapedly", panelX + 40, 70);
+      ctx.fillStyle = "#0f172a"; ctx.font = "bold 36px Inter,system-ui,sans-serif"; ctx.fillText("I Just Listed", panelX + 40, 140);
+      ctx.fillStyle = "#5A45FF"; ctx.font = "bold 32px Inter,system-ui,sans-serif";
+      const maxW = W * 0.5 - 80; const words = `"${title}"`.split(" "); let line = "", lineY = 195;
+      for (const w of words) { const test = line + (line ? " " : "") + w; if (ctx.measureText(test).width > maxW && line) { ctx.fillText(line, panelX + 40, lineY); line = w; lineY += 44; } else line = test; }
+      ctx.fillText(line, panelX + 40, lineY);
+      ctx.fillStyle = "#64748b"; ctx.font = "24px Inter,system-ui,sans-serif"; ctx.fillText("on Swapedly", panelX + 40, lineY + 44);
+      ctx.fillStyle = "#e2e8f0"; ctx.fillRect(panelX + 40, lineY + 68, W * 0.5 - 80, 2);
+      ctx.fillStyle = "#0f172a"; ctx.font = "bold 22px Inter,system-ui,sans-serif";
+      const ctaY = lineY + 115; ctx.fillText("Join me on Swapedly!", panelX + 40, ctaY);
+      ctx.fillStyle = "#64748b"; ctx.font = "18px Inter,system-ui,sans-serif";
+      ctx.fillText("We'll both get Bonus Swap Bucks", panelX + 40, ctaY + 34);
+      const boxY = ctaY + 80;
+      ctx.fillStyle = "#f1f5f9"; ctx.beginPath(); ctx.roundRect(panelX + 40, boxY, W * 0.5 - 80, 44, 8); ctx.fill();
+      ctx.fillStyle = "#5A45FF"; ctx.font = "14px Inter,system-ui,sans-serif";
+      ctx.fillText(`swapedly.com/?ref=${referralCode}`, panelX + 56, boxY + 28);
+      ctx.fillStyle = "#ffffff"; ctx.font = "bold 32px Inter,system-ui,sans-serif"; ctx.textAlign = "center";
+      ctx.fillText("I Just Listed", W * 0.25, H * 0.4);
+      ctx.font = "bold 28px Inter,system-ui,sans-serif"; ctx.fillStyle = "#fbbf24";
+      const lw = `"${title}"`.split(" "); let ll = "", ly = H * 0.5;
+      for (const w of lw) { const t = ll + (ll ? " " : "") + w; if (ctx.measureText(t).width > W * 0.45 && ll) { ctx.fillText(ll, W * 0.25, ly); ll = w; ly += 38; } else ll = t; }
+      ctx.fillText(ll, W * 0.25, ly); ctx.textAlign = "start";
+      setImageDataUrl(canvas.toDataURL("image/png"));
+    } catch (e) { console.error(e); } finally { setGeneratingImage(false); }
+  }
+
+  const handleDownload = () => {
+    if (!imageDataUrl) return;
+    const a = document.createElement("a");
+    a.download = `swapedly-share-${title.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase()}.png`;
+    a.href = imageDataUrl; a.click();
+    setDownloaded(true);
+    toast({ title: "Image downloaded!", description: "Now upload it to your Facebook post." });
+  };
+
+  const handleCopy = async () => {
+    try { await navigator.clipboard.writeText(shareText); } catch {
+      const el = document.createElement("textarea"); el.value = shareText;
+      document.body.appendChild(el); el.select(); document.execCommand("copy"); document.body.removeChild(el);
+    }
+    setCopied(true); toast({ title: "Copied!" }); setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[92vh] overflow-y-auto">
+        <div className="p-6 space-y-5">
+
+          {/* ── Big incentive header ── */}
+          <div className="text-center bg-gradient-to-r from-[#5A45FF] to-[#FF4D6D] rounded-xl p-4">
+            <p className="text-white font-black text-xl leading-tight">
+              🎉 Earn Swap Bucks Every Time<br />Someone Joins via Your Link!
+            </p>
+            <p className="text-white/90 text-sm mt-1.5 font-medium">
+              Share your post on Facebook → Friends sign up → You earn 1 SB per referral. It adds up fast!
+            </p>
+          </div>
+
+          {/* ── Facebook icon + title ── */}
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
+              <Facebook className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h2 className="font-bold text-lg leading-tight">Share on Facebook</h2>
+              <p className="text-xs text-muted-foreground">Your referral link is automatically included</p>
+            </div>
+          </div>
+
+          {/* ── Numbered how-to steps ── */}
+          <div className="bg-blue-50 rounded-xl p-4 space-y-3">
+            <p className="text-sm font-semibold text-blue-900 mb-1">How to share in 3 easy steps:</p>
+            {[
+              { n: "1", label: "Download the photo", sub: "Tap the button below to save the share image to your device", done: downloaded },
+              { n: "2", label: "Copy the caption text", sub: "Hit \"Copy\" to grab the caption with your referral link", done: copied },
+              { n: "3", label: "Post to Facebook", sub: "Open Facebook, create a new post, upload the photo, paste the caption, and post!" },
+            ].map((step) => (
+              <div key={step.n} className="flex items-start gap-3">
+                <div className={`h-6 w-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold ${step.done ? "bg-green-500 text-white" : "bg-blue-600 text-white"}`}>
+                  {step.done ? "✓" : step.n}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">{step.label}</p>
+                  <p className="text-xs text-slate-500">{step.sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Share image preview ── */}
+          <div className="rounded-xl overflow-hidden border bg-muted aspect-[1.9] flex items-center justify-center">
+            {generatingImage ? (
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-6 w-6 animate-spin" />
+                <p className="text-xs">Generating share image...</p>
+              </div>
+            ) : imageDataUrl ? (
+              <img src={imageDataUrl} alt="Share card" className="w-full h-full object-cover" />
+            ) : null}
+          </div>
+
+          {/* Step 1: Download */}
+          <Button
+            className={`w-full rounded-xl gap-2 ${downloaded ? "bg-green-600 hover:bg-green-700" : ""}`}
+            onClick={handleDownload}
+            disabled={!imageDataUrl}
+            data-testid="download-share-image"
+          >
+            <Sparkles className="h-4 w-4" />
+            {downloaded ? "✓ Photo Downloaded!" : "Step 1: Download Share Photo"}
+          </Button>
+
+          {/* Step 2: Copy caption */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-xs font-semibold text-slate-700">Step 2: Copy this caption</p>
+              <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={handleCopy} data-testid="copy-caption-btn">
+                {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+                {copied ? "Copied!" : "Copy"}
+              </Button>
+            </div>
+            <div className="bg-slate-50 rounded-xl p-3 text-xs whitespace-pre-wrap text-slate-600 border border-slate-200">
+              {shareText}
+            </div>
+          </div>
+
+          {/* Step 3: Open Facebook */}
+          <Button
+            className="w-full rounded-xl gap-2 bg-blue-600 hover:bg-blue-700"
+            onClick={() => { window.open(facebookShareUrl, "_blank"); }}
+            data-testid="open-facebook-btn"
+          >
+            <Facebook className="h-4 w-4" />
+            Step 3: Open Facebook & Post
+          </Button>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between pt-1">
+            <button onClick={onSkip} className="text-xs text-muted-foreground hover:text-foreground">
+              Skip for now
+            </button>
+            <Button size="sm" className="rounded-xl gap-1.5 text-xs" onClick={onDone} data-testid="share-done-btn">
+              Done <ArrowRight className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
