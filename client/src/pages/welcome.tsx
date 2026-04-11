@@ -25,15 +25,11 @@ export default function WelcomePage() {
   const { toast } = useToast();
   const [showLogin, setShowLogin] = useState(false);
 
-  // Open login modal from nav Sign In button or ?login=1 param
+  // Open login modal when ?login=1 is in the URL (from Sign In nav button)
   useEffect(() => {
-    const handler = () => setShowLogin(true);
-    window.addEventListener('swapedly:open-login', handler);
-    // Also check if redirected here with ?login=1
-    if (window.location.search.includes('login=1') || window.location.hash.includes('login=1')) {
+    if (window.location.hash.includes('login=1') || window.location.search.includes('login=1')) {
       setShowLogin(true);
     }
-    return () => window.removeEventListener('swapedly:open-login', handler);
   }, []);
   const [showPassword, setShowPassword] = useState(false);
 

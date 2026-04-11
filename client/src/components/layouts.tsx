@@ -43,9 +43,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useOnboarding } from "@/components/onboarding-guard";
 import { ReactNode, useState } from "react";
-import { Label } from "@/components/ui/label";
-import { apiRequest, setAuthToken, queryClient as qc } from "@/lib/queryClient";
-import { FcGoogle } from "react-icons/fc";
 
 // ============================
 // Logo Component
@@ -82,7 +79,12 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             </nav>
           </div>
           <div className="flex items-center gap-3">
-            <LoginModal />
+            <Link href="/?login=1">
+              <Button variant="ghost" size="sm" data-testid="signin-nav-btn" className="gap-1.5">
+                <LogIn className="h-4 w-4" />
+                Sign In
+              </Button>
+            </Link>
             <Link href="/signup">
               <Button size="sm" data-testid="signup-nav-btn">
                 <UserPlus className="h-4 w-4 mr-1" />
@@ -368,128 +370,5 @@ export function AuthenticatedLayout({ children }: { children: ReactNode }) {
         </main>
       </div>
     </div>
-  );
-}
-
-// ─── Login Modal (lives in PublicLayout so it works on every public page) ────
-function LoginModal() {
-  const [open, setOpen] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [, navigate] = useLocation();
-  const { refetch } = useQuery({ queryKey: ["/api/auth/me"], queryFn: getQueryFn({ on401: "returnNull" }), enabled: false });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    try {
-      const res = await apiRequest("POST", "/api/auth/login", { email, password });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Login failed");
-      setAuthToken(data.token);
-      qc.invalidateQueries({ queryKey: ["/api/auth/me"] });
-      setOpen(false);
-      navigate("/dashboard");
-    } catch (e: any) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogle = () => {
-    const base = window.location.origin.includes("localhost") ? "http://localhost:5000" : "";
-    window.location.href = `${base}/auth/google`;
-  };
-
-  return (
-    <>
-      <button
-        onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
-        data-testid="signin-nav-btn"
-      >
-        <LogIn className="h-4 w-4" />
-        Sign In
-      </button>
-
-      {open && (
-        <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-          onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="font-bold text-lg">Welcome back</h2>
-                <p className="text-sm text-muted-foreground">Sign in to your account</p>
-              </div>
-              <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground text-xl leading-none">&times;</button>
-            </div>
-
-            {/* Google */}
-            <button
-              onClick={handleGoogle}
-              className="w-full flex items-center justify-center gap-3 border rounded-xl h-11 text-sm font-medium hover:bg-slate-50 transition-colors"
-              data-testid="google-signin-modal-btn"
-            >
-              <FcGoogle className="h-5 w-5" />
-              Continue with Google
-            </button>
-
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-xs text-muted-foreground">or</span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
-            {/* Email form */}
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="modal-email">Email</Label>
-                <Input
-                  id="modal-email"
-                  type="email"
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="rounded-xl"
-                  required
-                  data-testid="modal-login-email"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="modal-password">Password</Label>
-                <Input
-                  id="modal-password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="rounded-xl"
-                  required
-                  data-testid="modal-login-password"
-                />
-              </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full rounded-xl" disabled={loading}>
-                {loading ? "Signing in..." : "Log In"}
-              </Button>
-            </form>
-
-            <p className="text-center text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link href="/signup" className="text-primary font-medium hover:underline" onClick={() => setOpen(false)}>
-                Sign up free
-              </Link>
-            </p>
-          </div>
-        </div>
-      )}
-    </>
   );
 }
