@@ -31,6 +31,173 @@ const DB_PATH = join(DATA_DIR, "data.db");
 const sqlite = new Database(DB_PATH);
 sqlite.pragma("journal_mode = WAL");
 
+// Auto-create all tables on startup (safe — uses IF NOT EXISTS)
+sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    display_name TEXT,
+    bio TEXT,
+    avatar_url TEXT,
+    location TEXT,
+    rating REAL NOT NULL DEFAULT 0,
+    rating_count INTEGER NOT NULL DEFAULT 0,
+    swap_count INTEGER NOT NULL DEFAULT 0,
+    role TEXT NOT NULL DEFAULT 'user',
+    is_verified INTEGER NOT NULL DEFAULT 0,
+    referral_code TEXT,
+    referred_by INTEGER,
+    joined_at TEXT NOT NULL,
+    oauth_provider TEXT,
+    oauth_id TEXT,
+    notification_prefs TEXT,
+    membership_tier TEXT NOT NULL DEFAULT 'free',
+    membership_expires_at TEXT,
+    highlights_remaining INTEGER NOT NULL DEFAULT 0,
+    listing_credits INTEGER NOT NULL DEFAULT 0,
+    paddle_customer_id TEXT,
+    paddle_subscription_id TEXT,
+    onboarding_complete INTEGER NOT NULL DEFAULT 0,
+    onboarding_step TEXT NOT NULL DEFAULT 'listings',
+    onboarding_listings_count INTEGER NOT NULL DEFAULT 0
+  );
+  CREATE TABLE IF NOT EXISTS listings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    seller_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    price REAL NOT NULL,
+    condition TEXT NOT NULL,
+    category TEXT NOT NULL,
+    subcategory TEXT,
+    tags TEXT,
+    images TEXT,
+    video_url TEXT,
+    delivery_options TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'active',
+    is_highlighted INTEGER NOT NULL DEFAULT 0,
+    highlighted_at TEXT,
+    views INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS wallets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL UNIQUE,
+    balance REAL NOT NULL DEFAULT 0,
+    total_earned REAL NOT NULL DEFAULT 0,
+    total_spent REAL NOT NULL DEFAULT 0
+  );
+  CREATE TABLE IF NOT EXISTS ledger_entries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    amount REAL NOT NULL,
+    type TEXT NOT NULL,
+    description TEXT NOT NULL,
+    related_listing_id INTEGER,
+    related_transaction_id INTEGER,
+    created_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS transactions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    listing_id INTEGER NOT NULL,
+    buyer_id INTEGER NOT NULL,
+    seller_id INTEGER NOT NULL,
+    amount REAL NOT NULL,
+    buyer_fee_usd REAL NOT NULL DEFAULT 0,
+    seller_fee_usd REAL NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'pending',
+    delivery_method TEXT,
+    notes TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    conversation_id TEXT NOT NULL,
+    sender_id INTEGER NOT NULL,
+    recipient_id INTEGER NOT NULL,
+    listing_id INTEGER,
+    content TEXT NOT NULL,
+    is_read INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    reviewer_id INTEGER NOT NULL,
+    reviewee_id INTEGER NOT NULL,
+    transaction_id INTEGER NOT NULL,
+    rating INTEGER NOT NULL,
+    comment TEXT,
+    created_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    link TEXT,
+    is_read INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS earn_tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    reward REAL NOT NULL,
+    type TEXT NOT NULL,
+    action_url TEXT,
+    icon TEXT,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    max_completions INTEGER NOT NULL DEFAULT 1
+  );
+  CREATE TABLE IF NOT EXISTS earn_completions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    task_id INTEGER NOT NULL,
+    completed_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS favorites (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    listing_id INTEGER NOT NULL,
+    created_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS disputes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    transaction_id INTEGER NOT NULL,
+    opened_by INTEGER NOT NULL,
+    reason TEXT NOT NULL,
+    description TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'open',
+    resolution TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS social_accounts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    platform TEXT NOT NULL,
+    handle TEXT NOT NULL,
+    profile_url TEXT,
+    created_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS social_shares (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    listing_id INTEGER NOT NULL,
+    platform TEXT NOT NULL,
+    post_url TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    reward REAL NOT NULL DEFAULT 5,
+    reward_paid INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL
+  );
+`);
+
 export const db = drizzle(sqlite);
 
 export interface IStorage {
