@@ -39,7 +39,7 @@ export default function WelcomePage() {
     const ref = params.get("ref");
     if (ref) {
       // Store for signup form pre-fill
-      sessionStorage.setItem("referralCode", ref);
+      try { sessionStorage.setItem("referralCode", ref); } catch (_) {}
       // Fire tracking event
       fetch("/api/referral/click", {
         method: "POST",
