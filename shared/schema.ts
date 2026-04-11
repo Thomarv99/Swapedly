@@ -26,7 +26,7 @@ export const users = sqliteTable("users", {
   membershipTier: text("membership_tier").notNull().default("free"), // "free" | "plus"
   membershipExpiresAt: text("membership_expires_at"), // ISO string, null = no active subscription
   highlightsRemaining: integer("highlights_remaining").notNull().default(0), // monthly highlight quota
-  listingCredits: integer("listing_credits").notNull().default(0), // pre-purchased listing credits (free users)
+  purchaseCredits: integer("purchase_credits").notNull().default(0), // credits required to make a purchase
   paddleCustomerId: text("paddle_customer_id"), // Paddle customer ID for billing
   paddleSubscriptionId: text("paddle_subscription_id"), // active Paddle subscription ID
   // Onboarding
@@ -44,7 +44,7 @@ export const insertUserSchema = createInsertSchema(users).omit({
   membershipTier: true,
   membershipExpiresAt: true,
   highlightsRemaining: true,
-  listingCredits: true,
+  purchaseCredits: true,
   paddleCustomerId: true,
   paddleSubscriptionId: true,
   onboardingComplete: true,

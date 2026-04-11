@@ -11,7 +11,7 @@ type OnboardingStatus = {
   listingsRequired: number;
   hasMembership: boolean;
   isPlus: boolean;
-  listingCredits: number;
+  purchaseCredits: number;
   sbBalance: number;
   sbRequired: number;
   canAccessMarketplace: boolean;

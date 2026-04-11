@@ -131,8 +131,8 @@ export async function handleStripeWebhook(event: Stripe.Event): Promise<void> {
           const credits = creditsForPriceId(priceId);
           if (credits > 0) {
             const user = await storage.getUserById(userId);
-            const newCredits = (user?.listingCredits || 0) + credits;
-            await storage.updateUser(userId, { listingCredits: newCredits });
+            const newCredits = (user?.purchaseCredits || 0) + credits;
+            await storage.updateUser(userId, { purchaseCredits: newCredits });
 
             await storage.createNotification({
               userId,

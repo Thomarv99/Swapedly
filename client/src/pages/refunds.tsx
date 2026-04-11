@@ -39,10 +39,10 @@ export default function RefundsPage() {
           <p><strong>Auto-renewal:</strong> Subscriptions automatically renew monthly. You will receive an email reminder before each renewal. Cancel before the renewal date to avoid being charged for the next period.</p>
         </Section>
 
-        <Section title="2. Listing Credits">
+        <Section title="2. Purchase Credits">
           <p><strong>Non-refundable once used:</strong> Listing credits that have been used to publish a listing are non-refundable.</p>
-          <p><strong>Unused credits:</strong> If you have unused listing credits and wish to request a refund within 30 days of purchase, contact us at <a href="mailto:support@swapedly.com" className="text-primary hover:underline">support@swapedly.com</a>. Refunds for unused credits are issued at our discretion.</p>
-          <p><strong>Upgrading to Plus:</strong> If you purchase listing credits and then upgrade to Swapedly Plus, your unused credits will remain in your account and can still be used. We do not automatically refund listing credits upon upgrading.</p>
+          <p><strong>Unused credits:</strong> If you have unused purchase credits and wish to request a refund within 30 days of purchase, contact us at <a href="mailto:support@swapedly.com" className="text-primary hover:underline">support@swapedly.com</a>. Refunds for unused credits are issued at our discretion.</p>
+          <p><strong>Upgrading to Plus:</strong> If you purchase purchase credits and then upgrade to Swapedly Plus, your unused credits will remain in your account and can still be used. We do not automatically refund purchase credits upon upgrading.</p>
         </Section>
 
         <Section title="3. Transaction Fees">

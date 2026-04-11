@@ -150,8 +150,8 @@ export async function handlePaddleWebhook(eventType: string, data: any): Promise
         const credits = creditsForPriceId(priceId);
         if (credits > 0) {
           const current = await storage.getUserById(user.id);
-          const newCredits = (current?.listingCredits || 0) + credits;
-          await storage.updateUser(user.id, { listingCredits: newCredits });
+          const newCredits = (current?.purchaseCredits || 0) + credits;
+          await storage.updateUser(user.id, { purchaseCredits: newCredits });
 
           await storage.createNotification({
             userId: user.id,

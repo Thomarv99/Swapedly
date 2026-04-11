@@ -63,7 +63,7 @@ export default function ProductPage() {
               {
                 icon: Package,
                 title: "List Your Items",
-                desc: "Take photos of items you want to sell and publish listings in minutes. Set your price in Swap Bucks. Free accounts use listing credits ($0.49 each); Swapedly Plus members list for free.",
+                desc: "Take photos of items you want to sell and publish listings in minutes. Set your price in Swap Bucks. Free accounts use purchase credits ($0.49 each); Swapedly Plus members list for free.",
                 color: "bg-blue-100 text-blue-600",
               },
               {
@@ -156,7 +156,7 @@ export default function ProductPage() {
             <Card className="rounded-2xl">
               <CardContent className="p-7">
                 <Package className="h-8 w-8 text-muted-foreground mb-4" />
-                <h3 className="text-xl font-bold mb-2">Listing Credits</h3>
+                <h3 className="text-xl font-bold mb-2">Purchase Credits</h3>
                 <p className="text-sm text-muted-foreground mb-4">One-time purchases. Free accounts use credits to publish listings ($0.49 per listing).</p>
                 <ul className="space-y-3">
                   {[

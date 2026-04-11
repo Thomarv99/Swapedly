@@ -78,7 +78,7 @@ function calculateFee(price: number): number {
 // ============================================================
 const MEMBERSHIP = {
   PLUS_PRICE_USD: 9.99,
-  LISTING_CREDIT_PRICE_USD: 0.49,
+  PURCHASE_CREDIT_PRICE_USD: 0.49,
   MIN_CREDIT_PURCHASE: 10, // minimum 10 credits ($4.90, ~$5)
   PLUS_HIGHLIGHTS_PER_MONTH: 5,
   SB_MULTIPLIER_FREE: 1.0,
@@ -494,20 +494,7 @@ export async function registerRoutes(
       const userIsPlus = isPlus(fullUser);
       const inOnboarding = !fullUser.onboardingComplete;
 
-      // Free users must spend a listing credit to publish (not for drafts)
-      // Exception: users in onboarding get their first 3 listings free
-      if (publishingActive && !userIsPlus && !inOnboarding) {
-        if ((fullUser.listingCredits || 0) < 1) {
-          return res.status(402).json({
-            message: "Listing credit required",
-            code: "LISTING_CREDIT_REQUIRED",
-            creditsNeeded: 1,
-            creditsAvailable: fullUser.listingCredits || 0,
-          });
-        }
-        // Deduct one listing credit
-        await storage.updateUser(user.id, { listingCredits: (fullUser.listingCredits || 0) - 1 });
-      }
+      // Listings are FREE for all users — no credit gate on publishing
 
       const listing = await storage.createListing({
         ...req.body,
@@ -521,7 +508,7 @@ export async function registerRoutes(
       await storage.createLedgerEntry({
         userId: user.id,
         amount: sbReward,
-        type: "listing_credit",
+        type: "purchase_credit",
         description: `Listing credit for creating "${listing.title}"${multiplier > 1 ? " (Plus bonus)" : ""}`,
         relatedListingId: listing.id,
       });
@@ -591,6 +578,22 @@ export async function registerRoutes(
       const buyerWallet = await storage.getWalletByUserId(buyer.id);
       if (!buyerWallet || buyerWallet.balance < listing.price) {
         return res.status(400).json({ message: "Insufficient Swap Bucks" });
+      }
+
+      // Check buyer has a purchase credit (free users must buy credits to complete a purchase)
+      const fullBuyer = await storage.getUserById(buyer.id);
+      if (!fullBuyer) return res.status(401).json({ message: "User not found" });
+      if (!isPlus(fullBuyer) && (fullBuyer.purchaseCredits || 0) < 1) {
+        return res.status(402).json({
+          message: "Purchase credit required",
+          code: "PURCHASE_CREDIT_REQUIRED",
+          creditsNeeded: 1,
+          creditsAvailable: fullBuyer.purchaseCredits || 0,
+        });
+      }
+      // Deduct one purchase credit (Plus members are exempt)
+      if (!isPlus(fullBuyer)) {
+        await storage.updateUser(buyer.id, { purchaseCredits: (fullBuyer.purchaseCredits || 0) - 1 });
       }
 
       // Calculate fees
@@ -1750,7 +1753,7 @@ export async function registerRoutes(
         isPlus: isPlus(fullUser),
         expiresAt: fullUser.membershipExpiresAt,
         highlightsRemaining: fullUser.highlightsRemaining,
-        listingCredits: fullUser.listingCredits,
+        purchaseCredits: fullUser.purchaseCredits,
         pricing: MEMBERSHIP,
         multiplier: getSbMultiplier(fullUser),
       });
@@ -1810,7 +1813,7 @@ export async function registerRoutes(
       const { quantity } = req.body;
       if (!quantity || quantity < MEMBERSHIP.MIN_CREDIT_PURCHASE) {
         return res.status(400).json({
-          message: `Minimum purchase is ${MEMBERSHIP.MIN_CREDIT_PURCHASE} credits ($${(MEMBERSHIP.MIN_CREDIT_PURCHASE * MEMBERSHIP.LISTING_CREDIT_PRICE_USD).toFixed(2)})`,
+          message: `Minimum purchase is ${MEMBERSHIP.MIN_CREDIT_PURCHASE} credits ($${(MEMBERSHIP.MIN_CREDIT_PURCHASE * MEMBERSHIP.PURCHASE_CREDIT_PRICE_USD).toFixed(2)})`,
         });
       }
 
@@ -1819,15 +1822,15 @@ export async function registerRoutes(
       const fullUser = await storage.getUserById(user.id);
       if (!fullUser) return res.status(401).json({ message: "User not found" });
 
-      const newCredits = (fullUser.listingCredits || 0) + quantity;
-      await storage.updateUser(user.id, { listingCredits: newCredits });
+      const newCredits = (fullUser.purchaseCredits || 0) + quantity;
+      await storage.updateUser(user.id, { purchaseCredits: newCredits });
 
-      const totalUsd = (quantity * MEMBERSHIP.LISTING_CREDIT_PRICE_USD).toFixed(2);
+      const totalUsd = (quantity * MEMBERSHIP.PURCHASE_CREDIT_PRICE_USD).toFixed(2);
       await storage.createNotification({
         userId: user.id,
         type: "system",
         title: "Listing Credits Purchased",
-        body: `You purchased ${quantity} listing credits for $${totalUsd}.`,
+        body: `You purchased ${quantity} purchase credits for $${totalUsd}.`,
         link: "/my-listings",
       });
 
@@ -1914,7 +1917,7 @@ export async function registerRoutes(
       const wallet = await storage.getWalletByUserId(user.id);
       const sbBalance = wallet?.balance || 0;
       const userIsPlus = isPlus(fullUser);
-      const hasCredits = (fullUser.listingCredits || 0) > 0;
+      const hasCredits = (fullUser.purchaseCredits || 0) > 0;
       const hasMembership = userIsPlus || hasCredits;
 
       return res.json({
@@ -1924,7 +1927,7 @@ export async function registerRoutes(
         listingsRequired: 1,
         hasMembership,
         isPlus: userIsPlus,
-        listingCredits: fullUser.listingCredits || 0,
+        purchaseCredits: fullUser.purchaseCredits || 0,
         sbBalance,
         sbRequired: 30,
         canAccessMarketplace: fullUser.onboardingComplete || sbBalance >= 30,

@@ -209,15 +209,6 @@ export default function CreateEditListingPage() {
       navigate("/my-listings");
     },
     onError: (e: Error) => {
-      if (e.message.includes("Listing credit required") || e.message.includes("402")) {
-        toast({
-          title: "Listing Credit Required",
-          description: "Free accounts need listing credits to publish. Buy credits or upgrade to Swapedly Plus for unlimited listings.",
-          variant: "destructive",
-        });
-        navigate("/membership");
-        return;
-      }
       toast({ title: "Error", description: e.message, variant: "destructive" });
     },
   });

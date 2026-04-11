@@ -354,7 +354,7 @@ export default function MyListingsPage() {
     tier: string;
     isPlus: boolean;
     highlightsRemaining: number;
-    listingCredits: number;
+    purchaseCredits: number;
   }>({
     queryKey: ["/api/membership"],
     queryFn: async () => {

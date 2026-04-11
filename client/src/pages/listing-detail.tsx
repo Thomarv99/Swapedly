@@ -48,6 +48,15 @@ export default function ListingDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/wallet"] });
     },
     onError: (e: Error) => {
+      if (e.message.includes("PURCHASE_CREDIT_REQUIRED") || e.message.includes("Purchase credit required") || e.message.includes("402")) {
+        toast({
+          title: "Purchase Credit Required",
+          description: "You need a Purchase Credit to buy items. Buy credits on the Membership page, or upgrade to Swapedly Plus.",
+          variant: "destructive",
+        });
+        navigate("/membership");
+        return;
+      }
       toast({ title: "Purchase failed", description: e.message, variant: "destructive" });
     },
   });

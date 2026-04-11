@@ -40,7 +40,7 @@ export default function PricingPage() {
           Start free. Upgrade when you're ready.
         </h1>
         <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-          Swapedly is free to join. Upgrade to Plus for unlimited listings, bonus Swap Bucks, and featured placement in the marketplace.
+          Swapedly is free to join and list. Upgrade to Plus for unlimited purchases, bonus Swap Bucks, and featured placement in the marketplace.
         </p>
       </section>
 
@@ -57,7 +57,7 @@ export default function PricingPage() {
                   <span className="text-5xl font-bold">$0</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground">Pay per listing with credits</p>
+                <p className="mt-2 text-sm text-muted-foreground">List for free · Buy with Purchase Credits</p>
               </div>
 
               <Link href="/signup">
@@ -69,14 +69,14 @@ export default function PricingPage() {
               <ul className="space-y-3">
                 {[
                   { text: "10 Swap Bucks welcome bonus", ok: true },
-                  { text: "$0.49 per listing credit (min $5)", ok: true },
+                  { text: "$0.49 per purchase credit (min $5)", ok: true },
                   { text: "1× SB earnings on all tasks", ok: true },
                   { text: "Browse & buy in the marketplace", ok: true },
                   { text: "Referral rewards", ok: true },
                   { text: "Share & earn on social media", ok: true },
                   { text: "Highlighted listings", ok: false },
                   { text: "1.5× SB bonus multiplier", ok: false },
-                  { text: "Unlimited free listings", ok: false },
+                  { text: "Unlimited free listings", ok: true },
                   { text: "Priority support", ok: false },
                 ].map((item) => (
                   <li key={item.text} className="flex items-start gap-3">
@@ -105,7 +105,7 @@ export default function PricingPage() {
                   <span className="text-5xl font-bold">$9.99</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground">Unlimited listings & premium perks</p>
+                <p className="mt-2 text-sm text-muted-foreground">Unlimited listings & purchases, premium perks</p>
               </div>
 
               <Link href="/signup">
@@ -137,13 +137,13 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* Listing Credits */}
+      {/* Purchase Credits */}
       <section className="py-16 px-4 sm:px-6 bg-gray-50">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold">Listing Credits</h2>
+            <h2 className="text-3xl font-bold">Purchase Credits</h2>
             <p className="mt-3 text-muted-foreground text-lg">
-              Free accounts purchase credits to publish listings. $0.49 per listing.
+              Free accounts need Purchase Credits to buy items. $0.49 per purchase. Listing is always free!
             </p>
           </div>
           <div className="grid sm:grid-cols-3 gap-4">
@@ -158,7 +158,7 @@ export default function PricingPage() {
                     <span className="inline-block bg-primary/10 text-primary text-xs font-bold px-2.5 py-0.5 rounded-full mb-3">MOST POPULAR</span>
                   )}
                   <p className="text-3xl font-bold mb-1">{pack.qty}</p>
-                  <p className="text-sm text-muted-foreground mb-3">listing credits</p>
+                  <p className="text-sm text-muted-foreground mb-3">purchase credits</p>
                   <p className="text-2xl font-bold text-primary">{pack.price}</p>
                   <p className="text-xs text-muted-foreground mt-1">{pack.perCredit} per credit</p>
                   <Link href="/signup">
@@ -172,7 +172,7 @@ export default function PricingPage() {
           </div>
           <p className="text-center text-sm text-muted-foreground mt-6">
             <Shield className="h-3.5 w-3.5 inline mr-1" />
-            Swapedly Plus members never need listing credits — unlimited listings included.
+            Swapedly Plus members never need Purchase Credits — make unlimited purchases included.
           </p>
         </div>
       </section>
@@ -188,8 +188,8 @@ export default function PricingPage() {
                 a: "Swap Bucks (SB) are Swapedly's in-app currency. You earn them by listing items, completing tasks, referring friends, and sharing on social media. Use them to buy items in the marketplace — no cash needed.",
               },
               {
-                q: "What are listing credits?",
-                a: "Free accounts use listing credits to publish items for sale. Each credit costs $0.49 and lets you publish one listing. Swapedly Plus members get unlimited free listings with no credits required.",
+                q: "What are purchase credits?",
+                a: "Purchase Credits let free account holders buy items in the marketplace. Each credit costs $0.49 and covers one purchase transaction. Listing items is always free for everyone. Swapedly Plus members never need Purchase Credits.",
               },
               {
                 q: "What is a highlighted listing?",

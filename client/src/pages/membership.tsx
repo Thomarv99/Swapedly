@@ -51,7 +51,7 @@ interface MembershipData {
   isPlus: boolean;
   expiresAt: string | null;
   highlightsRemaining: number;
-  listingCredits: number;
+  purchaseCredits: number;
   pricing: {
     plusMonthly: number;
     creditPrice: number;
@@ -67,7 +67,7 @@ const creditPackages = [
 ];
 
 const freeFeatures = [
-  { label: "$0.49 per listing credit", included: true },
+  { label: "$0.49 per purchase credit", included: true },
   { label: "Minimum $5 purchase", included: true },
   { label: "1× SB earnings", included: true },
   { label: "Standard listings", included: true },
@@ -187,21 +187,21 @@ export default function MembershipPage() {
                 <CreditCard className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-base">One more step to publish your listing!</h3>
+                <h3 className="font-semibold text-base">Your listing is live — now start selling!</h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  To list your product on Swapedly, you'll need either:
+                  Listing is always free. When you're ready to <strong>buy</strong> items, you'll need either:
                 </p>
                 <ul className="mt-2 space-y-1.5">
                   <li className="flex items-center gap-2 text-sm">
                     <span className="h-5 w-5 rounded-full bg-yellow-100 text-yellow-700 flex items-center justify-center text-xs font-bold shrink-0">1</span>
-                    <span><strong>Buy Listing Credits</strong> — $0.49 per listing, minimum $5 purchase</span>
+                    <span><strong>Buy Purchase Credits</strong> — $0.49 per purchase, minimum $5</span>
                   </li>
                   <li className="flex items-center gap-2 text-sm">
                     <span className="h-5 w-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">2</span>
-                    <span><strong>Swapedly Plus</strong> — $9.99/month for unlimited free listings + bonus perks</span>
+                    <span><strong>Swapedly Plus</strong> — $9.99/month for unlimited purchases + bonus perks</span>
                   </li>
                 </ul>
-                <p className="text-xs text-muted-foreground mt-3">Choose an option below to complete your listing and start selling.</p>
+                <p className="text-xs text-muted-foreground mt-3">Pick an option below to unlock buying in the marketplace.</p>
               </div>
             </div>
           </div>
@@ -256,7 +256,7 @@ export default function MembershipPage() {
                     </p>
                   ) : (
                     <p className="text-sm text-muted-foreground">
-                      Upgrade to Plus for unlimited listings
+                      Upgrade to Plus for unlimited purchases
                     </p>
                   )}
                 </div>
@@ -306,7 +306,7 @@ export default function MembershipPage() {
                 <span className="text-muted-foreground text-sm ml-1">/month</span>
               </div>
               <p className="text-sm text-muted-foreground mt-1">
-                Pay per listing with credits
+                Pay per purchase with credits
               </p>
             </CardHeader>
             <Separator />
@@ -350,7 +350,7 @@ export default function MembershipPage() {
                 <span className="text-muted-foreground text-sm ml-1">/month</span>
               </div>
               <p className="text-sm text-muted-foreground mt-1">
-                Unlimited listings &amp; premium perks
+                Unlimited purchases &amp; premium perks
               </p>
             </CardHeader>
             <Separator />
@@ -397,17 +397,17 @@ export default function MembershipPage() {
           </Card>
         </div>
 
-        {/* Listing Credits Section (Free users) */}
+        {/* Purchase Credits Section (Free users) */}
         {!isPlus && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-bold flex items-center gap-2">
                   <ShoppingBag className="h-5 w-5 text-primary" />
-                  Listing Credits
+                  Purchase Credits
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Purchase credits to create new listings
+                  Purchase credits to buy items on Swapedly
                 </p>
               </div>
               <div
@@ -415,7 +415,7 @@ export default function MembershipPage() {
                 data-testid="credits-balance"
               >
                 <Coins className="h-5 w-5 text-[#5A45FF]" />
-                <span className="font-bold text-lg">{membership?.listingCredits ?? 0}</span>
+                <span className="font-bold text-lg">{membership?.purchaseCredits ?? 0}</span>
                 <span className="text-sm text-muted-foreground">credits</span>
               </div>
             </div>

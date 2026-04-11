@@ -167,7 +167,7 @@ export default function WalletPage() {
                 <SelectItem value="purchase">Purchase</SelectItem>
                 <SelectItem value="sale">Sale</SelectItem>
                 <SelectItem value="welcome_bonus">Welcome Bonus</SelectItem>
-                <SelectItem value="listing_credit">Listing Credit</SelectItem>
+                <SelectItem value="purchase_credit">Purchase Credit</SelectItem>
                 <SelectItem value="referral_bonus">Referral Bonus</SelectItem>
                 <SelectItem value="earn_task">Earn Task</SelectItem>
               </SelectContent>

@@ -35,7 +35,7 @@ export default function TermsPage() {
 
         <Section title="2. Description of Service">
           <p>Swapedly is an online marketplace that allows users to list items for sale, earn virtual currency called "Swap Bucks" (SB), and purchase items from other users using Swap Bucks. No direct cash-for-goods transactions occur between users — all purchases are made using Swap Bucks.</p>
-          <p>Real-money transactions occur only for: (a) Swapedly Plus membership subscriptions, (b) listing credit purchases, and (c) transaction fees on completed trades.</p>
+          <p>Real-money transactions occur only for: (a) Swapedly Plus membership subscriptions, (b) purchase credit purchases, and (c) transaction fees on completed trades.</p>
         </Section>
 
         <Section title="3. Account Registration">
@@ -57,7 +57,7 @@ export default function TermsPage() {
         </Section>
 
         <Section title="6. Paid Services">
-          <p>Swapedly offers optional paid services including Swapedly Plus membership ($9.99/month) and listing credit packs. All payments are processed securely by Paddle, our authorized payment processor.</p>
+          <p>Swapedly offers optional paid services including Swapedly Plus membership ($9.99/month) and purchase credit packs. All payments are processed securely by Paddle, our authorized payment processor.</p>
           <p>By purchasing a paid service, you authorize us to charge your payment method for the stated amount. Subscriptions auto-renew monthly unless cancelled before the renewal date.</p>
           <p>Please see our <Link href="/refunds" className="text-primary hover:underline">Refund Policy</Link> for information on refunds and cancellations.</p>
         </Section>

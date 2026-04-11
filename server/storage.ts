@@ -58,7 +58,7 @@ sqlite.exec(`
     membership_tier TEXT NOT NULL DEFAULT 'free',
     membership_expires_at TEXT,
     highlights_remaining INTEGER NOT NULL DEFAULT 0,
-    listing_credits INTEGER NOT NULL DEFAULT 0,
+    purchase_credits INTEGER NOT NULL DEFAULT 0,
     paddle_customer_id TEXT,
     paddle_subscription_id TEXT,
     onboarding_complete INTEGER NOT NULL DEFAULT 0,
@@ -218,6 +218,24 @@ sqlite.exec(`
     created_at TEXT NOT NULL
   );
 `);
+
+// ─── Column migration: listing_credits → purchase_credits ───────────────────
+// The live DB may have an old `listing_credits` column. Add `purchase_credits`
+// if missing, then copy any existing data over.
+try {
+  const cols = sqlite.pragma("table_info(users)") as Array<{ name: string }>;
+  const hasOld = cols.some((c) => c.name === "listing_credits");
+  const hasNew = cols.some((c) => c.name === "purchase_credits");
+  if (!hasNew) {
+    sqlite.exec("ALTER TABLE users ADD COLUMN purchase_credits INTEGER NOT NULL DEFAULT 0");
+  }
+  if (hasOld && hasNew) {
+    // Copy existing values (once) then zero out old column
+    sqlite.exec("UPDATE users SET purchase_credits = listing_credits WHERE purchase_credits = 0 AND listing_credits > 0");
+  }
+} catch (e) {
+  console.warn("Migration warning (purchase_credits):", e);
+}
 
 export const db = drizzle(sqlite);
 
