@@ -25,6 +25,81 @@ import { useToast } from "@/hooks/use-toast";
 import { useOnboarding } from "@/components/onboarding-guard";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
+import { useEffect, useRef, useCallback } from "react";
+
+// ============================================================
+// Paddle checkout helper
+// ============================================================
+function usePaddle() {
+  const paddleRef = useRef<any>(null);
+  const { user } = useAuth();
+
+  const { data: paddleConfig } = useQuery({
+    queryKey: ["/api/paddle/config"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/paddle/config");
+      return res.json();
+    },
+    staleTime: Infinity,
+  });
+
+  useEffect(() => {
+    if (!paddleConfig?.clientToken) return;
+
+    // Load Paddle.js script once
+    if ((window as any).Paddle) {
+      initPaddle(paddleConfig);
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = paddleConfig.isSandbox
+      ? "https://cdn.paddle.com/paddle/v2/paddle.js"
+      : "https://cdn.paddle.com/paddle/v2/paddle.js";
+    script.onload = () => initPaddle(paddleConfig);
+    document.head.appendChild(script);
+  }, [paddleConfig]);
+
+  function initPaddle(config: any) {
+    const Paddle = (window as any).Paddle;
+    if (config.isSandbox) {
+      Paddle.Environment.set("sandbox");
+    }
+    Paddle.Initialize({ token: config.clientToken });
+    paddleRef.current = Paddle;
+  }
+
+  const openCheckout = useCallback(async (priceId: string, onSuccess?: () => void) => {
+    const Paddle = paddleRef.current || (window as any).Paddle;
+    if (!Paddle) {
+      console.error("Paddle not loaded");
+      return;
+    }
+
+    Paddle.Checkout.open({
+      items: [{ priceId, quantity: 1 }],
+      customer: user?.email ? { email: user.email } : undefined,
+      customData: { userId: String(user?.id) },
+      settings: {
+        displayMode: "overlay",
+        theme: "light",
+        locale: "en",
+      },
+      eventCallback: async (event: any) => {
+        if (event.name === "checkout.completed") {
+          // Store Paddle customer ID
+          const customerId = event.data?.customer?.id;
+          if (customerId) {
+            await apiRequest("POST", "/api/paddle/customer", { paddleCustomerId: customerId });
+          }
+          onSuccess?.();
+        }
+      },
+    });
+  }, [user]);
+
+  return { openCheckout, prices: paddleConfig?.prices };
+}
 
 interface MembershipData {
   tier: "free" | "plus";
@@ -71,6 +146,7 @@ export default function MembershipPage() {
   const queryClient = useQueryClient();
   const [, navigate] = useLocation();
   const { data: onboardingData } = useOnboarding();
+  const { openCheckout, prices } = usePaddle();
 
   const { data: membership, isLoading } = useQuery<MembershipData>({
     queryKey: ["/api/membership"],
@@ -78,25 +154,26 @@ export default function MembershipPage() {
     enabled: !!user,
   });
 
-  const upgradeMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest("POST", "/api/membership/upgrade");
-    },
-    onSuccess: async () => {
-      toast({ title: "Welcome to Swapedly Plus!", description: "Your membership has been activated." });
-      queryClient.invalidateQueries({ queryKey: ["/api/membership"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-      // Advance onboarding if in membership step
-      if (onboardingData && !onboardingData.onboardingComplete && onboardingData.step === "membership") {
-        await apiRequest("POST", "/api/onboarding/advance", { step: "profile" });
-        queryClient.invalidateQueries({ queryKey: ["/api/onboarding"] });
-        navigate("/complete-profile");
-      }
-    },
-    onError: (e: Error) => {
-      toast({ title: "Upgrade failed", description: e.message, variant: "destructive" });
-    },
-  });
+  // Upgrade via Paddle checkout
+  const handleUpgrade = async () => {
+    if (!prices?.plusMonthly) {
+      toast({ title: "Loading...", description: "Please wait a moment and try again." });
+      return;
+    }
+    await openCheckout(prices.plusMonthly, async () => {
+      toast({ title: "Welcome to Swapedly Plus!", description: "Your membership is being activated — this may take a moment." });
+      // Give webhook time to process
+      setTimeout(async () => {
+        queryClient.invalidateQueries({ queryKey: ["/api/membership"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+        if (onboardingData && !onboardingData.onboardingComplete && onboardingData.step === "membership") {
+          await apiRequest("POST", "/api/onboarding/advance", { step: "profile" });
+          queryClient.invalidateQueries({ queryKey: ["/api/onboarding"] });
+          navigate("/complete-profile");
+        }
+      }, 3000);
+    });
+  };
 
   const cancelMutation = useMutation({
     mutationFn: async () => {
@@ -112,25 +189,34 @@ export default function MembershipPage() {
     },
   });
 
-  const buyCreditsMutation = useMutation({
-    mutationFn: async (quantity: number) => {
-      await apiRequest("POST", "/api/membership/buy-credits", { quantity });
-    },
-    onSuccess: async () => {
-      toast({ title: "Credits purchased!", description: "Listing credits added to your account." });
-      queryClient.invalidateQueries({ queryKey: ["/api/membership"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-      // Advance onboarding if in membership step
-      if (onboardingData && !onboardingData.onboardingComplete && onboardingData.step === "membership") {
-        await apiRequest("POST", "/api/onboarding/advance", { step: "profile" });
-        queryClient.invalidateQueries({ queryKey: ["/api/onboarding"] });
-        navigate("/complete-profile");
-      }
-    },
-    onError: (e: Error) => {
-      toast({ title: "Purchase failed", description: e.message, variant: "destructive" });
-    },
-  });
+  // Buy credits via Paddle checkout
+  const handleBuyCredits = async (quantity: number) => {
+    const priceId = quantity === 10
+      ? prices?.credits10
+      : quantity === 25
+      ? prices?.credits25
+      : prices?.credits50;
+
+    if (!priceId) {
+      toast({ title: "Loading...", description: "Please wait a moment and try again." });
+      return;
+    }
+
+    await openCheckout(priceId, async () => {
+      toast({ title: "Credits purchased!", description: `${quantity} listing credits will be added to your account shortly.` });
+      setTimeout(async () => {
+        queryClient.invalidateQueries({ queryKey: ["/api/membership"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+        if (onboardingData && !onboardingData.onboardingComplete && onboardingData.step === "membership") {
+          await apiRequest("POST", "/api/onboarding/advance", { step: "profile" });
+          queryClient.invalidateQueries({ queryKey: ["/api/onboarding"] });
+          navigate("/complete-profile");
+        }
+      }, 3000);
+    });
+  };
+
+  const buyCreditsMutation = { isPending: false, mutate: (q: number) => handleBuyCredits(q) };
 
   const isPlus = membership?.isPlus ?? false;
 
@@ -310,11 +396,11 @@ export default function MembershipPage() {
                 ) : (
                   <Button
                     className="w-full rounded-xl bg-[#5A45FF] hover:bg-[#4935EE] text-white gap-2"
-                    onClick={() => upgradeMutation.mutate()}
-                    disabled={upgradeMutation.isPending}
+                    onClick={handleUpgrade}
+                    disabled={false}
                     data-testid="upgrade-btn"
                   >
-                    {upgradeMutation.isPending ? (
+                    {false ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <Zap className="h-4 w-4" />

@@ -11,6 +11,7 @@ import multer from "multer";
 import cors from "cors";
 import path from "path";
 import fs from "fs";
+import { PADDLE_CONFIG, verifyPaddleWebhook, handlePaddleWebhook } from "./paddle";
 
 // ============================================================
 // FILE UPLOAD SETUP
@@ -2015,6 +2016,65 @@ export async function registerRoutes(
       return res.status(500).json({ message: err.message });
     }
   });
+
+  // ============================================================
+  // PADDLE WEBHOOK & CHECKOUT
+  // ============================================================
+
+  // Return Paddle config to frontend (safe — only client token + price IDs)
+  app.get("/api/paddle/config", (_req: Request, res: Response) => {
+    return res.json({
+      clientToken: PADDLE_CONFIG.clientToken,
+      isSandbox: PADDLE_CONFIG.isSandbox,
+      prices: PADDLE_CONFIG.prices,
+    });
+  });
+
+  // Store Paddle customer ID when user initiates checkout
+  app.post("/api/paddle/customer", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { paddleCustomerId } = req.body;
+      if (!paddleCustomerId) return res.status(400).json({ message: "paddleCustomerId required" });
+      await storage.updateUser(user.id, { paddleCustomerId });
+      return res.json({ success: true });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Paddle webhook — receives payment events
+  // Must use raw body for signature verification
+  app.post("/api/paddle/webhook",
+    express.default.raw({ type: "application/json" }),
+    async (req: Request, res: Response) => {
+      try {
+        const signature = req.headers["paddle-signature"] as string;
+        const rawBody = req.body instanceof Buffer ? req.body.toString("utf8") : JSON.stringify(req.body);
+
+        // Verify webhook signature
+        if (PADDLE_CONFIG.webhookSecret && signature) {
+          const valid = verifyPaddleWebhook(rawBody, signature, PADDLE_CONFIG.webhookSecret);
+          if (!valid) {
+            console.error("[Paddle] Invalid webhook signature");
+            return res.status(401).json({ message: "Invalid signature" });
+          }
+        }
+
+        const event = JSON.parse(rawBody);
+        const eventType = event.event_type || event.alert_name;
+        const data = event.data || event;
+
+        // Handle async — respond 200 immediately so Paddle doesn't retry
+        res.status(200).json({ received: true });
+        await handlePaddleWebhook(eventType, data);
+      } catch (err: any) {
+        console.error("[Paddle] Webhook error:", err.message);
+        // Still return 200 to prevent Paddle retries for our own errors
+        return res.status(200).json({ received: true });
+      }
+    }
+  );
 
   // ===== SEED DATABASE =====
   seedDatabase();

@@ -12,6 +12,20 @@ services:
         generateValue: true
       - key: RENDER
         value: true
+      - key: PADDLE_API_KEY
+        sync: false
+      - key: PADDLE_CLIENT_TOKEN
+        sync: false
+      - key: PADDLE_WEBHOOK_SECRET
+        sync: false
+      - key: PADDLE_PRICE_PLUS_MONTHLY
+        sync: false
+      - key: PADDLE_PRICE_CREDITS_10
+        sync: false
+      - key: PADDLE_PRICE_CREDITS_25
+        sync: false
+      - key: PADDLE_PRICE_CREDITS_50
+        sync: false
     disk:
       name: swapedly-data
       mountPath: /data
