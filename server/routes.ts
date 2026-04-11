@@ -286,25 +286,27 @@ export async function registerRoutes(
   // ============================================================
   // GOOGLE OAUTH ROUTES
   // ============================================================
-  app.get("/auth/google",
-    passport.authenticate("google", { scope: ["profile", "email"] })
-  );
-
-  app.get("/auth/google/callback",
-    passport.authenticate("google", { failureRedirect: "/#/login?error=google_failed" }),
-    async (req: Request, res: Response) => {
-      const user = req.user as any;
-      if (!user) return res.redirect("/#/login?error=no_user");
-
-      // Issue a Bearer token (same system as email login)
-      const token = crypto.randomBytes(32).toString("hex");
-      tokenStore.set(token, user.id);
-      setTimeout(() => tokenStore.delete(token), 7 * 24 * 60 * 60 * 1000); // 7 days
-
-      // Redirect to frontend with token in hash — frontend stores it
-      res.redirect(`/#/oauth-callback?token=${token}&userId=${user.id}`);
+  app.get("/auth/google", (req: Request, res: Response, next: NextFunction) => {
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      return res.redirect("/#/login?error=google_not_configured");
     }
-  );
+    passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
+  });
+
+  app.get("/auth/google/callback", (req: Request, res: Response, next: NextFunction) => {
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      return res.redirect("/#/login?error=google_not_configured");
+    }
+    passport.authenticate("google", { failureRedirect: "/#/login?error=google_failed" },
+      async (err: any, user: any) => {
+        if (err || !user) return res.redirect("/#/login?error=google_failed");
+        const token = crypto.randomBytes(32).toString("hex");
+        tokenStore.set(token, user.id);
+        setTimeout(() => tokenStore.delete(token), 7 * 24 * 60 * 60 * 1000);
+        res.redirect(`/#/oauth-callback?token=${token}&userId=${user.id}`);
+      }
+    )(req, res, next);
+  });
 
   // ============================================================
   // AUTH ENDPOINTS
