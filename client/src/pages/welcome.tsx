@@ -261,9 +261,13 @@ export default function WelcomePage() {
       <footer className="py-8 px-4 sm:px-6 border-t">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <Logo />
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap justify-center">
             <button onClick={() => setShowLogin(true)} className="hover:text-primary">Sign In</button>
             <Link href="/signup" className="hover:text-primary">Sign Up</Link>
+            <Link href="/pricing" className="hover:text-primary">Pricing</Link>
+            <Link href="/terms" className="hover:text-primary">Terms</Link>
+            <Link href="/privacy" className="hover:text-primary">Privacy</Link>
+            <Link href="/refunds" className="hover:text-primary">Refunds</Link>
           </div>
           <PerplexityAttribution />
         </div>

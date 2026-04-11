@@ -25,6 +25,9 @@ import NotificationsPage from "@/pages/notifications";
 import AdminPage from "@/pages/admin";
 import CompleteProfilePage from "@/pages/complete-profile";
 import PricingPage from "@/pages/pricing";
+import TermsPage from "@/pages/terms";
+import PrivacyPage from "@/pages/privacy";
+import RefundsPage from "@/pages/refunds";
 import NotFound from "@/pages/not-found";
 import { OnboardingGuard } from "@/components/onboarding-guard";
 
@@ -34,6 +37,9 @@ function AppRouter() {
       {/* Public */}
       <Route path="/" component={WelcomePage} />
       <Route path="/pricing" component={PricingPage} />
+      <Route path="/terms" component={TermsPage} />
+      <Route path="/privacy" component={PrivacyPage} />
+      <Route path="/refunds" component={RefundsPage} />
       <Route path="/signup" component={SignUpPage} />
       <Route path="/marketplace" component={MarketplacePage} />
       <Route path="/listing/:id" component={ListingDetailPage} />
