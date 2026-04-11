@@ -26,6 +26,22 @@ export default function WelcomePage() {
   const [showLogin, setShowLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Track referral link click when ?ref=CODE is in URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref) {
+      // Store for signup form pre-fill
+      sessionStorage.setItem("referralCode", ref);
+      // Fire tracking event
+      fetch("/api/referral/click", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ referralCode: ref }),
+      }).catch(() => {}); // fire and forget
+    }
+  }, []);
+
   const { register, handleSubmit, formState: { errors } } = useForm<{ email: string; password: string }>();
 
   if (isAuthenticated) {

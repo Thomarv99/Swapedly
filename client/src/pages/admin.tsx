@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import {
   Shield, Users, Package, Scale, Coins, Search, Ban,
-  CheckCircle, Crown, Trash2, Eye, Star, PlusCircle,
+  CheckCircle, Crown, Trash2, Eye, Star, PlusCircle, Share2, MousePointer, UserPlus,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getQueryFn, apiRequest } from "@/lib/queryClient";
@@ -208,6 +208,7 @@ export default function AdminPage() {
             <TabsTrigger value="listings" className="rounded-lg" data-testid="admin-listings-tab">Listings</TabsTrigger>
             <TabsTrigger value="disputes" className="rounded-lg" data-testid="admin-disputes-tab">Disputes</TabsTrigger>
             <TabsTrigger value="tasks" className="rounded-lg" data-testid="admin-tasks-tab">Earn Tasks</TabsTrigger>
+            <TabsTrigger value="referrals" className="rounded-lg" data-testid="admin-referrals-tab">Referrals</TabsTrigger>
           </TabsList>
 
           {/* Users Tab */}
@@ -494,8 +495,114 @@ export default function AdminPage() {
               </Card>
             </div>
           </TabsContent>
+
+          {/* Referrals Tab */}
+          <TabsContent value="referrals" className="mt-6">
+            <ReferralStatsTab />
+          </TabsContent>
         </Tabs>
       </div>
     </AuthenticatedLayout>
+  );
+}
+
+function ReferralStatsTab() {
+  const { data: stats, isLoading } = useQuery<Array<{
+    userId: number;
+    username: string;
+    clicks: number;
+    signups: number;
+    creditsEarned: number;
+  }>>({ 
+    queryKey: ["/api/admin/referral-stats"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/admin/referral-stats");
+      return res.json();
+    },
+  });
+
+  const totalClicks = (stats || []).reduce((s, r) => s + r.clicks, 0);
+  const totalSignups = (stats || []).reduce((s, r) => s + r.signups, 0);
+  const totalCredits = (stats || []).reduce((s, r) => s + r.creditsEarned, 0);
+
+  return (
+    <div className="space-y-5">
+      {/* Summary cards */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="rounded-xl">
+          <CardContent className="p-4 text-center">
+            <MousePointer className="h-5 w-5 mx-auto text-blue-500 mb-1" />
+            <p className="text-2xl font-bold">{totalClicks}</p>
+            <p className="text-xs text-muted-foreground">Total Link Clicks</p>
+          </CardContent>
+        </Card>
+        <Card className="rounded-xl">
+          <CardContent className="p-4 text-center">
+            <UserPlus className="h-5 w-5 mx-auto text-green-500 mb-1" />
+            <p className="text-2xl font-bold text-green-600">{totalSignups}</p>
+            <p className="text-xs text-muted-foreground">Signups via Referral</p>
+          </CardContent>
+        </Card>
+        <Card className="rounded-xl">
+          <CardContent className="p-4 text-center">
+            <Coins className="h-5 w-5 mx-auto text-yellow-500 mb-1" />
+            <p className="text-2xl font-bold text-yellow-600">{totalCredits.toFixed(1)}</p>
+            <p className="text-xs text-muted-foreground">SB Paid Out</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Per-user table */}
+      <Card className="rounded-xl">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Share2 className="h-5 w-5" />
+            Referral Activity by User
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Loading...</p>
+          ) : !stats || stats.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No referral activity yet.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead className="text-center">Link Clicks</TableHead>
+                  <TableHead className="text-center">Signups</TableHead>
+                  <TableHead className="text-center">Conversion %</TableHead>
+                  <TableHead className="text-center">SB Earned</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {stats.map(r => (
+                  <TableRow key={r.userId}>
+                    <TableCell className="font-medium">{r.username}</TableCell>
+                    <TableCell className="text-center">
+                      <span className="inline-flex items-center gap-1">
+                        <MousePointer className="h-3 w-3 text-blue-400" />{r.clicks}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className="inline-flex items-center gap-1 text-green-600">
+                        <UserPlus className="h-3 w-3" />{r.signups}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {r.clicks > 0 ? `${Math.round((r.signups / r.clicks) * 100)}%` : "—"}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className="font-semibold text-yellow-600">{r.creditsEarned.toFixed(1)} SB</span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

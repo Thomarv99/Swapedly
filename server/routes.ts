@@ -313,11 +313,11 @@ export async function registerRoutes(
 
       // Handle referral bonus
       if (referrer) {
-        // Credit 500 SB to referrer
-        await storage.creditWallet(referrer.id, 500);
+        // Credit 1 SB to referrer per invite
+        await storage.creditWallet(referrer.id, 1);
         await storage.createLedgerEntry({
           userId: referrer.id,
-          amount: 500,
+          amount: 1,
           type: "referral_bonus",
           description: `Referral bonus for inviting ${username}`,
         });
@@ -325,18 +325,12 @@ export async function registerRoutes(
           userId: referrer.id,
           type: "referral",
           title: "Referral Bonus!",
-          body: `${username} joined using your referral code. You earned 500 SB!`,
+          body: `${username} joined using your referral code. You earned 1 SB!`,
           link: "/wallet",
         });
 
-        // Credit 500 SB to new user
-        await storage.creditWallet(user.id, 500);
-        await storage.createLedgerEntry({
-          userId: user.id,
-          amount: 500,
-          type: "referral_bonus",
-          description: "Referral bonus for joining with a referral code",
-        });
+        // Mark the referral click as converted
+        await storage.markReferralConverted(referrer.referralCode || "", user.id);
       }
 
       // Login the user
@@ -2096,6 +2090,60 @@ export async function registerRoutes(
         highlightsRemaining: 0,
       });
       return res.json({ success: true });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ============================================================
+  // REFERRAL TRACKING
+  // ============================================================
+
+  // Track a referral link click (called from frontend when /?ref=CODE is visited)
+  app.post("/api/referral/click", async (req: Request, res: Response) => {
+    try {
+      const { referralCode } = req.body;
+      if (!referralCode) return res.status(400).json({ message: "referralCode required" });
+
+      const referrer = await storage.getUserByReferralCode(referralCode);
+      if (!referrer) return res.status(404).json({ message: "Invalid referral code" });
+
+      const ip = (req.headers["x-forwarded-for"] as string)?.split(",")[0] || req.socket.remoteAddress || "";
+      const ua = req.headers["user-agent"] || "";
+
+      await storage.trackReferralClick({
+        referrerId: referrer.id,
+        referralCode,
+        ipAddress: ip,
+        userAgent: ua,
+        convertedUserId: null,
+      });
+
+      return res.json({ success: true });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Get referral stats for the current user
+  app.get("/api/referral/stats", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const stats = await storage.getReferralStatsByUserId(user.id);
+      return res.json(stats);
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Admin: get all users' referral stats
+  app.get("/api/admin/referral-stats", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const fullUser = await storage.getUserById(user.id);
+      if (fullUser?.role !== "admin") return res.status(403).json({ message: "Admin only" });
+      const stats = await storage.getAllReferralStats();
+      return res.json(stats);
     } catch (err: any) {
       return res.status(500).json({ message: err.message });
     }

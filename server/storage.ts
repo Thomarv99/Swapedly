@@ -16,6 +16,7 @@ import {
   type Favorite, type InsertFavorite, favorites,
   type SocialAccount, type InsertSocialAccount, socialAccounts,
   type SocialShare, type InsertSocialShare, socialShares,
+  type ReferralClick, type InsertReferralClick, referralClicks,
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import Database from "better-sqlite3";
@@ -196,6 +197,15 @@ sqlite.exec(`
     reward_paid INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS referral_clicks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    referrer_id INTEGER NOT NULL,
+    referral_code TEXT NOT NULL,
+    ip_address TEXT,
+    user_agent TEXT,
+    converted_user_id INTEGER,
+    created_at TEXT NOT NULL
+  );
 `);
 
 export const db = drizzle(sqlite);
@@ -299,6 +309,13 @@ export interface IStorage {
 
   // Paddle / Stripe
   getUserByPaddleCustomerId(customerId: string): Promise<User | undefined>;
+
+  // Referral tracking
+  trackReferralClick(data: InsertReferralClick): Promise<ReferralClick>;
+  markReferralConverted(referralCode: string, convertedUserId: number): Promise<void>;
+  getReferralStatsByUserId(userId: number): Promise<{ clicks: number; signups: number; creditsEarned: number }>;
+  getAllReferralStats(): Promise<Array<{ userId: number; username: string; clicks: number; signups: number; creditsEarned: number }>>;
+  getUserByReferralCode(referralCode: string): Promise<User | undefined>;
 
   // Social Accounts
   createSocialAccount(account: InsertSocialAccount): Promise<SocialAccount>;
@@ -769,6 +786,75 @@ export class DatabaseStorage implements IStorage {
   // ===== PADDLE/STRIPE HELPERS =====
   async getUserByPaddleCustomerId(customerId: string): Promise<User | undefined> {
     return db.select().from(users).where(eq(users.paddleCustomerId, customerId)).get();
+  }
+
+  // ===== REFERRAL TRACKING =====
+  async trackReferralClick(data: InsertReferralClick): Promise<ReferralClick> {
+    return db.insert(referralClicks).values({
+      ...data,
+      createdAt: new Date().toISOString(),
+    }).returning().get();
+  }
+
+  async markReferralConverted(referralCode: string, convertedUserId: number): Promise<void> {
+    // Find the most recent unconverted click for this referral code
+    const click = db.select().from(referralClicks)
+      .where(and(
+        eq(referralClicks.referralCode, referralCode),
+        sql`${referralClicks.convertedUserId} IS NULL`
+      ))
+      .orderBy(desc(referralClicks.createdAt))
+      .limit(1)
+      .get();
+    if (click) {
+      db.update(referralClicks)
+        .set({ convertedUserId })
+        .where(eq(referralClicks.id, click.id))
+        .run();
+    }
+  }
+
+  async getReferralStatsByUserId(userId: number): Promise<{ clicks: number; signups: number; creditsEarned: number }> {
+    const clicks = db.select().from(referralClicks)
+      .where(eq(referralClicks.referrerId, userId))
+      .all();
+    const signups = clicks.filter(c => c.convertedUserId !== null).length;
+    // Each successful referral earns 1 SB — check ledger
+    const ledger = db.select().from(ledgerEntries)
+      .where(and(
+        eq(ledgerEntries.userId, userId),
+        eq(ledgerEntries.type, "referral_bonus")
+      ))
+      .all();
+    const creditsEarned = ledger.reduce((sum, e) => sum + e.amount, 0);
+    return { clicks: clicks.length, signups, creditsEarned };
+  }
+
+  async getAllReferralStats(): Promise<Array<{ userId: number; username: string; clicks: number; signups: number; creditsEarned: number }>> {
+    const allUsers = db.select().from(users).orderBy(desc(users.id)).all();
+    const allClicks = db.select().from(referralClicks).all();
+    const allLedger = db.select().from(ledgerEntries)
+      .where(eq(ledgerEntries.type, "referral_bonus"))
+      .all();
+
+    return allUsers.map(u => {
+      const userClicks = allClicks.filter(c => c.referrerId === u.id);
+      const signups = userClicks.filter(c => c.convertedUserId !== null).length;
+      const creditsEarned = allLedger
+        .filter(e => e.userId === u.id)
+        .reduce((sum, e) => sum + e.amount, 0);
+      return {
+        userId: u.id,
+        username: u.username,
+        clicks: userClicks.length,
+        signups,
+        creditsEarned,
+      };
+    }).filter(r => r.clicks > 0 || r.signups > 0); // only show users with any activity
+  }
+
+  async getUserByReferralCode(referralCode: string): Promise<User | undefined> {
+    return db.select().from(users).where(eq(users.referralCode, referralCode)).get();
   }
 
   async isFavorited(userId: number, listingId: number): Promise<boolean> {

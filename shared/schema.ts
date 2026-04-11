@@ -403,3 +403,23 @@ export const insertSocialShareSchema = createInsertSchema(socialShares).omit({
 });
 export type InsertSocialShare = z.infer<typeof insertSocialShareSchema>;
 export type SocialShare = typeof socialShares.$inferSelect;
+
+// ============================================================
+// REFERRAL CLICKS (tracks each click on a referral link)
+// ============================================================
+export const referralClicks = sqliteTable("referral_clicks", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  referrerId: integer("referrer_id").notNull(), // user who shared the link
+  referralCode: text("referral_code").notNull(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  convertedUserId: integer("converted_user_id"), // set when visitor signs up
+  createdAt: text("created_at").notNull(),
+});
+
+export const insertReferralClickSchema = createInsertSchema(referralClicks).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertReferralClick = z.infer<typeof insertReferralClickSchema>;
+export type ReferralClick = typeof referralClicks.$inferSelect;
