@@ -42,6 +42,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ReactNode, useState } from "react";
+import { useOnboarding } from "@/components/onboarding-guard";
 
 // ============================
 // Logo Component
@@ -139,11 +140,17 @@ export function PublicLayout({ children }: { children: ReactNode }) {
 // ============================
 // Sidebar Nav Items
 // ============================
-const sidebarItems = [
+// Base items always shown
+const BASE_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/messages", label: "Messages", icon: Mail, badgeKey: "unreadMessages" as const },
   { href: "/wallet", label: "Wallet", icon: Wallet },
   { href: "/my-listings", label: "My Listings", icon: Package },
+] as const;
+
+// Items that unlock after the user creates their first listing
+const UNLOCKED_ITEMS = [
+  { href: "/marketplace", label: "Marketplace", icon: ShoppingBag },
   { href: "/earn", label: "Earn Swap Bucks", icon: Coins },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
   { href: "/share-earn", label: "Share & Earn", icon: Share2 },
@@ -151,11 +158,20 @@ const sidebarItems = [
   { href: "/disputes", label: "Disputes", icon: Scale },
   { href: "/settings", label: "Settings", icon: Settings },
   { href: "/admin", label: "Admin Console", icon: Shield, adminOnly: true },
-];
+] as const;
 
 function SidebarNav({ onNavClick }: { onNavClick?: () => void }) {
   const [location] = useLocation();
   const { user, isAdmin } = useAuth();
+  const { data: onboarding } = useOnboarding();
+
+  // Marketplace (and rest of sidebar) unlocks after user creates their first listing
+  const hasListed = !!(onboarding?.listingsCreated && onboarding.listingsCreated >= 1) || !!onboarding?.onboardingComplete;
+
+  const sidebarItems = [
+    ...BASE_ITEMS,
+    ...(hasListed ? UNLOCKED_ITEMS : []),
+  ] as any[];
 
   const { data: unreadCount } = useQuery<number>({
     queryKey: ["/api/messages/unread-count"],
@@ -167,8 +183,8 @@ function SidebarNav({ onNavClick }: { onNavClick?: () => void }) {
   return (
     <nav className="flex flex-col gap-1 px-3 py-2">
       {sidebarItems
-        .filter((item) => !item.adminOnly || isAdmin)
-        .map((item) => {
+        .filter((item: any) => !item.adminOnly || isAdmin)
+        .map((item: any) => {
           const Icon = item.icon;
           const isActive = location === item.href || location.startsWith(item.href + "/");
           const badge = item.badgeKey === "unreadMessages" ? unreadCount : undefined;
