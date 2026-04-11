@@ -513,7 +513,8 @@ export async function registerRoutes(
   // ============================================================
   app.get("/api/listings", async (req: Request, res: Response) => {
     try {
-      const { category, categories, condition, minPrice, maxPrice, search, sort, page, limit, city } = req.query;
+      const { category: _cat, categories: _cats, condition: _cond, minPrice: _minP, maxPrice: _maxP, search: _search, sort: _sort, page: _page, limit: _limit, city: _city } = req.query;
+      const category = _cat as string, categories = _cats as string, condition = _cond as string, minPrice = _minP as string, maxPrice = _maxP as string, search = _search as string, sort = _sort as string, page = _page as string, limit = _limit as string, city = _city as string;
       const result = await storage.getListings({
         category: (categories as string) || (category as string), // support both param names
         condition: condition as string,
@@ -805,7 +806,7 @@ export async function registerRoutes(
 
       let conv = await storage.getConversationByParticipants(txn.buyerId, txn.sellerId);
       if (!conv) {
-        conv = await storage.createConversation({ participantIds: JSON.stringify([txn.buyerId, txn.sellerId]) });
+        conv = await storage.createConversation({ participant1Id: txn.buyerId, participant2Id: txn.sellerId, lastMessageAt: new Date().toISOString() });
       }
 
       const msg = await storage.createMessage({ conversationId: conv.id, senderId: user.id, content: content.trim() });
@@ -901,7 +902,7 @@ export async function registerRoutes(
       // Open a conversation between buyer and seller for this transaction
       let conv = await storage.getConversationByParticipants(buyer.id, listing.sellerId);
       if (!conv) {
-        conv = await storage.createConversation({ participantIds: JSON.stringify([buyer.id, listing.sellerId]) });
+        conv = await storage.createConversation({ participant1Id: buyer.id, participant2Id: listing.sellerId, lastMessageAt: new Date().toISOString() });
       }
       // Send automated first message
       await storage.createMessage({
