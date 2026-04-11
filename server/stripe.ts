@@ -33,9 +33,19 @@ export const STRIPE_CONFIG = {
     credits10: process.env.STRIPE_PRICE_CREDITS_10 || "",
     credits25: process.env.STRIPE_PRICE_CREDITS_25 || "",
     credits50: process.env.STRIPE_PRICE_CREDITS_50 || "",
+    sb100: process.env.STRIPE_PRICE_SB_100 || "",
+    sb500: process.env.STRIPE_PRICE_SB_500 || "",
+    sb1000: process.env.STRIPE_PRICE_SB_1000 || "",
   },
   webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || "",
 };
+
+export function sbForPriceId(priceId: string): number {
+  if (priceId === STRIPE_CONFIG.prices.sb100) return 100;
+  if (priceId === STRIPE_CONFIG.prices.sb500) return 500;
+  if (priceId === STRIPE_CONFIG.prices.sb1000) return 1000;
+  return 0;
+}
 
 export function creditsForPriceId(priceId: string): number {
   if (priceId === STRIPE_CONFIG.prices.credits10) return 10;
@@ -124,7 +134,42 @@ export async function handleStripeWebhook(event: Stripe.Event): Promise<void> {
 
         console.log(`[Stripe] Plus activated for user ${userId}`);
       } else if (session.mode === "payment") {
-        // One-time credit purchase
+        // Check metadata type first (dynamic pricing sessions)
+        const sessionType = session.metadata?.type;
+        if (sessionType === "sb_pack") {
+          const sbAmount = parseInt(session.metadata?.sbAmount || "0");
+          if (sbAmount > 0) {
+            await storage.creditWallet(userId, sbAmount);
+            await storage.createLedgerEntry({
+              userId, amount: sbAmount, type: "purchase_sb",
+              description: `Purchased ${sbAmount} Swap Bucks`,
+              relatedListingId: null, relatedTransactionId: null,
+            });
+            await storage.createNotification({
+              userId, type: "system",
+              title: `${sbAmount} Swap Bucks Added!`,
+              body: `Your wallet has been topped up by ${sbAmount} SB.`,
+              link: "/wallet",
+            });
+          }
+          break;
+        }
+        if (sessionType === "purchase_credits") {
+          const credits = parseInt(session.metadata?.purchaseCredits || "0");
+          if (credits > 0) {
+            const user = await storage.getUserById(userId);
+            const newCredits = (user?.purchaseCredits || 0) + credits;
+            await storage.updateUser(userId, { purchaseCredits: newCredits });
+            await storage.createNotification({
+              userId, type: "system",
+              title: `${credits} Purchase Credits Added`,
+              body: `You can now complete ${credits} marketplace purchase${credits > 1 ? "s" : ""}.`,
+              link: "/membership",
+            });
+          }
+          break;
+        }
+        // One-time credit purchase (price ID based, legacy)
         const lineItems = await getStripe().checkout.sessions.listLineItems(session.id);
         for (const item of lineItems.data) {
           const priceId = item.price?.id || "";
@@ -133,16 +178,36 @@ export async function handleStripeWebhook(event: Stripe.Event): Promise<void> {
             const user = await storage.getUserById(userId);
             const newCredits = (user?.purchaseCredits || 0) + credits;
             await storage.updateUser(userId, { purchaseCredits: newCredits });
-
             await storage.createNotification({
               userId,
               type: "system",
-              title: "Listing Credits Added",
-              body: `${credits} listing credits have been added to your account.`,
+              title: "Purchase Credits Added",
+              body: `${credits} purchase credits have been added to your account.`,
               link: "/membership",
             });
+            console.log(`[Stripe] Added ${credits} purchase credits to user ${userId}`);
+          }
 
-            console.log(`[Stripe] Added ${credits} credits to user ${userId}`);
+          // SB packs
+          const sbAmount = sbForPriceId(priceId);
+          if (sbAmount > 0) {
+            await storage.creditWallet(userId, sbAmount);
+            await storage.createLedgerEntry({
+              userId,
+              amount: sbAmount,
+              type: "purchase_sb",
+              description: `Purchased ${sbAmount} Swap Bucks`,
+              relatedListingId: null,
+              relatedTransactionId: null,
+            });
+            await storage.createNotification({
+              userId,
+              type: "system",
+              title: `${sbAmount} Swap Bucks Added!`,
+              body: `Your Swap Bucks balance has been topped up by ${sbAmount} SB.`,
+              link: "/wallet",
+            });
+            console.log(`[Stripe] Added ${sbAmount} SB to user ${userId}`);
           }
         }
       }

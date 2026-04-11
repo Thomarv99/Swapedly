@@ -444,9 +444,9 @@ export async function registerRoutes(
   // ============================================================
   app.get("/api/listings", async (req: Request, res: Response) => {
     try {
-      const { category, condition, minPrice, maxPrice, search, sort, page, limit } = req.query;
+      const { category, categories, condition, minPrice, maxPrice, search, sort, page, limit, city } = req.query;
       const result = await storage.getListings({
-        category: category as string,
+        category: (categories as string) || (category as string), // support both param names
         condition: condition as string,
         minPrice: minPrice ? parseFloat(minPrice as string) : undefined,
         maxPrice: maxPrice ? parseFloat(maxPrice as string) : undefined,
@@ -454,6 +454,7 @@ export async function registerRoutes(
         sort: sort as string,
         page: page ? parseInt(page as string) : 1,
         limit: limit ? parseInt(limit as string) : 20,
+        city: city as string,
       });
       return res.json(result);
     } catch (err: any) {
@@ -565,6 +566,198 @@ export async function registerRoutes(
   // ============================================================
   // TRANSACTION ENDPOINTS
   // ============================================================
+
+  // Seller accepts a purchase request
+  app.post("/api/transactions/:id/accept", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = req.user as any;
+      const txnId = parseInt(req.params.id);
+      const txn = await storage.getTransactionById(txnId);
+      if (!txn) return res.status(404).json({ message: "Transaction not found" });
+      if (txn.sellerId !== user.id) return res.status(403).json({ message: "Only the seller can accept" });
+      if (txn.status !== "awaiting_acceptance") return res.status(400).json({ message: "Transaction cannot be accepted in this state" });
+
+      await storage.updateTransaction(txnId, { status: "accepted" });
+
+      // Notify buyer
+      const listing = await storage.getListingById(txn.listingId);
+      await storage.createNotification({
+        userId: txn.buyerId,
+        type: "sale",
+        title: "Purchase accepted!",
+        body: `The seller accepted your purchase of "${listing?.title}". You can now coordinate the exchange in the transaction chat.`,
+        link: `/transactions/${txnId}`,
+      });
+
+      return res.json({ success: true, status: "accepted" });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Seller declines — refund buyer
+  app.post("/api/transactions/:id/decline", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = req.user as any;
+      const txnId = parseInt(req.params.id);
+      const txn = await storage.getTransactionById(txnId);
+      if (!txn) return res.status(404).json({ message: "Transaction not found" });
+      if (txn.sellerId !== user.id) return res.status(403).json({ message: "Only the seller can decline" });
+      if (txn.status !== "awaiting_acceptance") return res.status(400).json({ message: "Transaction cannot be declined in this state" });
+
+      // Refund buyer
+      await storage.creditWallet(txn.buyerId, txn.amount);
+      await storage.createLedgerEntry({
+        userId: txn.buyerId,
+        amount: txn.amount,
+        type: "refund",
+        description: "Purchase declined by seller — refund",
+        relatedListingId: txn.listingId,
+        relatedTransactionId: txnId,
+      });
+
+      // Refund purchase credit
+      const buyer = await storage.getUserById(txn.buyerId);
+      if (buyer && !isPlus(buyer)) {
+        await storage.updateUser(txn.buyerId, { purchaseCredits: (buyer.purchaseCredits || 0) + 1 });
+      }
+
+      await storage.updateTransaction(txnId, { status: "cancelled" });
+
+      // Un-reserve the listing
+      await storage.updateListing(txn.listingId, { status: "active" });
+
+      await storage.createNotification({
+        userId: txn.buyerId,
+        type: "system",
+        title: "Purchase declined",
+        body: "The seller declined your purchase. Your Swap Bucks have been refunded.",
+        link: `/transactions/${txnId}`,
+      });
+
+      return res.json({ success: true, status: "cancelled" });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Mark exchange as complete — transfers SB to seller
+  app.post("/api/transactions/:id/complete", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = req.user as any;
+      const txnId = parseInt(req.params.id);
+      const txn = await storage.getTransactionById(txnId);
+      if (!txn) return res.status(404).json({ message: "Transaction not found" });
+      if (txn.buyerId !== user.id && txn.sellerId !== user.id) return res.status(403).json({ message: "Not your transaction" });
+      if (!["accepted", "in_progress"].includes(txn.status)) return res.status(400).json({ message: "Transaction not in a completable state" });
+
+      // Credit seller
+      await storage.creditWallet(txn.sellerId, txn.amount);
+      await storage.createLedgerEntry({
+        userId: txn.sellerId,
+        amount: txn.amount,
+        type: "sale",
+        description: `Sale completed`,
+        relatedListingId: txn.listingId,
+        relatedTransactionId: txnId,
+      });
+
+      await storage.updateTransaction(txnId, {
+        status: "completed",
+        completedAt: new Date().toISOString(),
+      });
+
+      // Mark listing as sold
+      await storage.updateListing(txn.listingId, { status: "sold" });
+
+      const listing = await storage.getListingById(txn.listingId);
+
+      // SB earned notification for seller
+      await storage.createNotification({
+        userId: txn.sellerId,
+        type: "sale",
+        title: "Exchange complete! SB transferred.",
+        body: `${txn.amount} Swap Bucks have been added to your wallet for selling "${listing?.title}".`,
+        link: "/wallet",
+      });
+
+      await storage.createNotification({
+        userId: txn.buyerId,
+        type: "system",
+        title: "Exchange complete!",
+        body: `Your purchase of "${listing?.title}" is complete. Enjoy!`,
+        link: "/wallet",
+      });
+
+      return res.json({ success: true, status: "completed" });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Transaction messages
+  app.get("/api/transactions/:id/messages", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = req.user as any;
+      const txnId = parseInt(req.params.id);
+      const txn = await storage.getTransactionById(txnId);
+      if (!txn) return res.status(404).json({ message: "Not found" });
+      if (txn.buyerId !== user.id && txn.sellerId !== user.id) return res.status(403).json({ message: "Not your transaction" });
+
+      // Find conversation between buyer and seller
+      const conv = await storage.getConversationByParticipants(txn.buyerId, txn.sellerId);
+      if (!conv) return res.json([]);
+
+      const msgs = await storage.getMessagesByConversation(conv.id);
+      return res.json(msgs);
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/transactions/:id/messages", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = req.user as any;
+      const txnId = parseInt(req.params.id);
+      const txn = await storage.getTransactionById(txnId);
+      if (!txn) return res.status(404).json({ message: "Not found" });
+      if (txn.buyerId !== user.id && txn.sellerId !== user.id) return res.status(403).json({ message: "Not your transaction" });
+
+      const { content } = req.body;
+      if (!content?.trim()) return res.status(400).json({ message: "Message required" });
+
+      let conv = await storage.getConversationByParticipants(txn.buyerId, txn.sellerId);
+      if (!conv) {
+        conv = await storage.createConversation({ participantIds: JSON.stringify([txn.buyerId, txn.sellerId]) });
+      }
+
+      const msg = await storage.createMessage({ conversationId: conv.id, senderId: user.id, content: content.trim() });
+      return res.json(msg);
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Get single transaction
+  app.get("/api/transactions/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = req.user as any;
+      const txnId = parseInt(req.params.id);
+      const txn = await storage.getTransactionById(txnId);
+      if (!txn) return res.status(404).json({ message: "Transaction not found" });
+      if (txn.buyerId !== user.id && txn.sellerId !== user.id) return res.status(403).json({ message: "Not your transaction" });
+
+      const listing = await storage.getListingById(txn.listingId);
+      const buyer = await storage.getUserById(txn.buyerId);
+      const seller = await storage.getUserById(txn.sellerId);
+      const { password: _b, ...safeBuyer } = buyer || { password: "" };
+      const { password: _s, ...safeSeller } = seller || { password: "" };
+
+      return res.json({ ...txn, listing, buyer: safeBuyer, seller: safeSeller });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
   app.post("/api/transactions/buy", requireAuth, async (req: Request, res: Response) => {
     try {
       const buyer = req.user as any;
@@ -601,17 +794,17 @@ export async function registerRoutes(
       const buyerFee = calculateFee(listing.price);
       const sellerFee = calculateFee(listing.price);
 
-      // Debit buyer wallet (escrow)
+      // Debit buyer wallet (hold in escrow — SB removed from buyer balance)
       await storage.debitWallet(buyer.id, listing.price);
       await storage.createLedgerEntry({
         userId: buyer.id,
         amount: -listing.price,
         type: "purchase",
-        description: `Purchased "${listing.title}"`,
+        description: `Purchase request for "${listing.title}" (awaiting seller acceptance)`,
         relatedListingId: listing.id,
       });
 
-      // Create transaction
+      // Create transaction in "awaiting_acceptance" state
       const txn = await storage.createTransaction({
         listingId: listing.id,
         buyerId: buyer.id,
@@ -619,19 +812,33 @@ export async function registerRoutes(
         amount: listing.price,
         buyerFeeUsd: buyerFee,
         sellerFeeUsd: sellerFee,
-        deliveryMethod: deliveryMethod || "shipping",
+        deliveryMethod: deliveryMethod || "local_pickup",
       });
 
-      // Mark listing as sold
-      await storage.updateListing(listing.id, { status: "sold" });
+      // Update transaction status to awaiting_acceptance
+      await storage.updateTransaction(txn.id, { status: "awaiting_acceptance" });
 
-      // Update ledger entry with transaction id
+      // Mark listing as reserved (not sold yet — seller must accept)
+      await storage.updateListing(listing.id, { status: "reserved" });
+
+      // Open a conversation between buyer and seller for this transaction
+      let conv = await storage.getConversationByParticipants(buyer.id, listing.sellerId);
+      if (!conv) {
+        conv = await storage.createConversation({ participantIds: JSON.stringify([buyer.id, listing.sellerId]) });
+      }
+      // Send automated first message
+      await storage.createMessage({
+        conversationId: conv.id,
+        senderId: buyer.id,
+        content: `Hi! I'd like to purchase "${listing.title}" for ${listing.price} SB. My SB has been held in escrow. Please accept or decline this request.`,
+      });
+
       // Notify seller
       await storage.createNotification({
         userId: listing.sellerId,
         type: "sale",
-        title: "You made a sale!",
-        body: `${buyer.username} purchased "${listing.title}" for ${listing.price} SB`,
+        title: "New purchase request!",
+        body: `${buyer.username} wants to buy "${listing.title}" for ${listing.price} SB. Accept or decline.`,
         link: `/transactions/${txn.id}`,
       });
 
@@ -1350,7 +1557,24 @@ export async function registerRoutes(
       const user = await storage.getUserById(id);
       if (!user) return res.status(404).json({ message: "User not found" });
       const { password: _, ...safeUser } = user;
-      return res.json(safeUser);
+      // Include active listings and stats
+      const allListings = await storage.getListingsBySellerId(id);
+      const activeListings = allListings.filter(l => l.status === "active");
+      const txns = await storage.getTransactionsByUserId(id);
+      const userReviews = await storage.getReviewsByUserId(id);
+      const avgRating = userReviews.length > 0
+        ? userReviews.reduce((sum, r) => sum + r.rating, 0) / userReviews.length : 0;
+      return res.json({
+        ...safeUser,
+        listings: activeListings,
+        reviews: userReviews,
+        stats: {
+          totalListings: activeListings.length,
+          successfulTrades: txns.filter(t => t.status === "completed").length,
+          averageRating: Math.round(avgRating * 10) / 10,
+          reviewCount: userReviews.length,
+        },
+      });
     } catch (err: any) {
       return res.status(500).json({ message: err.message });
     }
@@ -1359,11 +1583,12 @@ export async function registerRoutes(
   app.put("/api/users/me", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const { displayName, bio, location, avatarUrl, notificationPrefs } = req.body;
+      const { displayName, bio, location, city, avatarUrl, notificationPrefs } = req.body;
       const updated = await storage.updateUser(user.id, {
         displayName,
         bio,
         location,
+        city,
         avatarUrl,
         notificationPrefs: notificationPrefs ? JSON.stringify(notificationPrefs) : undefined,
       });
@@ -1837,6 +2062,105 @@ export async function registerRoutes(
 
       return res.json({ success: true, credits: newCredits, purchased: quantity });
     } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── Buy Swap Bucks via Stripe ───────────────────────────────────────────────
+  app.post("/api/stripe/buy-swap-bucks", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const fullUser = await storage.getUserById(user.id);
+      if (!fullUser) return res.status(401).json({ message: "User not found" });
+
+      const { pack } = req.body; // "100" | "500" | "1000"
+      const packMap: Record<string, { sb: number; priceUsd: number; label: string }> = {
+        "100": { sb: 100, priceUsd: 1.99, label: "100 Swap Bucks" },
+        "500": { sb: 500, priceUsd: 7.99, label: "500 Swap Bucks" },
+        "1000": { sb: 1000, priceUsd: 14.99, label: "1,000 Swap Bucks" },
+      };
+      const chosen = packMap[pack];
+      if (!chosen) return res.status(400).json({ message: "Invalid pack" });
+
+      const origin = req.headers.origin || "https://www.swapedly.com";
+
+      // Create a Stripe checkout session with dynamic pricing
+      const s = getStripe();
+      const user2 = await storage.getUserById(user.id);
+      let customerId = user2?.paddleCustomerId;
+      if (!customerId) {
+        const cust = await s.customers.create({ email: fullUser.email, metadata: { swapelyUserId: String(user.id) } });
+        customerId = cust.id;
+        await storage.updateUser(user.id, { paddleCustomerId: customerId });
+      }
+
+      const session = await s.checkout.sessions.create({
+        customer: customerId,
+        line_items: [{
+          price_data: {
+            currency: "usd",
+            unit_amount: Math.round(chosen.priceUsd * 100),
+            product_data: { name: chosen.label, description: `${chosen.sb} Swap Bucks added to your Swapedly wallet` },
+          },
+          quantity: 1,
+        }],
+        mode: "payment",
+        success_url: `${origin}/#/wallet?sb_success=${chosen.sb}`,
+        cancel_url: `${origin}/#/earn`,
+        metadata: { userId: String(user.id), sbAmount: String(chosen.sb), type: "sb_pack" },
+        allow_promotion_codes: true,
+      });
+
+      return res.json({ url: session.url });
+    } catch (err: any) {
+      console.error("[Stripe] buy-swap-bucks error:", err.message);
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── Buy Purchase Credits via Stripe ─────────────────────────────────────────
+  app.post("/api/stripe/buy-purchase-credits", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const fullUser = await storage.getUserById(user.id);
+      if (!fullUser) return res.status(401).json({ message: "User not found" });
+
+      const { quantity } = req.body; // number of credits
+      if (!quantity || quantity < 10) return res.status(400).json({ message: "Minimum 10 credits" });
+
+      const pricePerCredit = 0.49;
+      const totalUsd = quantity * pricePerCredit;
+      const origin = req.headers.origin || "https://www.swapedly.com";
+
+      const s = getStripe();
+      const user2 = await storage.getUserById(user.id);
+      let customerId = user2?.paddleCustomerId;
+      if (!customerId) {
+        const cust = await s.customers.create({ email: fullUser.email, metadata: { swapelyUserId: String(user.id) } });
+        customerId = cust.id;
+        await storage.updateUser(user.id, { paddleCustomerId: customerId });
+      }
+
+      const session = await s.checkout.sessions.create({
+        customer: customerId,
+        line_items: [{
+          price_data: {
+            currency: "usd",
+            unit_amount: Math.round(totalUsd * 100),
+            product_data: { name: `${quantity} Purchase Credits`, description: "Each credit lets you complete one marketplace purchase" },
+          },
+          quantity: 1,
+        }],
+        mode: "payment",
+        success_url: `${origin}/#/membership?credits_success=${quantity}`,
+        cancel_url: `${origin}/#/membership`,
+        metadata: { userId: String(user.id), purchaseCredits: String(quantity), type: "purchase_credits" },
+        allow_promotion_codes: true,
+      });
+
+      return res.json({ url: session.url });
+    } catch (err: any) {
+      console.error("[Stripe] buy-purchase-credits error:", err.message);
       return res.status(500).json({ message: err.message });
     }
   });

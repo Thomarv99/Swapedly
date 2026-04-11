@@ -44,6 +44,7 @@ sqlite.exec(`
     bio TEXT,
     avatar_url TEXT,
     location TEXT,
+    city TEXT,
     rating REAL NOT NULL DEFAULT 0,
     rating_count INTEGER NOT NULL DEFAULT 0,
     swap_count INTEGER NOT NULL DEFAULT 0,
@@ -219,6 +220,14 @@ sqlite.exec(`
   );
 `);
 
+// ─── Column migration: add city column if missing
+try {
+  const userCols = sqlite.pragma("table_info(users)") as Array<{ name: string }>;
+  if (!userCols.some(col => col.name === "city")) {
+    sqlite.exec("ALTER TABLE users ADD COLUMN city TEXT");
+  }
+} catch (e) { console.warn("Migration warning (city):", e); }
+
 // ─── Column migration: listing_credits → purchase_credits ───────────────────
 // The live DB may have an old `listing_credits` column. Add `purchase_credits`
 // if missing, then copy any existing data over.
@@ -280,6 +289,8 @@ export interface IStorage {
   // Transactions
   createTransaction(txn: InsertTransaction): Promise<Transaction>;
   getTransactionById(id: number): Promise<Transaction | undefined>;
+  updateTransaction(id: number, updates: Partial<Transaction>): Promise<Transaction | undefined>;
+  getConversationByParticipants(userId1: number, userId2: number): Promise<Conversation | undefined>;
   getTransactionsByUserId(userId: number): Promise<Transaction[]>;
   updateTransactionStatus(id: number, data: Partial<Transaction>): Promise<Transaction | undefined>;
 
@@ -487,6 +498,7 @@ export class DatabaseStorage implements IStorage {
     page?: number;
     limit?: number;
     status?: string;
+    city?: string;
   }): Promise<{ listings: Listing[]; total: number }> {
     const page = filters.page || 1;
     const limit = filters.limit || 20;
@@ -518,6 +530,12 @@ export class DatabaseStorage implements IStorage {
           like(listings.title, `%${filters.search}%`),
           like(listings.description, `%${filters.search}%`)
         )
+      );
+    }
+    if (filters.city) {
+      // Filter by seller city — join handled via subquery approach
+      conditions.push(
+        sql`${listings.sellerId} IN (SELECT id FROM users WHERE city = ${filters.city})`
       );
     }
 
@@ -572,6 +590,20 @@ export class DatabaseStorage implements IStorage {
 
   async getTransactionById(id: number): Promise<Transaction | undefined> {
     return db.select().from(transactions).where(eq(transactions.id, id)).get();
+  }
+
+  async updateTransaction(id: number, updates: Partial<Transaction>): Promise<Transaction | undefined> {
+    return db.update(transactions).set(updates).where(eq(transactions.id, id)).returning().get();
+  }
+
+  async getConversationByParticipants(userId1: number, userId2: number): Promise<Conversation | undefined> {
+    const all = await this.getConversationsByUserId(userId1);
+    return all.find(conv => {
+      try {
+        const ids = JSON.parse(conv.participantIds || "[]");
+        return ids.includes(userId1) && ids.includes(userId2);
+      } catch { return false; }
+    });
   }
 
   async getTransactionsByUserId(userId: number): Promise<Transaction[]> {

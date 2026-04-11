@@ -1,4 +1,4 @@
-import { PublicLayout } from "@/components/layouts";
+import { AuthenticatedLayout } from "@/components/layouts";
 import { SwapBucksAmount, StatusBadge, UserAvatar, RatingStars, DeliveryBadge, VerifiedBadge } from "@/components/shared";
 import { resolveImageUrl } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -49,12 +49,7 @@ export default function ListingDetailPage() {
     },
     onError: (e: Error) => {
       if (e.message.includes("PURCHASE_CREDIT_REQUIRED") || e.message.includes("Purchase credit required") || e.message.includes("402")) {
-        toast({
-          title: "Purchase Credit Required",
-          description: "You need a Purchase Credit to buy items. Buy credits on the Membership page, or upgrade to Swapedly Plus.",
-          variant: "destructive",
-        });
-        navigate("/membership");
+        setShowCreditModal(true);
         return;
       }
       toast({ title: "Purchase failed", description: e.message, variant: "destructive" });
@@ -72,10 +67,11 @@ export default function ListingDetailPage() {
   });
 
   const isSeller = user && listing && listing.seller?.id === user.id;
+  const [showCreditModal, setShowCreditModal] = useState(false);
 
   if (isLoading) {
     return (
-      <PublicLayout>
+      <AuthenticatedLayout>
         <div className="container mx-auto px-4 py-6 max-w-6xl">
           <Skeleton className="h-8 w-64 mb-6" />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -87,20 +83,20 @@ export default function ListingDetailPage() {
             </div>
           </div>
         </div>
-      </PublicLayout>
+      </AuthenticatedLayout>
     );
   }
 
   if (!listing) {
     return (
-      <PublicLayout>
+      <AuthenticatedLayout>
         <div className="container mx-auto px-4 py-20 text-center">
           <p className="text-muted-foreground">Listing not found.</p>
           <Link href="/marketplace">
             <Button className="mt-4" data-testid="back-to-marketplace">Back to Marketplace</Button>
           </Link>
         </div>
-      </PublicLayout>
+      </AuthenticatedLayout>
     );
   }
 
@@ -111,7 +107,7 @@ export default function ListingDetailPage() {
   const reviews = listing.reviews || [];
 
   return (
-    <PublicLayout>
+    <AuthenticatedLayout>
       <div className="container mx-auto px-4 py-6 max-w-6xl">
         {/* Breadcrumb */}
         <Breadcrumb className="mb-6">
@@ -129,6 +125,13 @@ export default function ListingDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Image gallery */}
           <div>
+            {/* View count below image */}
+            {listing.views > 0 && (
+              <div className="flex items-center gap-1.5 mb-2 text-xs text-muted-foreground">
+                <Eye className="h-3.5 w-3.5" />
+                <span>{listing.views.toLocaleString()} product page views</span>
+              </div>
+            )}
             <div className="relative aspect-square rounded-2xl overflow-hidden bg-muted mb-3">
               <img
                 src={images[selectedImage] ? resolveImageUrl(images[selectedImage]) : "https://placehold.co/600x600/e2e8f0/94a3b8?text=No+Image"}
@@ -319,7 +322,14 @@ export default function ListingDetailPage() {
           )}
         </div>
       </div>
-    </PublicLayout>
+    {/* Purchase Credit Modal */}
+      {showCreditModal && listing && (
+        <PurchaseCreditModal
+          listing={listing}
+          onClose={() => setShowCreditModal(false)}
+        />
+      )}
+    </AuthenticatedLayout>
   );
 }
 
@@ -491,6 +501,106 @@ function QASection({
           </p>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Purchase Credit Modal ────────────────────────────────────────────────────
+function PurchaseCreditModal({ listing, onClose }: { listing: any; onClose: () => void }) {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+
+  // Figure out how many credits to suggest (always 1 per purchase, but offer packs)
+  const creditsNeeded = 1;
+  const pricePerCredit = 0.49;
+  const suggestedQty = 10; // minimum pack
+  const suggestedPrice = (suggestedQty * pricePerCredit).toFixed(2);
+
+  const handleBuyCredits = async (qty: number) => {
+    setLoading(true);
+    try {
+      const res = await apiRequest("POST", "/api/stripe/buy-purchase-credits", { quantity: qty });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.message || "Failed to start checkout");
+      }
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4">
+        {/* Header */}
+        <div className="text-center">
+          <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+            <ShoppingCart className="h-7 w-7 text-primary" />
+          </div>
+          <h2 className="font-bold text-lg">Purchase Credit Required</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            You need 1 Purchase Credit to buy items on Swapedly.
+          </p>
+        </div>
+
+        {/* Item summary */}
+        <div className="bg-slate-50 rounded-xl p-3 space-y-1.5">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Item</span>
+            <span className="font-medium truncate max-w-[60%] text-right">{listing.title}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Price</span>
+            <span className="font-bold text-yellow-600">{listing.price} SB</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Credits needed</span>
+            <span className="font-semibold text-red-600">{creditsNeeded} credit</span>
+          </div>
+        </div>
+
+        {/* Credit packs */}
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-slate-700">Choose a credit pack:</p>
+          {[
+            { qty: 10, label: "10 credits", price: 4.90, tag: "Starter" },
+            { qty: 25, label: "25 credits", price: 12.25, tag: "Popular" },
+            { qty: 50, label: "50 credits", price: 24.50, tag: "Best Value" },
+          ].map((pack) => (
+            <button
+              key={pack.qty}
+              onClick={() => handleBuyCredits(pack.qty)}
+              disabled={loading}
+              className="w-full flex items-center justify-between p-3 rounded-xl border-2 border-slate-200 hover:border-primary hover:bg-primary/5 transition-all text-left disabled:opacity-50"
+              data-testid={`buy-credits-${pack.qty}`}
+            >
+              <div>
+                <span className="text-sm font-semibold">{pack.label}</span>
+                <span className="ml-2 text-[10px] bg-primary/10 text-primary font-bold px-1.5 py-0.5 rounded-full">{pack.tag}</span>
+              </div>
+              <span className="text-sm font-bold text-green-700">${pack.price.toFixed(2)}</span>
+            </button>
+          ))}
+        </div>
+
+        <p className="text-[11px] text-muted-foreground text-center">
+          Each credit = 1 marketplace purchase · $0.49/credit · Powered by Stripe
+        </p>
+
+        <div className="flex gap-2">
+          <button onClick={onClose} className="flex-1 text-sm text-muted-foreground hover:text-foreground py-2 rounded-xl border">
+            Cancel
+          </button>
+          <Link href="/membership">
+            <button className="flex-1 text-sm text-primary font-medium py-2 rounded-xl border border-primary/20 hover:bg-primary/5">
+              Or upgrade to Plus
+            </button>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

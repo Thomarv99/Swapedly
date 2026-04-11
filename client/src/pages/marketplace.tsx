@@ -169,20 +169,26 @@ export default function MarketplacePage() {
     return () => clearTimeout(t);
   }, [search]);
 
+  const { user } = useAuth();
+
   const queryParams = new URLSearchParams();
   if (debouncedSearch) queryParams.set("search", debouncedSearch);
   if (sortBy) queryParams.set("sort", sortBy);
-  if (selectedCategory && selectedCategory !== "All") queryParams.set("categories", selectedCategory);
+  if (selectedCategory && selectedCategory !== "All") queryParams.set("category", selectedCategory);
+  if (localOnly && (user as any)?.city) queryParams.set("city", (user as any).city);
 
   const { data, isLoading } = useQuery<{ listings: (Listing & { seller?: User })[] }>({
-    queryKey: ["/api/listings?" + queryParams.toString()],
-    queryFn: getQueryFn({ on401: "returnNull" }),
+    queryKey: ["/api/listings", debouncedSearch, selectedCategory, sortBy, localOnly ? (user as any)?.city : ""],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/listings?" + queryParams.toString());
+      return res.json();
+    },
   });
 
   let listings = data?.listings || (Array.isArray(data) ? data : []);
 
-  // Client-side local filter (delivery options check)
-  if (localOnly) {
+  // Client-side local pickup filter (delivery options) — also filter if no city set
+  if (localOnly && !(user as any)?.city) {
     listings = listings.filter((l) => {
       try {
         const opts = JSON.parse(l.deliveryOptions || "{}");

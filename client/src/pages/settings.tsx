@@ -36,6 +36,7 @@ type ProfileForm = {
   username: string;
   bio: string;
   location: string;
+  city: string;
   avatarUrl: string;
 };
 
@@ -200,6 +201,7 @@ export default function SettingsPage() {
       username: user?.username || "",
       bio: user?.bio || "",
       location: user?.location || "",
+      city: (user as any)?.city || "",
       avatarUrl: user?.avatarUrl || "",
     },
   });
@@ -287,8 +289,12 @@ export default function SettingsPage() {
                 <Textarea id="bio" placeholder="Tell others about yourself..." rows={3} className="rounded-xl" data-testid="settings-bio" {...register("bio")} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
-                <Input id="location" placeholder="City, State" className="rounded-xl" data-testid="settings-location" {...register("location")} />
+                <Label htmlFor="location">Location / Bio Location</Label>
+                <Input id="location" placeholder="e.g. San Francisco, CA" className="rounded-xl" data-testid="settings-location" {...register("location")} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="city">City (for Local Marketplace Filter)</Label>
+                <Input id="city" placeholder="e.g. San Francisco" className="rounded-xl" data-testid="settings-city" {...register("city")} />
               </div>
               <Button type="submit" className="rounded-xl gap-2" disabled={profileMutation.isPending} data-testid="save-profile-btn">
                 <Save className="h-4 w-4" />

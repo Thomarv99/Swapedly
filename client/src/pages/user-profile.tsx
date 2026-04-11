@@ -1,4 +1,4 @@
-import { PublicLayout } from "@/components/layouts";
+import { AuthenticatedLayout } from "@/components/layouts";
 import { ListingCard, RatingStars, UserAvatar, VerifiedBadge, StatusBadge } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,23 +22,23 @@ export default function UserProfilePage() {
 
   if (isLoading) {
     return (
-      <PublicLayout>
+      <AuthenticatedLayout>
         <Skeleton className="h-64 w-full" />
         <div className="container mx-auto px-4 py-6">
           <Skeleton className="h-8 w-48 mb-4" />
           <Skeleton className="h-4 w-64" />
         </div>
-      </PublicLayout>
+      </AuthenticatedLayout>
     );
   }
 
   if (!profile) {
     return (
-      <PublicLayout>
+      <AuthenticatedLayout>
         <div className="text-center py-20">
           <p className="text-muted-foreground">User not found.</p>
         </div>
-      </PublicLayout>
+      </AuthenticatedLayout>
     );
   }
 
@@ -47,7 +47,7 @@ export default function UserProfilePage() {
   const stats = profile.stats || {};
 
   return (
-    <PublicLayout>
+    <AuthenticatedLayout>
       {/* Dark header */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-[#5A45FF]/80 text-white">
         <div className="container mx-auto px-4 py-12">
@@ -58,10 +58,10 @@ export default function UserProfilePage() {
                 <h1 className="text-2xl font-bold">{profile.displayName || profile.username}</h1>
                 {profile.isVerified && <VerifiedBadge />}
               </div>
-              {profile.location && (
+              {(profile.city || profile.location) && (
                 <p className="text-white/70 flex items-center gap-1 mt-1">
                   <MapPin className="h-4 w-4" />
-                  {profile.location}
+                  {[profile.city, profile.location].filter(Boolean).join(", ")}
                 </p>
               )}
               {profile.bio && <p className="mt-2 text-white/80 max-w-lg">{profile.bio}</p>}
@@ -145,6 +145,6 @@ export default function UserProfilePage() {
           )}
         </section>
       </div>
-    </PublicLayout>
+    </AuthenticatedLayout>
   );
 }

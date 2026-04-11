@@ -217,6 +217,50 @@ export default function EarnPage() {
             )}
           </CardContent>
         </Card>
+      {/* Buy Swap Bucks */}
+      <Card className="rounded-xl">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Coins className="h-5 w-5 text-yellow-500" />
+            Buy Swap Bucks
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">Need SB fast? Top up your wallet instantly.</p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              { pack: "100", sb: 100, price: "$1.99", tag: null },
+              { pack: "500", sb: 500, price: "$7.99", tag: "Popular" },
+              { pack: "1000", sb: 1000, price: "$14.99", tag: "Best Value" },
+            ].map((item) => (
+              <button
+                key={item.pack}
+                onClick={async () => {
+                  try {
+                    const res = await apiRequest("POST", "/api/stripe/buy-swap-bucks", { pack: item.pack });
+                    const data = await res.json();
+                    if (data.url) window.location.href = data.url;
+                  } catch (e: any) {
+                    alert(e.message);
+                  }
+                }}
+                className="relative rounded-xl border-2 border-slate-200 hover:border-primary hover:bg-primary/5 transition-all p-4 text-center"
+                data-testid={`buy-sb-${item.pack}`}
+              >
+                {item.tag && (
+                  <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    {item.tag}
+                  </span>
+                )}
+                <p className="text-2xl font-black text-yellow-500">{item.sb}</p>
+                <p className="text-xs text-muted-foreground mb-1">Swap Bucks</p>
+                <p className="text-sm font-bold text-green-700">{item.price}</p>
+              </button>
+            ))}
+          </div>
+          <p className="text-[11px] text-muted-foreground text-center mt-3">Secure checkout via Stripe · Instant delivery to your wallet</p>
+        </CardContent>
+      </Card>
       </div>
     </AuthenticatedLayout>
   );

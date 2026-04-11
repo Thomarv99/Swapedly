@@ -14,6 +14,7 @@ export const users = sqliteTable("users", {
   avatarUrl: text("avatar_url"),
   bio: text("bio"),
   location: text("location"),
+  city: text("city"),
   joinedAt: text("joined_at").notNull(), // ISO string
   role: text("role").notNull().default("user"), // "user" | "admin"
   isVerified: integer("is_verified", { mode: "boolean" }).notNull().default(false),
@@ -115,7 +116,7 @@ export const transactions = sqliteTable("transactions", {
   buyerFeeUsd: real("buyer_fee_usd").notNull(), // 10% capped at $20
   sellerFeeUsd: real("seller_fee_usd").notNull(), // 10% capped at $20
   status: text("status").notNull().default("pending"),
-  // "pending" | "paid" | "shipped" | "delivered" | "completed" | "disputed" | "cancelled"
+  // "awaiting_acceptance" | "accepted" | "pending" | "paid" | "in_progress" | "exchange_requested" | "completed" | "disputed" | "cancelled"
   deliveryMethod: text("delivery_method").notNull(), // "shipping" | "local_pickup"
   trackingNumber: text("tracking_number"),
   meetupLocation: text("meetup_location"),
