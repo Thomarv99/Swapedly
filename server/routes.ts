@@ -518,9 +518,8 @@ export async function registerRoutes(
         const newCount = (fullUser.onboardingListingsCount || 0) + 1;
         const updates: any = { onboardingListingsCount: newCount };
         if (newCount >= 1 && fullUser.onboardingStep === "listings") {
-          // Move past the listings gate — membership/profile are optional from here
-          updates.onboardingStep = "complete";
-          updates.onboardingComplete = true;
+          // Listing created — unlock sidebar but keep marketplace gated on 30 SB
+          updates.onboardingStep = "earn";
         }
         await storage.updateUser(user.id, updates);
       }
@@ -1921,9 +1920,15 @@ export async function registerRoutes(
       const userIsPlus = isPlus(fullUser);
       const hasCredits = (fullUser.purchaseCredits || 0) > 0;
       const hasMembership = userIsPlus || hasCredits;
+      const canAccessMarketplace = fullUser.onboardingComplete || sbBalance >= 30;
+
+      // Auto-complete onboarding once the user has earned 30 SB
+      if (!fullUser.onboardingComplete && sbBalance >= 30) {
+        await storage.updateUser(user.id, { onboardingStep: "complete", onboardingComplete: true });
+      }
 
       return res.json({
-        onboardingComplete: fullUser.onboardingComplete,
+        onboardingComplete: fullUser.onboardingComplete || sbBalance >= 30,
         step: fullUser.onboardingStep,
         listingsCreated: fullUser.onboardingListingsCount || 0,
         listingsRequired: 1,
@@ -1932,7 +1937,7 @@ export async function registerRoutes(
         purchaseCredits: fullUser.purchaseCredits || 0,
         sbBalance,
         sbRequired: 30,
-        canAccessMarketplace: fullUser.onboardingComplete || sbBalance >= 30,
+        canAccessMarketplace,
         hasProfileImage: !!fullUser.avatarUrl,
       });
     } catch (err: any) {

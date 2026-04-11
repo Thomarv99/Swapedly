@@ -22,7 +22,7 @@ type OnboardingStatus = {
 const BYPASS_PATHS = [
   "/", "/signup", "/create-listing", "/edit-listing",
   "/membership", "/complete-profile", "/settings",
-  "/notifications", "/marketplace", "/listing", "/leaderboard",
+  "/notifications", "/listing", "/leaderboard",
   "/pricing", "/terms", "/privacy", "/refunds",
 ];
 
@@ -53,16 +53,15 @@ export function OnboardingGuard({ children }: { children: ReactNode }) {
     if (onboarding.onboardingComplete) return;
     if (shouldBypass(location)) return;
 
-    // Only gate on the "listings" step — once they've created their first listing,
-    // they can freely navigate anywhere (membership/profile are optional nudges, not walls)
-    switch (onboarding.step) {
-      case "listings":
-        // Haven't created a listing yet — send them to create one
-        if (location !== "/create-listing") {
-          navigate("/create-listing");
-        }
-        break;
-      // "membership", "profile", and "complete" are all free to browse
+    // Gate 1: must create a listing first
+    if (onboarding.step === "listings") {
+      if (location !== "/create-listing") navigate("/create-listing");
+      return;
+    }
+
+    // Gate 2: marketplace requires 30 SB earned — redirect to dashboard to show progress
+    if (location === "/marketplace" && !onboarding.canAccessMarketplace) {
+      navigate("/dashboard");
     }
   }, [isAuthenticated, onboarding, location, navigate]);
 

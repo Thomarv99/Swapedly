@@ -8,8 +8,9 @@ import {
 } from "@/components/ui/table";
 import {
   Coins, Package, Mail, Scale, Wallet, PlusCircle, MessageSquare, TrendingUp,
-  ArrowUpRight, ArrowDownRight,
+  ArrowUpRight, ArrowDownRight, ShoppingBag, Lock,
 } from "lucide-react";
+import { useOnboarding } from "@/components/onboarding-guard";
 import { useQuery } from "@tanstack/react-query";
 import { getQueryFn } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -86,9 +87,56 @@ export default function DashboardPage() {
     { label: "Earn Bucks", icon: TrendingUp, href: "/earn" },
   ];
 
+  const { data: onboarding } = useOnboarding();
+  const sbBalance = wallet?.totalEarned ?? 0;
+  const sbRequired = 30;
+  const marketplaceUnlocked = onboarding?.canAccessMarketplace ?? false;
+  const progressPct = Math.min(100, Math.round((sbBalance / sbRequired) * 100));
+
   return (
     <AuthenticatedLayout>
       <div className="space-y-6">
+        {/* Marketplace unlock progress banner */}
+        {onboarding && !marketplaceUnlocked && (
+          <div className="rounded-xl border-2 border-primary/30 bg-gradient-to-r from-primary/5 to-violet-50 p-4" data-testid="marketplace-unlock-banner">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Lock className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="font-semibold text-sm">Unlock the Marketplace</p>
+                  <span className="text-sm font-bold text-primary">{Math.round(sbBalance)} / {sbRequired} SB</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Earn <strong>{Math.max(0, sbRequired - Math.round(sbBalance))} more Swap Bucks</strong> to unlock the marketplace. List items, refer friends, and complete tasks to earn SB fast!
+                </p>
+                <div className="h-2 rounded-full bg-primary/15 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all duration-500"
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {onboarding && marketplaceUnlocked && !onboarding.onboardingComplete && (
+          <div className="rounded-xl border-2 border-green-200 bg-green-50 p-4 flex items-center gap-3">
+            <ShoppingBag className="h-8 w-8 text-green-600 shrink-0" />
+            <div className="flex-1">
+              <p className="font-semibold text-sm text-green-800">🎉 Marketplace Unlocked!</p>
+              <p className="text-xs text-green-700">You've earned enough Swap Bucks. Browse the marketplace and start swapping!</p>
+            </div>
+            <Link href="/marketplace">
+              <button className="bg-green-600 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-green-700 transition-colors shrink-0">
+                Browse Now
+              </button>
+            </Link>
+          </div>
+        )}
+
         {/* Welcome */}
         <div>
           <h1 className="text-2xl font-bold" data-testid="dashboard-welcome">
