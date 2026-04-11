@@ -79,12 +79,21 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             </nav>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/">
-              <Button variant="ghost" size="sm" data-testid="signin-nav-btn">
-                <LogIn className="h-4 w-4 mr-1" />
-                Sign In
-              </Button>
-            </Link>
+            <button
+              onClick={() => {
+                // If already on home page, trigger the login modal via hash
+                if (window.location.hash === '#/' || window.location.hash === '' || window.location.pathname === '/') {
+                  window.dispatchEvent(new CustomEvent('swapedly:open-login'));
+                } else {
+                  window.location.href = '/#/?login=1';
+                }
+              }}
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+              data-testid="signin-nav-btn"
+            >
+              <LogIn className="h-4 w-4" />
+              Sign In
+            </button>
             <Link href="/signup">
               <Button size="sm" data-testid="signup-nav-btn">
                 <UserPlus className="h-4 w-4 mr-1" />
