@@ -25,80 +25,25 @@ import { useToast } from "@/hooks/use-toast";
 import { useOnboarding } from "@/components/onboarding-guard";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
-import { useEffect, useRef, useCallback } from "react";
-
-// ============================================================
-// Paddle checkout helper
-// ============================================================
-function usePaddle() {
-  const paddleRef = useRef<any>(null);
-  const { user } = useAuth();
-
-  const { data: paddleConfig } = useQuery({
-    queryKey: ["/api/paddle/config"],
+import { useEffect } from "react";
+// Stripe checkout — redirects to Stripe hosted page
+function useStripeCheckout() {
+  const { data: stripeConfig } = useQuery({
+    queryKey: ["/api/stripe/config"],
     queryFn: async () => {
-      const res = await apiRequest("GET", "/api/paddle/config");
+      const res = await apiRequest("GET", "/api/stripe/config");
       return res.json();
     },
     staleTime: Infinity,
   });
 
-  useEffect(() => {
-    if (!paddleConfig?.clientToken) return;
+  const openCheckout = async (priceId: string, mode: "subscription" | "payment") => {
+    const res = await apiRequest("POST", "/api/stripe/checkout", { priceId, mode });
+    const { url } = await res.json();
+    if (url) window.location.href = url; // Redirect to Stripe hosted checkout
+  };
 
-    // Load Paddle.js script once
-    if ((window as any).Paddle) {
-      initPaddle(paddleConfig);
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = paddleConfig.isSandbox
-      ? "https://cdn.paddle.com/paddle/v2/paddle.js"
-      : "https://cdn.paddle.com/paddle/v2/paddle.js";
-    script.onload = () => initPaddle(paddleConfig);
-    document.head.appendChild(script);
-  }, [paddleConfig]);
-
-  function initPaddle(config: any) {
-    const Paddle = (window as any).Paddle;
-    if (config.isSandbox) {
-      Paddle.Environment.set("sandbox");
-    }
-    Paddle.Initialize({ token: config.clientToken });
-    paddleRef.current = Paddle;
-  }
-
-  const openCheckout = useCallback(async (priceId: string, onSuccess?: () => void) => {
-    const Paddle = paddleRef.current || (window as any).Paddle;
-    if (!Paddle) {
-      console.error("Paddle not loaded");
-      return;
-    }
-
-    Paddle.Checkout.open({
-      items: [{ priceId, quantity: 1 }],
-      customer: user?.email ? { email: user.email } : undefined,
-      customData: { userId: String(user?.id) },
-      settings: {
-        displayMode: "overlay",
-        theme: "light",
-        locale: "en",
-      },
-      eventCallback: async (event: any) => {
-        if (event.name === "checkout.completed") {
-          // Store Paddle customer ID
-          const customerId = event.data?.customer?.id;
-          if (customerId) {
-            await apiRequest("POST", "/api/paddle/customer", { paddleCustomerId: customerId });
-          }
-          onSuccess?.();
-        }
-      },
-    });
-  }, [user]);
-
-  return { openCheckout, prices: paddleConfig?.prices };
+  return { openCheckout, prices: stripeConfig?.prices };
 }
 
 interface MembershipData {
@@ -146,7 +91,22 @@ export default function MembershipPage() {
   const queryClient = useQueryClient();
   const [, navigate] = useLocation();
   const { data: onboardingData } = useOnboarding();
-  const { openCheckout, prices } = usePaddle();
+  const { openCheckout, prices } = useStripeCheckout();
+
+  // Handle redirect back from Stripe checkout
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("success") === "true") {
+      toast({ title: "Payment successful!", description: "Your account is being updated — this may take a moment." });
+      // Remove the query param and refresh membership data
+      window.history.replaceState({}, "", window.location.pathname + window.location.hash);
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/membership"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/onboarding"] });
+      }, 2000);
+    }
+  }, []);
 
   const { data: membership, isLoading } = useQuery<MembershipData>({
     queryKey: ["/api/membership"],
@@ -154,30 +114,20 @@ export default function MembershipPage() {
     enabled: !!user,
   });
 
-  // Upgrade via Paddle checkout
+  // Upgrade via Stripe Checkout (redirects to Stripe hosted page)
   const handleUpgrade = async () => {
     if (!prices?.plusMonthly) {
       toast({ title: "Loading...", description: "Please wait a moment and try again." });
       return;
     }
-    await openCheckout(prices.plusMonthly, async () => {
-      toast({ title: "Welcome to Swapedly Plus!", description: "Your membership is being activated — this may take a moment." });
-      // Give webhook time to process
-      setTimeout(async () => {
-        queryClient.invalidateQueries({ queryKey: ["/api/membership"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-        if (onboardingData && !onboardingData.onboardingComplete && onboardingData.step === "membership") {
-          await apiRequest("POST", "/api/onboarding/advance", { step: "profile" });
-          queryClient.invalidateQueries({ queryKey: ["/api/onboarding"] });
-          navigate("/complete-profile");
-        }
-      }, 3000);
-    });
+    await openCheckout(prices.plusMonthly, "subscription");
+    // After payment, Stripe redirects back to /#/membership?success=true
+    // The webhook handles activation asynchronously
   };
 
   const cancelMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/membership/cancel");
+      await apiRequest("POST", "/api/stripe/cancel");
     },
     onSuccess: () => {
       toast({ title: "Membership cancelled", description: "Your Plus membership has been cancelled." });
@@ -189,7 +139,7 @@ export default function MembershipPage() {
     },
   });
 
-  // Buy credits via Paddle checkout
+  // Buy credits via Stripe Checkout
   const handleBuyCredits = async (quantity: number) => {
     const priceId = quantity === 10
       ? prices?.credits10
@@ -201,19 +151,7 @@ export default function MembershipPage() {
       toast({ title: "Loading...", description: "Please wait a moment and try again." });
       return;
     }
-
-    await openCheckout(priceId, async () => {
-      toast({ title: "Credits purchased!", description: `${quantity} listing credits will be added to your account shortly.` });
-      setTimeout(async () => {
-        queryClient.invalidateQueries({ queryKey: ["/api/membership"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-        if (onboardingData && !onboardingData.onboardingComplete && onboardingData.step === "membership") {
-          await apiRequest("POST", "/api/onboarding/advance", { step: "profile" });
-          queryClient.invalidateQueries({ queryKey: ["/api/onboarding"] });
-          navigate("/complete-profile");
-        }
-      }, 3000);
-    });
+    await openCheckout(priceId, "payment");
   };
 
   const buyCreditsMutation = { isPending: false, mutate: (q: number) => handleBuyCredits(q) };

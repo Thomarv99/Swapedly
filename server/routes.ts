@@ -11,7 +11,7 @@ import multer from "multer";
 import cors from "cors";
 import path from "path";
 import fs from "fs";
-import { PADDLE_CONFIG, verifyPaddleWebhook, handlePaddleWebhook } from "./paddle";
+import { STRIPE_CONFIG, createCheckoutSession, handleStripeWebhook, stripe } from "./stripe";
 
 // ============================================================
 // FILE UPLOAD SETUP
@@ -2018,63 +2018,88 @@ export async function registerRoutes(
   });
 
   // ============================================================
-  // PADDLE WEBHOOK & CHECKOUT
+  // STRIPE PAYMENTS
   // ============================================================
 
-  // Return Paddle config to frontend (safe — only client token + price IDs)
-  app.get("/api/paddle/config", (_req: Request, res: Response) => {
+  // Return Stripe public config to frontend
+  app.get("/api/stripe/config", (_req: Request, res: Response) => {
     return res.json({
-      clientToken: PADDLE_CONFIG.clientToken,
-      isSandbox: PADDLE_CONFIG.isSandbox,
-      prices: PADDLE_CONFIG.prices,
+      publishableKey: STRIPE_CONFIG.publishableKey,
+      prices: STRIPE_CONFIG.prices,
     });
   });
 
-  // Store Paddle customer ID when user initiates checkout
-  app.post("/api/paddle/customer", requireAuth, async (req: Request, res: Response) => {
+  // Create a Stripe Checkout session
+  app.post("/api/stripe/checkout", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = (req as any).user;
-      const { paddleCustomerId } = req.body;
-      if (!paddleCustomerId) return res.status(400).json({ message: "paddleCustomerId required" });
-      await storage.updateUser(user.id, { paddleCustomerId });
+      const fullUser = await storage.getUserById(user.id);
+      if (!fullUser) return res.status(401).json({ message: "User not found" });
+
+      const { priceId, mode } = req.body;
+      if (!priceId || !mode) return res.status(400).json({ message: "priceId and mode required" });
+
+      const origin = req.headers.origin || "https://www.swapedly.com";
+      const session = await createCheckoutSession({
+        priceId,
+        userId: user.id,
+        userEmail: fullUser.email,
+        mode,
+        successUrl: `${origin}/#/membership?success=true`,
+        cancelUrl: `${origin}/#/membership`,
+      });
+
+      return res.json({ url: session.url, sessionId: session.id });
+    } catch (err: any) {
+      console.error("[Stripe] Checkout error:", err.message);
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Stripe webhook — receives payment events (raw body required)
+  app.post("/api/stripe/webhook",
+    express.default.raw({ type: "application/json" }),
+    async (req: Request, res: Response) => {
+      try {
+        const sig = req.headers["stripe-signature"] as string;
+        const rawBody = req.body instanceof Buffer ? req.body : Buffer.from(JSON.stringify(req.body));
+
+        let event;
+        if (STRIPE_CONFIG.webhookSecret && sig) {
+          event = stripe.webhooks.constructEvent(rawBody, sig, STRIPE_CONFIG.webhookSecret);
+        } else {
+          event = JSON.parse(rawBody.toString());
+        }
+
+        res.status(200).json({ received: true });
+        await handleStripeWebhook(event);
+      } catch (err: any) {
+        console.error("[Stripe] Webhook error:", err.message);
+        return res.status(400).json({ message: err.message });
+      }
+    }
+  );
+
+  // Cancel subscription
+  app.post("/api/stripe/cancel", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const fullUser = await storage.getUserById(user.id);
+      if (!fullUser?.paddleSubscriptionId) {
+        return res.status(400).json({ message: "No active subscription" });
+      }
+      await stripe.subscriptions.cancel(fullUser.paddleSubscriptionId);
+      await storage.updateUser(user.id, {
+        membershipTier: "free",
+        membershipExpiresAt: null,
+        paddleSubscriptionId: null,
+        highlightsRemaining: 0,
+      });
       return res.json({ success: true });
     } catch (err: any) {
       return res.status(500).json({ message: err.message });
     }
   });
-
-  // Paddle webhook — receives payment events
-  // Must use raw body for signature verification
-  app.post("/api/paddle/webhook",
-    express.default.raw({ type: "application/json" }),
-    async (req: Request, res: Response) => {
-      try {
-        const signature = req.headers["paddle-signature"] as string;
-        const rawBody = req.body instanceof Buffer ? req.body.toString("utf8") : JSON.stringify(req.body);
-
-        // Verify webhook signature
-        if (PADDLE_CONFIG.webhookSecret && signature) {
-          const valid = verifyPaddleWebhook(rawBody, signature, PADDLE_CONFIG.webhookSecret);
-          if (!valid) {
-            console.error("[Paddle] Invalid webhook signature");
-            return res.status(401).json({ message: "Invalid signature" });
-          }
-        }
-
-        const event = JSON.parse(rawBody);
-        const eventType = event.event_type || event.alert_name;
-        const data = event.data || event;
-
-        // Handle async — respond 200 immediately so Paddle doesn't retry
-        res.status(200).json({ received: true });
-        await handlePaddleWebhook(eventType, data);
-      } catch (err: any) {
-        console.error("[Paddle] Webhook error:", err.message);
-        // Still return 200 to prevent Paddle retries for our own errors
-        return res.status(200).json({ received: true });
-      }
-    }
-  );
 
   // ===== SEED DATABASE =====
   seedDatabase();
