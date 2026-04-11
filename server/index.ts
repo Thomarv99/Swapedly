@@ -60,6 +60,10 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  console.log("[startup] NODE_ENV:", process.env.NODE_ENV);
+  console.log("[startup] PORT:", process.env.PORT);
+  console.log("[startup] RENDER:", process.env.RENDER);
+  console.log("[startup] Starting server...");
   await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
