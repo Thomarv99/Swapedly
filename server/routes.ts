@@ -11,7 +11,7 @@ import multer from "multer";
 import cors from "cors";
 import path from "path";
 import fs from "fs";
-import { STRIPE_CONFIG, createCheckoutSession, handleStripeWebhook, stripe } from "./stripe";
+import { STRIPE_CONFIG, createCheckoutSession, handleStripeWebhook, getStripe } from "./stripe";
 
 // ============================================================
 // FILE UPLOAD SETUP
@@ -2066,7 +2066,7 @@ export async function registerRoutes(
 
         let event;
         if (STRIPE_CONFIG.webhookSecret && sig) {
-          event = stripe.webhooks.constructEvent(rawBody, sig, STRIPE_CONFIG.webhookSecret);
+          event = getStripe().webhooks.constructEvent(rawBody, sig, STRIPE_CONFIG.webhookSecret);
         } else {
           event = JSON.parse(rawBody.toString());
         }
@@ -2088,7 +2088,7 @@ export async function registerRoutes(
       if (!fullUser?.paddleSubscriptionId) {
         return res.status(400).json({ message: "No active subscription" });
       }
-      await stripe.subscriptions.cancel(fullUser.paddleSubscriptionId);
+      await getStripe().subscriptions.cancel(fullUser.paddleSubscriptionId);
       await storage.updateUser(user.id, {
         membershipTier: "free",
         membershipExpiresAt: null,

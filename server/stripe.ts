@@ -5,11 +5,23 @@
 import Stripe from "stripe";
 import { storage } from "./storage";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2025-01-27.acacia",
-});
-
-export { stripe };
+// Lazy init — only create Stripe instance when key is available
+let _stripe: Stripe | null = null;
+export function getStripe(): Stripe {
+  if (!_stripe) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) throw new Error("STRIPE_SECRET_KEY not set");
+    _stripe = new Stripe(key, { apiVersion: "2025-01-27.acacia" });
+  }
+  return _stripe;
+}
+// Keep named export for backwards compat
+export const stripe = { // proxy object
+  get customers() { return getStripe().customers; },
+  get checkout() { return getStripe().checkout; },
+  get subscriptions() { return getStripe().subscriptions; },
+  get webhooks() { return getStripe().webhooks; },
+};
 
 // ============================================================
 // STRIPE CONFIG (sent to frontend)
@@ -51,11 +63,12 @@ export async function createCheckoutSession({
   cancelUrl: string;
 }): Promise<Stripe.Checkout.Session> {
   // Get or create Stripe customer
+  const s = getStripe();
   const user = await storage.getUserById(userId);
   let customerId = user?.paddleCustomerId; // reusing field for Stripe customer ID
 
   if (!customerId) {
-    const customer = await stripe.customers.create({
+    const customer = await s.customers.create({
       email: userEmail,
       metadata: { swapelyUserId: String(userId) },
     });
@@ -63,7 +76,7 @@ export async function createCheckoutSession({
     await storage.updateUser(userId, { paddleCustomerId: customerId });
   }
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await s.checkout.sessions.create({
     customer: customerId,
     line_items: [{ price: priceId, quantity: 1 }],
     mode,
@@ -91,7 +104,7 @@ export async function handleStripeWebhook(event: Stripe.Event): Promise<void> {
       if (session.mode === "subscription") {
         // Plus subscription activated
         const subscriptionId = session.subscription as string;
-        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
         const periodEnd = new Date((subscription as any).current_period_end * 1000).toISOString();
 
         await storage.updateUser(userId, {
@@ -112,7 +125,7 @@ export async function handleStripeWebhook(event: Stripe.Event): Promise<void> {
         console.log(`[Stripe] Plus activated for user ${userId}`);
       } else if (session.mode === "payment") {
         // One-time credit purchase
-        const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+        const lineItems = await getStripe().checkout.sessions.listLineItems(session.id);
         for (const item of lineItems.data) {
           const priceId = item.price?.id || "";
           const credits = creditsForPriceId(priceId);

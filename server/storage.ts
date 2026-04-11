@@ -297,9 +297,8 @@ export interface IStorage {
   getFavoritesByUserId(userId: number): Promise<Favorite[]>;
   isFavorited(userId: number, listingId: number): Promise<boolean>;
 
-  // Paddle
+  // Paddle / Stripe
   getUserByPaddleCustomerId(customerId: string): Promise<User | undefined>;
-  getUserByEmail(email: string): Promise<User | undefined>;
 
   // Social Accounts
   createSocialAccount(account: InsertSocialAccount): Promise<SocialAccount>;
@@ -767,13 +766,9 @@ export class DatabaseStorage implements IStorage {
       .all();
   }
 
-  // ===== PADDLE HELPERS =====
+  // ===== PADDLE/STRIPE HELPERS =====
   async getUserByPaddleCustomerId(customerId: string): Promise<User | undefined> {
     return db.select().from(users).where(eq(users.paddleCustomerId, customerId)).get();
-  }
-
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    return db.select().from(users).where(eq(users.email, email)).get();
   }
 
   async isFavorited(userId: number, listingId: number): Promise<boolean> {

@@ -31,7 +31,7 @@ const allowlist = [
 ];
 
 // Native modules that must always be external (compiled for the target platform)
-const nativeModules = ["better-sqlite3", "bufferutil", "utf-8-validate"];
+const nativeModules = ["better-sqlite3", "bufferutil", "utf-8-validate", "stripe"];
 
 async function buildAll() {
   await rm("dist", { recursive: true, force: true });
