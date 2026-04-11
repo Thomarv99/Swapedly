@@ -4,6 +4,8 @@ import { storage } from "./storage";
 import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { sendWelcomeEmail, sendPurchaseRequestEmail, sendPurchaseAcceptedEmail, sendExchangeCompleteEmail } from "./email";
 import crypto from "crypto";
 import createMemoryStore from "memorystore";
 import { seedDatabase } from "./seed";
@@ -207,6 +209,46 @@ export async function registerRoutes(
     )
   );
 
+  // Google OAuth Strategy
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    const callbackURL = (process.env.APP_URL || "https://swapedly.onrender.com") + "/auth/google/callback";
+    passport.use(new GoogleStrategy({
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL,
+    }, async (_accessToken, _refreshToken, profile, done) => {
+      try {
+        const email = profile.emails?.[0]?.value;
+        const name = profile.displayName || profile.name?.givenName || "User";
+        const avatar = profile.photos?.[0]?.value;
+        if (!email) return done(new Error("No email from Google"), false);
+
+        // Find or create user
+        let user = await storage.getUserByEmail(email);
+        if (!user) {
+          const username = email.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "") + Math.floor(Math.random() * 999);
+          user = await storage.createUser({
+            username,
+            email,
+            password: crypto.randomBytes(32).toString("hex"), // random password — OAuth users log in via Google
+            displayName: name,
+            avatarUrl: avatar || null,
+            oauthProvider: "google",
+            oauthId: profile.id,
+          });
+          await storage.createWallet({ userId: user.id });
+          await sendWelcomeEmail(email, name);
+        } else if (!user.oauthProvider) {
+          // Existing email account — link Google
+          await storage.updateUser(user.id, { oauthProvider: "google", oauthId: profile.id });
+        }
+        return done(null, user);
+      } catch (e: any) {
+        return done(e, false);
+      }
+    }));
+  }
+
   passport.serializeUser((user: any, done) => {
     done(null, user.id);
   });
@@ -240,6 +282,29 @@ export async function registerRoutes(
       return res.status(500).json({ message: err.message });
     }
   });
+
+  // ============================================================
+  // GOOGLE OAUTH ROUTES
+  // ============================================================
+  app.get("/auth/google",
+    passport.authenticate("google", { scope: ["profile", "email"] })
+  );
+
+  app.get("/auth/google/callback",
+    passport.authenticate("google", { failureRedirect: "/#/login?error=google_failed" }),
+    async (req: Request, res: Response) => {
+      const user = req.user as any;
+      if (!user) return res.redirect("/#/login?error=no_user");
+
+      // Issue a Bearer token (same system as email login)
+      const token = crypto.randomBytes(32).toString("hex");
+      tokenStore.set(token, user.id);
+      setTimeout(() => tokenStore.delete(token), 7 * 24 * 60 * 60 * 1000); // 7 days
+
+      // Redirect to frontend with token in hash — frontend stores it
+      res.redirect(`/#/oauth-callback?token=${token}&userId=${user.id}`);
+    }
+  );
 
   // ============================================================
   // AUTH ENDPOINTS
@@ -588,6 +653,11 @@ export async function registerRoutes(
         body: `The seller accepted your purchase of "${listing?.title}". You can now coordinate the exchange in the transaction chat.`,
         link: `/transactions/${txnId}`,
       });
+      const buyerForEmail = await storage.getUserById(txn.buyerId);
+      const sellerForAccept = await storage.getUserById(txn.sellerId);
+      if (buyerForEmail && sellerForAccept && listing) {
+        sendPurchaseAcceptedEmail(buyerForEmail.email, buyerForEmail.displayName || buyerForEmail.username, sellerForAccept.displayName || sellerForAccept.username, listing.title, txnId).catch(console.error);
+      }
 
       return res.json({ success: true, status: "accepted" });
     } catch (err: any) {
@@ -680,7 +750,6 @@ export async function registerRoutes(
         body: `${txn.amount} Swap Bucks have been added to your wallet for selling "${listing?.title}".`,
         link: "/wallet",
       });
-
       await storage.createNotification({
         userId: txn.buyerId,
         type: "system",
@@ -688,6 +757,10 @@ export async function registerRoutes(
         body: `Your purchase of "${listing?.title}" is complete. Enjoy!`,
         link: "/wallet",
       });
+      const sellerForComplete = await storage.getUserById(txn.sellerId);
+      const buyerForComplete = await storage.getUserById(txn.buyerId);
+      if (sellerForComplete && listing) sendExchangeCompleteEmail(sellerForComplete.email, sellerForComplete.displayName || sellerForComplete.username, listing.title, txn.amount).catch(console.error);
+      if (buyerForComplete && listing) sendExchangeCompleteEmail(buyerForComplete.email, buyerForComplete.displayName || buyerForComplete.username, listing.title, txn.amount).catch(console.error);
 
       return res.json({ success: true, status: "completed" });
     } catch (err: any) {
@@ -841,6 +914,10 @@ export async function registerRoutes(
         body: `${buyer.username} wants to buy "${listing.title}" for ${listing.price} SB. Accept or decline.`,
         link: `/transactions/${txn.id}`,
       });
+      const sellerForEmail = await storage.getUserById(listing.sellerId);
+      if (sellerForEmail) {
+        sendPurchaseRequestEmail(sellerForEmail.email, sellerForEmail.displayName || sellerForEmail.username, fullBuyer.displayName || fullBuyer.username, listing.title, listing.price, txn.id).catch(console.error);
+      }
 
       // Notify buyer
       await storage.createNotification({

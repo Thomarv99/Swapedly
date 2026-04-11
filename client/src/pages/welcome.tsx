@@ -58,6 +58,12 @@ export default function WelcomePage() {
     }
   };
 
+
+  const handleGoogleSignIn = () => {
+    const base = window.location.origin.includes("localhost") ? "http://localhost:5000" : "";
+    window.location.href = `${base}/auth/google`;
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -345,6 +351,20 @@ export default function WelcomePage() {
                   {loginPending ? "Signing in..." : "Log In"}
                 </Button>
               </form>
+
+              <div className="flex items-center gap-3 my-4">
+                <div className="flex-1 h-px bg-border" />
+                <span className="text-xs text-muted-foreground">or continue with</span>
+                <div className="flex-1 h-px bg-border" />
+              </div>
+              <button
+                onClick={handleGoogleSignIn}
+                className="w-full flex items-center justify-center gap-3 border rounded-xl h-11 text-sm font-medium hover:bg-slate-50 transition-colors"
+                data-testid="google-signin-btn"
+              >
+                <FcGoogle className="h-5 w-5" />
+                Continue with Google
+              </button>
 
               <p className="mt-4 text-center text-sm text-muted-foreground">
                 Don't have an account?{" "}
