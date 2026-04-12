@@ -1,6 +1,8 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
-import { storage, storage_raw } from "./storage";
+import { storage, storage_raw, db } from "./storage";
+import { authTokens } from "@shared/schema";
+import { eq, and, gte } from "drizzle-orm";
 import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
@@ -318,8 +320,7 @@ export async function registerRoutes(
         // If already has account, just credit the SB if not already redeemed
         const token = crypto.randomBytes(32).toString("hex");
         tokenStore.set(token, existing.id);
-        setTimeout(() => tokenStore.delete(token), 7 * 24 * 60 * 60 * 1000);
-        return res.status(409).json({ message: "Email already registered. Please log in instead.", token: null });
+          return res.status(409).json({ message: "Email already registered. Please log in instead.", token: null });
       }
 
       // Find referrer
@@ -378,8 +379,7 @@ export async function registerRoutes(
 
       // Issue token
       const token = crypto.randomBytes(32).toString("hex");
-      tokenStore.set(token, newUser.id);
-      setTimeout(() => tokenStore.delete(token), 7 * 24 * 60 * 60 * 1000);
+      await tokenStore.set(token, newUser.id);
 
       return res.json({
         token,
@@ -583,9 +583,8 @@ export async function registerRoutes(
       async (err: any, user: any) => {
         if (err || !user) return res.redirect("/#/login?error=google_failed");
         const token = crypto.randomBytes(32).toString("hex");
-        tokenStore.set(token, user.id);
-        setTimeout(() => tokenStore.delete(token), 7 * 24 * 60 * 60 * 1000);
-        // Redirect to the frontend domain (custom domain if set, otherwise APP_URL)
+        await tokenStore.set(token, user.id);
+          // Redirect to the frontend domain (custom domain if set, otherwise APP_URL)
         const frontendBase = process.env.FRONTEND_URL || process.env.APP_URL || "https://www.swapedly.com";
         res.redirect(`${frontendBase}/#/oauth-callback?token=${token}&userId=${user.id}`);
       }
@@ -685,11 +684,11 @@ export async function registerRoutes(
       }
 
       // Login the user
-      req.login(user, (err) => {
+      req.login(user, async (err) => {
         if (err) return res.status(500).json({ message: "Login failed after registration" });
         const { password: _, ...safeUser } = user;
         const token = generateToken();
-        tokenStore.set(token, user.id);
+        await tokenStore.set(token, user.id);
         return res.status(201).json({ ...safeUser, token });
       });
     } catch (err: any) {
@@ -702,19 +701,19 @@ export async function registerRoutes(
     passport.authenticate("local", (err: any, user: any, info: any) => {
       if (err) return res.status(500).json({ message: "Login failed" });
       if (!user) return res.status(401).json({ message: info?.message || "Invalid credentials" });
-      req.login(user, (loginErr) => {
+      req.login(user, async (loginErr) => {
         if (loginErr) return res.status(500).json({ message: "Login failed" });
         const { password: _, ...safeUser } = user;
         // Generate auth token for proxy/iframe environments where cookies don't work
         const token = generateToken();
-        tokenStore.set(token, user.id);
+        await tokenStore.set(token, user.id);
         return res.json({ ...safeUser, token });
       });
     })(req, res, next);
   });
 
   app.post("/api/auth/logout", (req: Request, res: Response) => {
-    req.logout((err) => {
+    req.logout(async (err) => {
       if (err) return res.status(500).json({ message: "Logout failed" });
       return res.json({ message: "Logged out successfully" });
     });

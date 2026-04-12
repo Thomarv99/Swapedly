@@ -1,12 +1,10 @@
 import { defineConfig } from "drizzle-kit";
 
-const dbPath = process.env.RENDER ? "/data/data.db" : "./data.db";
-
 export default defineConfig({
-  out: "./migrations",
   schema: "./shared/schema.ts",
-  dialect: "sqlite",
+  out: "./drizzle",
+  dialect: "postgresql",
   dbCredentials: {
-    url: dbPath,
+    url: process.env.DATABASE_URL!,
   },
 });

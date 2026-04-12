@@ -1,5 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
+import { initializeDatabase } from "./storage";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 
@@ -64,7 +65,8 @@ app.use((req, res, next) => {
   console.log("[startup] PORT:", process.env.PORT);
   console.log("[startup] RENDER:", process.env.RENDER);
   console.log("[startup] Starting server...");
-  await registerRoutes(httpServer, app);
+  await initializeDatabase();
+  registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
