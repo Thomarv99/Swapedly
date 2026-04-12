@@ -449,27 +449,27 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   // ===== USERS =====
   async createUser(insertUser: InsertUser): Promise<User> {
-    return db.insert(users).values(insertUser).returning();
+    return (await db.insert(users).values(insertUser).returning())[0];
   }
 
   async getUserById(id: number): Promise<User | undefined> {
-    return db.select().from(users).where(eq(users.id, id));
+    return (await db.select().from(users).where(eq(users.id, id)))[0];
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return db.select().from(users).where(eq(users.email, email));
+    return (await db.select().from(users).where(eq(users.email, email)))[0];
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return db.select().from(users).where(eq(users.username, username));
+    return (await db.select().from(users).where(eq(users.username, username)))[0];
   }
 
   async getUserByReferralCode(code: string): Promise<User | undefined> {
-    return db.select().from(users).where(eq(users.referralCode, code));
+    return (await db.select().from(users).where(eq(users.referralCode, code)))[0];
   }
 
   async updateUser(id: number, data: Partial<User>): Promise<User | undefined> {
-    return db.update(users).set(data).where(eq(users.id, id)).returning();
+    return (await db.update(users).set(data).where(eq(users.id, id)).returning())[0];
   }
 
   async getAllUsers(page: number, limit: number): Promise<{ users: User[]; total: number }> {
@@ -481,21 +481,21 @@ export class DatabaseStorage implements IStorage {
 
   // ===== WALLETS =====
   async createWallet(wallet: InsertWallet): Promise<Wallet> {
-    return db.insert(wallets).values(wallet).returning();
+    return (await db.insert(wallets).values(wallet).returning())[0];
   }
 
   async getWalletByUserId(userId: number): Promise<Wallet | undefined> {
-    return db.select().from(wallets).where(eq(wallets.userId, userId));
+    return (await db.select().from(wallets).where(eq(wallets.userId, userId)))[0];
   }
 
   async updateWalletBalance(userId: number, balance: number, totalEarned: number, totalSpent: number): Promise<Wallet | undefined> {
-    return db.update(wallets).set({ balance, totalEarned, totalSpent }).where(eq(wallets.userId, userId)).returning();
+    return await db.update(wallets).set({ balance, totalEarned, totalSpent }).where(eq(wallets.userId, userId)).returning();
   }
 
   async creditWallet(userId: number, amount: number): Promise<Wallet | undefined> {
     const wallet = await this.getWalletByUserId(userId);
     if (!wallet) return undefined;
-    return db.update(wallets).set({
+    return await db.update(wallets).set({
       balance: wallet.balance + amount,
       totalEarned: wallet.totalEarned + amount,
     }).where(eq(wallets.userId, userId)).returning();
@@ -505,7 +505,7 @@ export class DatabaseStorage implements IStorage {
     const wallet = await this.getWalletByUserId(userId);
     if (!wallet) return undefined;
     if (wallet.balance < amount) return undefined;
-    return db.update(wallets).set({
+    return await db.update(wallets).set({
       balance: wallet.balance - amount,
       totalSpent: wallet.totalSpent + amount,
     }).where(eq(wallets.userId, userId)).returning();
@@ -513,7 +513,7 @@ export class DatabaseStorage implements IStorage {
 
   // ===== WALLET LEDGER =====
   async createLedgerEntry(entry: InsertWalletLedger): Promise<WalletLedger> {
-    return db.insert(walletLedger).values({
+    return await db.insert(walletLedger).values({
       ...entry,
       createdAt: new Date().toISOString(),
     }).returning();
@@ -535,7 +535,7 @@ export class DatabaseStorage implements IStorage {
   // ===== LISTINGS =====
   async createListing(listing: InsertListing): Promise<Listing> {
     const now = new Date().toISOString();
-    return db.insert(listings).values({
+    return await db.insert(listings).values({
       ...listing,
       status: "active",
       views: 0,
@@ -545,7 +545,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getListingById(id: number): Promise<Listing | undefined> {
-    return db.select().from(listings).where(eq(listings.id, id));
+    return (await db.select().from(listings).where(eq(listings.id, id)))[0];
   }
 
   async getListings(filters: {
@@ -629,19 +629,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateListing(id: number, data: Partial<Listing>): Promise<Listing | undefined> {
-    return db.update(listings).set({
+    return await db.update(listings).set({
       ...data,
       updatedAt: new Date().toISOString(),
     }).where(eq(listings.id, id)).returning();
   }
 
   async getListingsBySellerId(sellerId: number): Promise<Listing[]> {
-    return db.select().from(listings).where(eq(listings.sellerId, sellerId)).orderBy(desc(listings.createdAt));
+    return await db.select().from(listings).where(eq(listings.sellerId, sellerId)).orderBy(desc(listings.createdAt));
   }
 
   // ===== TRANSACTIONS =====
   async createTransaction(txn: InsertTransaction): Promise<Transaction> {
-    return db.insert(transactions).values({
+    return await db.insert(transactions).values({
       ...txn,
       status: "paid",
       createdAt: new Date().toISOString(),
@@ -649,11 +649,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTransactionById(id: number): Promise<Transaction | undefined> {
-    return db.select().from(transactions).where(eq(transactions.id, id));
+    return (await db.select().from(transactions).where(eq(transactions.id, id)))[0];
   }
 
   async updateTransaction(id: number, updates: Partial<Transaction>): Promise<Transaction | undefined> {
-    return db.update(transactions).set(updates).where(eq(transactions.id, id)).returning();
+    return (await db.update(transactions).set(updates).where(eq(transactions.id, id)).returning())[0];
   }
 
   async getConversationByParticipants(userId1: number, userId2: number): Promise<Conversation | undefined> {
@@ -667,30 +667,30 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTransactionsByUserId(userId: number): Promise<Transaction[]> {
-    return db.select().from(transactions)
+    return await db.select().from(transactions)
       .where(or(eq(transactions.buyerId, userId), eq(transactions.sellerId, userId)))
       .orderBy(desc(transactions.createdAt))
       ;
   }
 
   async updateTransactionStatus(id: number, data: Partial<Transaction>): Promise<Transaction | undefined> {
-    return db.update(transactions).set(data).where(eq(transactions.id, id)).returning();
+    return await db.update(transactions).set(data).where(eq(transactions.id, id)).returning();
   }
 
   // ===== CONVERSATIONS & MESSAGES =====
   async createConversation(conv: InsertConversation): Promise<Conversation> {
-    return db.insert(conversations).values({
+    return await db.insert(conversations).values({
       ...conv,
       createdAt: new Date().toISOString(),
     }).returning();
   }
 
   async getConversationById(id: number): Promise<Conversation | undefined> {
-    return db.select().from(conversations).where(eq(conversations.id, id));
+    return (await db.select().from(conversations).where(eq(conversations.id, id)))[0];
   }
 
   async getConversationsByUserId(userId: number): Promise<Conversation[]> {
-    return db.select().from(conversations)
+    return await db.select().from(conversations)
       .where(or(eq(conversations.participant1Id, userId), eq(conversations.participant2Id, userId)))
       .orderBy(desc(conversations.lastMessageAt))
       ;
@@ -706,11 +706,11 @@ export class DatabaseStorage implements IStorage {
     if (listingId) {
       conditions.push(eq(conversations.listingId, listingId));
     }
-    return db.select().from(conversations).where(and(...conditions));
+    return await db.select().from(conversations).where(and(...conditions));
   }
 
   async createMessage(msg: InsertMessage): Promise<Message> {
-    return db.insert(messages).values({
+    return await db.insert(messages).values({
       ...msg,
       isRead: false,
       createdAt: new Date().toISOString(),
@@ -718,7 +718,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMessagesByConversation(conversationId: number): Promise<Message[]> {
-    return db.select().from(messages)
+    return await db.select().from(messages)
       .where(eq(messages.conversationId, conversationId))
       .orderBy(asc(messages.createdAt))
       ;
@@ -741,46 +741,46 @@ export class DatabaseStorage implements IStorage {
 
   // ===== REVIEWS =====
   async createReview(review: InsertReview): Promise<Review> {
-    return db.insert(reviews).values({
+    return await db.insert(reviews).values({
       ...review,
       createdAt: new Date().toISOString(),
     }).returning();
   }
 
   async getReviewsByUserId(userId: number): Promise<Review[]> {
-    return db.select().from(reviews)
+    return await db.select().from(reviews)
       .where(eq(reviews.revieweeId, userId))
       .orderBy(desc(reviews.createdAt))
       ;
   }
 
   async getReviewsByTransactionId(transactionId: number): Promise<Review[]> {
-    return db.select().from(reviews)
+    return await db.select().from(reviews)
       .where(eq(reviews.transactionId, transactionId))
       ;
   }
 
   // ===== QUESTIONS =====
   async getQuestionById(id: number): Promise<Question | undefined> {
-    return db.select().from(questions).where(eq(questions.id, id));
+    return (await db.select().from(questions).where(eq(questions.id, id)))[0];
   }
 
   async createQuestion(question: InsertQuestion): Promise<Question> {
-    return db.insert(questions).values({
+    return await db.insert(questions).values({
       ...question,
       createdAt: new Date().toISOString(),
     }).returning();
   }
 
   async getQuestionsByListingId(listingId: number): Promise<Question[]> {
-    return db.select().from(questions)
+    return await db.select().from(questions)
       .where(eq(questions.listingId, listingId))
       .orderBy(desc(questions.createdAt))
       ;
   }
 
   async answerQuestion(id: number, answer: string): Promise<Question | undefined> {
-    return db.update(questions).set({
+    return await db.update(questions).set({
       answer,
       answeredAt: new Date().toISOString(),
     }).where(eq(questions.id, id)).returning();
@@ -788,7 +788,7 @@ export class DatabaseStorage implements IStorage {
 
   // ===== DISPUTES =====
   async createDispute(dispute: InsertDispute): Promise<Dispute> {
-    return db.insert(disputes).values({
+    return await db.insert(disputes).values({
       ...dispute,
       status: "open",
       createdAt: new Date().toISOString(),
@@ -796,33 +796,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDisputeById(id: number): Promise<Dispute | undefined> {
-    return db.select().from(disputes).where(eq(disputes.id, id));
+    return (await db.select().from(disputes).where(eq(disputes.id, id)))[0];
   }
 
   async getDisputesByUserId(userId: number): Promise<Dispute[]> {
-    return db.select().from(disputes)
+    return await db.select().from(disputes)
       .where(or(eq(disputes.filedById, userId), eq(disputes.againstId, userId)))
       .orderBy(desc(disputes.createdAt))
       ;
   }
 
   async getAllDisputes(): Promise<Dispute[]> {
-    return db.select().from(disputes).orderBy(desc(disputes.createdAt));
+    return await db.select().from(disputes).orderBy(desc(disputes.createdAt));
   }
 
   async updateDisputeStatus(id: number, data: Partial<Dispute>): Promise<Dispute | undefined> {
-    return db.update(disputes).set(data).where(eq(disputes.id, id)).returning();
+    return await db.update(disputes).set(data).where(eq(disputes.id, id)).returning();
   }
 
   async createDisputeMessage(msg: InsertDisputeMessage): Promise<DisputeMessage> {
-    return db.insert(disputeMessages).values({
+    return await db.insert(disputeMessages).values({
       ...msg,
       createdAt: new Date().toISOString(),
     }).returning();
   }
 
   async getDisputeMessages(disputeId: number): Promise<DisputeMessage[]> {
-    return db.select().from(disputeMessages)
+    return await db.select().from(disputeMessages)
       .where(eq(disputeMessages.disputeId, disputeId))
       .orderBy(asc(disputeMessages.createdAt))
       ;
@@ -830,7 +830,7 @@ export class DatabaseStorage implements IStorage {
 
   // ===== NOTIFICATIONS =====
   async createNotification(notification: InsertNotification): Promise<Notification> {
-    return db.insert(notifications).values({
+    return await db.insert(notifications).values({
       ...notification,
       isRead: false,
       createdAt: new Date().toISOString(),
@@ -838,7 +838,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNotificationsByUserId(userId: number): Promise<Notification[]> {
-    return db.select().from(notifications)
+    return await db.select().from(notifications)
       .where(eq(notifications.userId, userId))
       .orderBy(desc(notifications.createdAt))
       ;
@@ -860,48 +860,48 @@ export class DatabaseStorage implements IStorage {
 
   // ===== EARN TASKS =====
   async getActiveTasks(): Promise<EarnTask[]> {
-    return db.select().from(earnTasks).where(eq(earnTasks.isActive, true));
+    return await db.select().from(earnTasks).where(eq(earnTasks.isActive, true));
   }
 
   async getAllTasks(): Promise<EarnTask[]> {
-    return db.select().from(earnTasks);
+    return await db.select().from(earnTasks);
   }
 
   async getTaskById(id: number): Promise<EarnTask | undefined> {
-    return db.select().from(earnTasks).where(eq(earnTasks.id, id));
+    return (await db.select().from(earnTasks).where(eq(earnTasks.id, id)))[0];
   }
 
   async createEarnTask(task: InsertEarnTask): Promise<EarnTask> {
-    return db.insert(earnTasks).values(task).returning();
+    return await db.insert(earnTasks).values(task).returning();
   }
 
   async updateEarnTask(id: number, data: Partial<EarnTask>): Promise<EarnTask | undefined> {
-    return db.update(earnTasks).set(data).where(eq(earnTasks.id, id)).returning();
+    return await db.update(earnTasks).set(data).where(eq(earnTasks.id, id)).returning();
   }
 
   async createEarnCompletion(completion: InsertEarnCompletion): Promise<EarnCompletion> {
-    return db.insert(earnCompletions).values({
+    return await db.insert(earnCompletions).values({
       ...completion,
       completedAt: new Date().toISOString(),
     }).returning();
   }
 
   async getCompletionsByUserId(userId: number): Promise<EarnCompletion[]> {
-    return db.select().from(earnCompletions)
+    return await db.select().from(earnCompletions)
       .where(eq(earnCompletions.userId, userId))
       .orderBy(desc(earnCompletions.completedAt))
       ;
   }
 
   async getCompletionByUserAndTask(userId: number, taskId: number): Promise<EarnCompletion | undefined> {
-    return db.select().from(earnCompletions)
+    return await db.select().from(earnCompletions)
       .where(and(eq(earnCompletions.userId, userId), eq(earnCompletions.taskId, taskId)))
       ;
   }
 
   // ===== FAVORITES =====
   async addFavorite(favorite: InsertFavorite): Promise<Favorite> {
-    return db.insert(favorites).values({
+    return await db.insert(favorites).values({
       ...favorite,
       createdAt: new Date().toISOString(),
     }).returning();
@@ -912,7 +912,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFavoritesByUserId(userId: number): Promise<Favorite[]> {
-    return db.select().from(favorites)
+    return await db.select().from(favorites)
       .where(eq(favorites.userId, userId))
       .orderBy(desc(favorites.createdAt))
       ;
@@ -1007,12 +1007,12 @@ export class DatabaseStorage implements IStorage {
 
   // ===== PADDLE/STRIPE HELPERS =====
   async getUserByPaddleCustomerId(customerId: string): Promise<User | undefined> {
-    return db.select().from(users).where(eq(users.paddleCustomerId, customerId));
+    return await db.select().from(users).where(eq(users.paddleCustomerId, customerId));
   }
 
   // ===== REFERRAL TRACKING =====
   async trackReferralClick(data: InsertReferralClick): Promise<ReferralClick> {
-    return db.insert(referralClicks).values({
+    return await db.insert(referralClicks).values({
       ...data,
       createdAt: new Date().toISOString(),
     }).returning();
@@ -1075,10 +1075,6 @@ export class DatabaseStorage implements IStorage {
     }).filter(r => r.clicks > 0 || r.signups > 0); // only show users with any activity
   }
 
-  async getUserByReferralCode(referralCode: string): Promise<User | undefined> {
-    return db.select().from(users).where(eq(users.referralCode, referralCode));
-  }
-
   async isFavorited(userId: number, listingId: number): Promise<boolean> {
     const result = db.select().from(favorites)
       .where(and(eq(favorites.userId, userId), eq(favorites.listingId, listingId)))
@@ -1088,21 +1084,21 @@ export class DatabaseStorage implements IStorage {
 
   // ===== SOCIAL ACCOUNTS =====
   async createSocialAccount(account: InsertSocialAccount): Promise<SocialAccount> {
-    return db.insert(socialAccounts).values({
+    return await db.insert(socialAccounts).values({
       ...account,
       createdAt: new Date().toISOString(),
     }).returning();
   }
 
   async getSocialAccountsByUserId(userId: number): Promise<SocialAccount[]> {
-    return db.select().from(socialAccounts)
+    return await db.select().from(socialAccounts)
       .where(eq(socialAccounts.userId, userId))
       .orderBy(asc(socialAccounts.platform))
       ;
   }
 
   async getSocialAccountByPlatform(userId: number, platform: string): Promise<SocialAccount | undefined> {
-    return db.select().from(socialAccounts)
+    return await db.select().from(socialAccounts)
       .where(and(eq(socialAccounts.userId, userId), eq(socialAccounts.platform, platform)))
       ;
   }
@@ -1112,26 +1108,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateSocialAccount(id: number, data: Partial<SocialAccount>): Promise<SocialAccount | undefined> {
-    return db.update(socialAccounts).set(data).where(eq(socialAccounts.id, id)).returning();
+    return await db.update(socialAccounts).set(data).where(eq(socialAccounts.id, id)).returning();
   }
 
   // ===== SOCIAL SHARES =====
   async createSocialShare(share: InsertSocialShare): Promise<SocialShare> {
-    return db.insert(socialShares).values({
+    return await db.insert(socialShares).values({
       ...share,
       createdAt: new Date().toISOString(),
     }).returning();
   }
 
   async getSocialSharesByUserId(userId: number): Promise<SocialShare[]> {
-    return db.select().from(socialShares)
+    return await db.select().from(socialShares)
       .where(eq(socialShares.userId, userId))
       .orderBy(desc(socialShares.createdAt))
       ;
   }
 
   async getSocialSharesByListingId(listingId: number): Promise<SocialShare[]> {
-    return db.select().from(socialShares)
+    return await db.select().from(socialShares)
       .where(eq(socialShares.listingId, listingId))
       ;
   }
@@ -1148,7 +1144,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateSocialShareStatus(id: number, data: Partial<SocialShare>): Promise<SocialShare | undefined> {
-    return db.update(socialShares).set(data).where(eq(socialShares.id, id)).returning();
+    return await db.update(socialShares).set(data).where(eq(socialShares.id, id)).returning();
   }
 }
 
