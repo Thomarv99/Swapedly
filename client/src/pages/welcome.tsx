@@ -138,6 +138,22 @@ export default function WelcomePage() {
             <Gift className="h-3.5 w-3.5 inline mr-1" />
             Get 10 free Swap Bucks when you sign up
           </p>
+
+          {/* Gift card visual in hero */}
+          <div className="mt-10 flex justify-center">
+            <div className="relative">
+              <img
+                src="/gift-card.jpg"
+                alt="Swapedly $40 Gift Card"
+                className="w-72 sm:w-96 drop-shadow-2xl hover:scale-105 transition-transform duration-300"
+              />
+              <Link href="/gift-card">
+                <button className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#5A45FF] to-[#FF4D6D] text-white text-sm font-bold px-6 py-2.5 rounded-full shadow-lg hover:opacity-90 transition-opacity whitespace-nowrap">
+                  🎁 Redeem a Gift Card
+                </button>
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -259,6 +275,55 @@ export default function WelcomePage() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Gift Card Section */}
+      <section className="py-20 px-4 sm:px-6 bg-gradient-to-br from-[#5A45FF]/5 to-[#FF4D6D]/5">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+            <div className="flex justify-center">
+              <img
+                src="/gift-card.jpg"
+                alt="Swapedly $40 Gift Card"
+                className="w-80 drop-shadow-2xl hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+            <div>
+              <span className="inline-block bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full mb-4 uppercase tracking-wide">
+                Gift Cards
+              </span>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Give the Gift of
+                <span className="bg-gradient-to-r from-[#5A45FF] to-[#FF4D6D] bg-clip-text text-transparent"> Swap Bucks</span>
+              </h2>
+              <p className="text-muted-foreground text-lg mb-6">
+                Send a $40 Swapedly Gift Card to a friend. They get 40 Swap Bucks to spend in the marketplace — and you earn 5 SB when they redeem it.
+              </p>
+              <div className="space-y-3 mb-8">
+                {[
+                  "🎁 $40 in Swap Bucks included",
+                  "✅ Instant digital delivery",
+                  "💰 Earn 5 SB when your friend redeems",
+                  "🔄 They join, list, and start trading",
+                ].map(item => (
+                  <p key={item} className="text-sm text-slate-700">{item}</p>
+                ))}
+              </div>
+              <div className="flex gap-3 flex-wrap">
+                <Link href="/gift-card">
+                  <button className="bg-gradient-to-r from-[#5A45FF] to-[#FF4D6D] text-white font-bold px-6 py-3 rounded-xl hover:opacity-90 transition-opacity">
+                    🎁 Redeem a Gift Card
+                  </button>
+                </Link>
+                <Link href="/signup">
+                  <button className="border-2 border-primary text-primary font-bold px-6 py-3 rounded-xl hover:bg-primary/5 transition-colors">
+                    Send a Gift Card
+                  </button>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
