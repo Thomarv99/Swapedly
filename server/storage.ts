@@ -25,7 +25,8 @@ import { Pool } from "pg";
 import { eq, and, or, ilike, desc, asc, sql, gte, lte, count } from "drizzle-orm";
 
 if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL environment variable is required");
+  console.error("\n\n❌ DATABASE_URL is not set. Go to Render → Environment and add your PostgreSQL connection string.\n");
+  process.exit(1);
 }
 
 const pool = new Pool({
