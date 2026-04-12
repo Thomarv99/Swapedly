@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getQueryFn } from "@/lib/queryClient";
 import { resolveImageUrl } from "@/lib/queryClient";
 import { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
 import type { Listing, User } from "@shared/schema";
 

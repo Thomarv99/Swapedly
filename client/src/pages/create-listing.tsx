@@ -19,7 +19,6 @@ import { useOnboarding } from "@/components/onboarding-guard";
 import { useParams, useLocation } from "wouter";
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { Listing } from "@shared/schema";
-import { resolveImageUrl } from "@/lib/queryClient";
 
 const CATEGORIES = [
   "Electronics", "Gaming", "Fashion", "Home & Garden", "Sports & Outdoors",

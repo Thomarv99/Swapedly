@@ -349,7 +349,6 @@ export async function registerRoutes(
         email,
         password: hashedPw,
         displayName,
-        phone: phone || null,
         city: city || null,
         location: location || null,
         avatarUrl: avatarUrl || null,
@@ -709,8 +708,16 @@ export async function registerRoutes(
   // ============================================================
   app.get("/api/listings", async (req: Request, res: Response) => {
     try {
-      const { category: _cat, categories: _cats, condition: _cond, minPrice: _minP, maxPrice: _maxP, search: _search, sort: _sort, page: _page, limit: _limit, city: _city } = req.query;
-      const category = _cat as string, categories = _cats as string, condition = _cond as string, minPrice = _minP as string, maxPrice = _maxP as string, search = _search as string, sort = _sort as string, page = _page as string, limit = _limit as string, city = _city as string;
+      const _q = req.query;
+      const category = (_q.category || _q.categories) as string;
+      const condition = _q.condition as string;
+      const minPrice = _q.minPrice as string;
+      const maxPrice = _q.maxPrice as string;
+      const search = _q.search as string;
+      const sort = _q.sort as string;
+      const page = _q.page as string;
+      const limit = _q.limit as string;
+      const city = _q.city as string;
       const result = await storage.getListings({
         category: (categories as string) || (category as string), // support both param names
         condition: condition as string,
