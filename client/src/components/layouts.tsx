@@ -33,6 +33,7 @@ import {
   Share2,
   Crown,
   Trophy,
+  Gift,
 } from "lucide-react";
 import {
   DropdownMenu,

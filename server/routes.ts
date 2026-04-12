@@ -352,8 +352,9 @@ export async function registerRoutes(
         city: city || null,
         location: location || null,
         avatarUrl: avatarUrl || null,
-        referralCode: newReferralCode,
       });
+      // Update referral code separately after creation
+      await storage.updateUser(newUser.id, { referralCode: newReferralCode });
 
       // Create wallet + credit 40 SB
       await storage.createWallet({ userId: newUser.id });
@@ -709,7 +710,7 @@ export async function registerRoutes(
   app.get("/api/listings", async (req: Request, res: Response) => {
     try {
       const _q = req.query;
-      const category = (_q.category || _q.categories) as string;
+      const category = (Array.isArray(_q.category) ? _q.category[0] : _q.category) as string;
       const condition = _q.condition as string;
       const minPrice = _q.minPrice as string;
       const maxPrice = _q.maxPrice as string;
@@ -737,7 +738,7 @@ export async function registerRoutes(
 
   app.get("/api/listings/user/:userId", async (req: Request, res: Response) => {
     try {
-      const userId = parseInt(req.params.userId);
+      const userId = parseInt(req.params.userId as string);
       const result = await storage.getListingsBySellerId(userId);
       return res.json(result);
     } catch (err: any) {
@@ -747,7 +748,7 @@ export async function registerRoutes(
 
   app.get("/api/listings/:id", async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const listing = await storage.getListingById(id);
       if (!listing) return res.status(404).json({ message: "Listing not found" });
       // Increment views
@@ -807,7 +808,7 @@ export async function registerRoutes(
   app.put("/api/listings/:id", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const listing = await storage.getListingById(id);
       if (!listing) return res.status(404).json({ message: "Listing not found" });
       if (listing.sellerId !== user.id && user.role !== "admin") {
@@ -823,7 +824,7 @@ export async function registerRoutes(
   app.delete("/api/listings/:id", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const listing = await storage.getListingById(id);
       if (!listing) return res.status(404).json({ message: "Listing not found" });
       if (listing.sellerId !== user.id && user.role !== "admin") {
@@ -844,7 +845,7 @@ export async function registerRoutes(
   app.post("/api/transactions/:id/accept", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const txnId = parseInt(req.params.id);
+      const txnId = parseInt(req.params.id as string);
       const txn = await storage.getTransactionById(txnId);
       if (!txn) return res.status(404).json({ message: "Transaction not found" });
       if (txn.sellerId !== user.id) return res.status(403).json({ message: "Only the seller can accept" });
@@ -877,7 +878,7 @@ export async function registerRoutes(
   app.post("/api/transactions/:id/decline", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const txnId = parseInt(req.params.id);
+      const txnId = parseInt(req.params.id as string);
       const txn = await storage.getTransactionById(txnId);
       if (!txn) return res.status(404).json({ message: "Transaction not found" });
       if (txn.sellerId !== user.id) return res.status(403).json({ message: "Only the seller can decline" });
@@ -923,7 +924,7 @@ export async function registerRoutes(
   app.post("/api/transactions/:id/complete", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const txnId = parseInt(req.params.id);
+      const txnId = parseInt(req.params.id as string);
       const txn = await storage.getTransactionById(txnId);
       if (!txn) return res.status(404).json({ message: "Transaction not found" });
       if (txn.buyerId !== user.id && txn.sellerId !== user.id) return res.status(403).json({ message: "Not your transaction" });
@@ -980,7 +981,7 @@ export async function registerRoutes(
   app.get("/api/transactions/:id/messages", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const txnId = parseInt(req.params.id);
+      const txnId = parseInt(req.params.id as string);
       const txn = await storage.getTransactionById(txnId);
       if (!txn) return res.status(404).json({ message: "Not found" });
       if (txn.buyerId !== user.id && txn.sellerId !== user.id) return res.status(403).json({ message: "Not your transaction" });
@@ -999,7 +1000,7 @@ export async function registerRoutes(
   app.post("/api/transactions/:id/messages", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const txnId = parseInt(req.params.id);
+      const txnId = parseInt(req.params.id as string);
       const txn = await storage.getTransactionById(txnId);
       if (!txn) return res.status(404).json({ message: "Not found" });
       if (txn.buyerId !== user.id && txn.sellerId !== user.id) return res.status(403).json({ message: "Not your transaction" });
@@ -1023,7 +1024,7 @@ export async function registerRoutes(
   app.get("/api/transactions/:id", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const txnId = parseInt(req.params.id);
+      const txnId = parseInt(req.params.id as string);
       const txn = await storage.getTransactionById(txnId);
       if (!txn) return res.status(404).json({ message: "Transaction not found" });
       if (txn.buyerId !== user.id && txn.sellerId !== user.id) return res.status(403).json({ message: "Not your transaction" });
@@ -1145,7 +1146,7 @@ export async function registerRoutes(
   app.put("/api/transactions/:id/ship", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const txn = await storage.getTransactionById(id);
       if (!txn) return res.status(404).json({ message: "Transaction not found" });
       if (txn.sellerId !== user.id) return res.status(403).json({ message: "Not authorized" });
@@ -1174,7 +1175,7 @@ export async function registerRoutes(
   app.put("/api/transactions/:id/meetup", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const txn = await storage.getTransactionById(id);
       if (!txn) return res.status(404).json({ message: "Transaction not found" });
       if (txn.sellerId !== user.id && txn.buyerId !== user.id) {
@@ -1205,7 +1206,7 @@ export async function registerRoutes(
   app.put("/api/transactions/:id/confirm", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const txn = await storage.getTransactionById(id);
       if (!txn) return res.status(404).json({ message: "Transaction not found" });
       if (txn.buyerId !== user.id) return res.status(403).json({ message: "Only buyer can confirm receipt" });
@@ -1254,7 +1255,7 @@ export async function registerRoutes(
   app.get("/api/transactions/:id", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const txn = await storage.getTransactionById(id);
       if (!txn) return res.status(404).json({ message: "Transaction not found" });
       if (txn.buyerId !== user.id && txn.sellerId !== user.id && user.role !== "admin") {
@@ -1372,7 +1373,7 @@ export async function registerRoutes(
   app.get("/api/conversations/:id/messages", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const convId = parseInt(req.params.id);
+      const convId = parseInt(req.params.id as string);
       const conv = await storage.getConversationById(convId);
       if (!conv) return res.status(404).json({ message: "Conversation not found" });
       if (conv.participant1Id !== user.id && conv.participant2Id !== user.id) {
@@ -1388,7 +1389,7 @@ export async function registerRoutes(
   app.post("/api/conversations/:id/messages", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const convId = parseInt(req.params.id);
+      const convId = parseInt(req.params.id as string);
       const conv = await storage.getConversationById(convId);
       if (!conv) return res.status(404).json({ message: "Conversation not found" });
       if (conv.participant1Id !== user.id && conv.participant2Id !== user.id) {
@@ -1423,7 +1424,7 @@ export async function registerRoutes(
   app.put("/api/conversations/:id/read", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const convId = parseInt(req.params.id);
+      const convId = parseInt(req.params.id as string);
       await storage.markMessagesAsRead(convId, user.id);
       return res.json({ message: "Messages marked as read" });
     } catch (err: any) {
@@ -1480,7 +1481,7 @@ export async function registerRoutes(
 
   app.get("/api/reviews/user/:userId", async (req: Request, res: Response) => {
     try {
-      const userId = parseInt(req.params.userId);
+      const userId = parseInt(req.params.userId as string);
       const userReviews = await storage.getReviewsByUserId(userId);
 
       // Enrich with reviewer info
@@ -1503,7 +1504,7 @@ export async function registerRoutes(
   // ============================================================
   app.get("/api/questions/listing/:listingId", async (req: Request, res: Response) => {
     try {
-      const listingId = parseInt(req.params.listingId);
+      const listingId = parseInt(req.params.listingId as string);
       const qs = await storage.getQuestionsByListingId(listingId);
 
       // Enrich with asker info
@@ -1553,7 +1554,7 @@ export async function registerRoutes(
   app.put("/api/questions/:id/answer", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const { answer } = req.body;
 
       const question = await storage.getQuestionById(id);
@@ -1626,7 +1627,7 @@ export async function registerRoutes(
   app.get("/api/disputes/:id", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const dispute = await storage.getDisputeById(id);
       if (!dispute) return res.status(404).json({ message: "Dispute not found" });
       if (dispute.filedById !== user.id && dispute.againstId !== user.id && user.role !== "admin") {
@@ -1642,7 +1643,7 @@ export async function registerRoutes(
   app.post("/api/disputes/:id/messages", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const disputeId = parseInt(req.params.id);
+      const disputeId = parseInt(req.params.id as string);
       const dispute = await storage.getDisputeById(disputeId);
       if (!dispute) return res.status(404).json({ message: "Dispute not found" });
       if (dispute.filedById !== user.id && dispute.againstId !== user.id && user.role !== "admin") {
@@ -1665,7 +1666,7 @@ export async function registerRoutes(
 
   app.put("/api/disputes/:id/status", requireAdmin, async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const { status, adminNotes } = req.body;
       const updated = await storage.updateDisputeStatus(id, {
         status,
@@ -1711,7 +1712,7 @@ export async function registerRoutes(
 
   app.put("/api/notifications/:id/read", requireAuth, async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       await storage.markNotificationRead(id);
       return res.json({ message: "Notification marked as read" });
     } catch (err: any) {
@@ -1754,7 +1755,7 @@ export async function registerRoutes(
   app.post("/api/earn/complete/:taskId", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const taskId = parseInt(req.params.taskId);
+      const taskId = parseInt(req.params.taskId as string);
 
       const task = await storage.getTaskById(taskId);
       if (!task) return res.status(404).json({ message: "Task not found" });
@@ -1801,7 +1802,7 @@ export async function registerRoutes(
   app.post("/api/favorites/:listingId", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const listingId = parseInt(req.params.listingId);
+      const listingId = parseInt(req.params.listingId as string);
 
       const existing = await storage.isFavorited(user.id, listingId);
       if (existing) {
@@ -1838,7 +1839,7 @@ export async function registerRoutes(
   // ============================================================
   app.get("/api/users/:id", async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const user = await storage.getUserById(id);
       if (!user) return res.status(404).json({ message: "User not found" });
       const { password: _, ...safeUser } = user;
@@ -1887,7 +1888,7 @@ export async function registerRoutes(
 
   app.get("/api/users/:id/stats", async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const user = await storage.getUserById(id);
       if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -1960,7 +1961,7 @@ export async function registerRoutes(
 
   app.put("/api/admin/users/:id", requireAdmin, async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const { role, isVerified } = req.body;
       const updated = await storage.updateUser(id, { role, isVerified });
       if (!updated) return res.status(404).json({ message: "User not found" });
@@ -1975,7 +1976,7 @@ export async function registerRoutes(
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 20;
-      const status = req.query.status as string || undefined;
+      const status = (req.query.status as string) || undefined;
       // Get all listings regardless of status for admin
       const result = await storage.getListings({
         page,
@@ -1990,7 +1991,7 @@ export async function registerRoutes(
 
   app.put("/api/admin/listings/:id", requireAdmin, async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const updated = await storage.updateListing(id, req.body);
       if (!updated) return res.status(404).json({ message: "Listing not found" });
       return res.json(updated);
@@ -2010,7 +2011,7 @@ export async function registerRoutes(
 
   app.put("/api/admin/disputes/:id", requireAdmin, async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const { status, adminNotes } = req.body;
       const updated = await storage.updateDisputeStatus(id, {
         status,
@@ -2061,7 +2062,7 @@ export async function registerRoutes(
 
   app.put("/api/admin/earn-tasks/:id", requireAdmin, async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const updated = await storage.updateEarnTask(id, req.body);
       if (!updated) return res.status(404).json({ message: "Task not found" });
       return res.json(updated);
@@ -2757,7 +2758,7 @@ export async function registerRoutes(
       const user = (req as any).user;
       const fullUser = await storage.getUserById(user.id);
       if (fullUser?.role !== "admin") return res.status(403).json({ message: "Admin only" });
-      const days = parseInt(req.query.days as string || "30");
+      const days = parseInt((req.query.days as string) || "30");
       const data = await storage.getAnalytics(days);
       return res.json({ ...data, onlineUsers: getOnlineCount() });
     } catch (err: any) {
@@ -2770,7 +2771,7 @@ export async function registerRoutes(
   // ============================================================
   app.get("/api/leaderboard", async (req: Request, res: Response) => {
     try {
-      const limit = Math.min(parseInt(req.query.limit as string || "50"), 100);
+      const limit = Math.min(parseInt((req.query.limit as string) || "50"), 100);
       const rows = await storage.getLeaderboard(limit);
       return res.json(rows);
     } catch (err: any) {
