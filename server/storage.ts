@@ -449,7 +449,12 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   // ===== USERS =====
   async createUser(insertUser: InsertUser): Promise<User> {
-    return (await db.insert(users).values(insertUser).returning())[0];
+    const referralCode = "SWAP-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+    return (await db.insert(users).values({
+      ...insertUser,
+      joinedAt: new Date().toISOString(),
+      referralCode: (insertUser as any).referralCode || referralCode,
+    }).returning())[0];
   }
 
   async getUserById(id: number): Promise<User | undefined> {
@@ -513,10 +518,10 @@ export class DatabaseStorage implements IStorage {
 
   // ===== WALLET LEDGER =====
   async createLedgerEntry(entry: InsertWalletLedger): Promise<WalletLedger> {
-    return await db.insert(walletLedger).values({
+    return (await db.insert(walletLedger).values({
       ...entry,
       createdAt: new Date().toISOString(),
-    }).returning();
+    }).returning())[0];
   }
 
   async getLedgerByUserId(userId: number, page: number, limit: number): Promise<{ entries: WalletLedger[]; total: number }> {
@@ -535,13 +540,13 @@ export class DatabaseStorage implements IStorage {
   // ===== LISTINGS =====
   async createListing(listing: InsertListing): Promise<Listing> {
     const now = new Date().toISOString();
-    return await db.insert(listings).values({
+    return (await db.insert(listings).values({
       ...listing,
       status: "active",
       views: 0,
       createdAt: now,
       updatedAt: now,
-    }).returning();
+    }).returning())[0];
   }
 
   async getListingById(id: number): Promise<Listing | undefined> {
@@ -641,11 +646,11 @@ export class DatabaseStorage implements IStorage {
 
   // ===== TRANSACTIONS =====
   async createTransaction(txn: InsertTransaction): Promise<Transaction> {
-    return await db.insert(transactions).values({
+    return (await db.insert(transactions).values({
       ...txn,
       status: "paid",
       createdAt: new Date().toISOString(),
-    }).returning();
+    }).returning())[0];
   }
 
   async getTransactionById(id: number): Promise<Transaction | undefined> {
@@ -679,10 +684,10 @@ export class DatabaseStorage implements IStorage {
 
   // ===== CONVERSATIONS & MESSAGES =====
   async createConversation(conv: InsertConversation): Promise<Conversation> {
-    return await db.insert(conversations).values({
+    return (await db.insert(conversations).values({
       ...conv,
       createdAt: new Date().toISOString(),
-    }).returning();
+    }).returning())[0];
   }
 
   async getConversationById(id: number): Promise<Conversation | undefined> {
@@ -710,11 +715,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createMessage(msg: InsertMessage): Promise<Message> {
-    return await db.insert(messages).values({
+    return (await db.insert(messages).values({
       ...msg,
       isRead: false,
       createdAt: new Date().toISOString(),
-    }).returning();
+    }).returning())[0];
   }
 
   async getMessagesByConversation(conversationId: number): Promise<Message[]> {
@@ -741,10 +746,10 @@ export class DatabaseStorage implements IStorage {
 
   // ===== REVIEWS =====
   async createReview(review: InsertReview): Promise<Review> {
-    return await db.insert(reviews).values({
+    return (await db.insert(reviews).values({
       ...review,
       createdAt: new Date().toISOString(),
-    }).returning();
+    }).returning())[0];
   }
 
   async getReviewsByUserId(userId: number): Promise<Review[]> {
@@ -766,10 +771,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createQuestion(question: InsertQuestion): Promise<Question> {
-    return await db.insert(questions).values({
+    return (await db.insert(questions).values({
       ...question,
       createdAt: new Date().toISOString(),
-    }).returning();
+    }).returning())[0];
   }
 
   async getQuestionsByListingId(listingId: number): Promise<Question[]> {
@@ -788,11 +793,11 @@ export class DatabaseStorage implements IStorage {
 
   // ===== DISPUTES =====
   async createDispute(dispute: InsertDispute): Promise<Dispute> {
-    return await db.insert(disputes).values({
+    return (await db.insert(disputes).values({
       ...dispute,
       status: "open",
       createdAt: new Date().toISOString(),
-    }).returning();
+    }).returning())[0];
   }
 
   async getDisputeById(id: number): Promise<Dispute | undefined> {
@@ -815,10 +820,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createDisputeMessage(msg: InsertDisputeMessage): Promise<DisputeMessage> {
-    return await db.insert(disputeMessages).values({
+    return (await db.insert(disputeMessages).values({
       ...msg,
       createdAt: new Date().toISOString(),
-    }).returning();
+    }).returning())[0];
   }
 
   async getDisputeMessages(disputeId: number): Promise<DisputeMessage[]> {
@@ -830,11 +835,11 @@ export class DatabaseStorage implements IStorage {
 
   // ===== NOTIFICATIONS =====
   async createNotification(notification: InsertNotification): Promise<Notification> {
-    return await db.insert(notifications).values({
+    return (await db.insert(notifications).values({
       ...notification,
       isRead: false,
       createdAt: new Date().toISOString(),
-    }).returning();
+    }).returning())[0];
   }
 
   async getNotificationsByUserId(userId: number): Promise<Notification[]> {
