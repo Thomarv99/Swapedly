@@ -234,6 +234,18 @@ export default function CreateEditListingPage() {
   return (
     <AuthenticatedLayout>
       <div className="space-y-6">
+        {/* Gift card context banner */}
+        {fromGiftCard && (
+          <div className="rounded-xl bg-gradient-to-r from-[#5A45FF] to-[#FF4D6D] p-4 flex items-center gap-4">
+            <img src="/gift-card.jpg" alt="Gift Card" className="h-16 w-24 object-contain shrink-0 drop-shadow" />
+            <div>
+              <p className="text-white font-black text-lg leading-tight">🎁 Redeem Your Gift Card</p>
+              <p className="text-white/90 text-sm mt-0.5">
+                Add at least one product to the marketplace to unlock your 40 Swap Bucks. It's 100% Free!
+              </p>
+            </div>
+          </div>
+        )}
         {/* Onboarding progress banner */}
         {inOnboarding && (
           <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-xl p-4" data-testid="onboarding-banner">
