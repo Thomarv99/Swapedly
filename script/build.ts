@@ -9,7 +9,6 @@ const allowlist = [
   "axios",
   "cors",
   "date-fns",
-  "drizzle-orm",
   "drizzle-zod",
   "express",
   "express-rate-limit",
@@ -31,7 +30,7 @@ const allowlist = [
 ];
 
 // Native modules that must always be external (compiled for the target platform)
-const nativeModules = ["pg", "bufferutil", "utf-8-validate", "stripe"];
+const nativeModules = ["pg", "drizzle-orm", "bufferutil", "utf-8-validate", "stripe"];
 
 async function buildAll() {
   await rm("dist", { recursive: true, force: true });
