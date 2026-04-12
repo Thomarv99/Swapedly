@@ -408,6 +408,17 @@ export type SocialShare = typeof socialShares.$inferSelect;
 // ============================================================
 // REFERRAL CLICKS (tracks each click on a referral link)
 // ============================================================
+export const giftCardInvites = sqliteTable("gift_card_invites", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  inviterId: integer("inviter_id").notNull(),       // user who shared
+  inviteCode: text("invite_code").notNull().unique(), // unique per user
+  clickCount: integer("click_count").notNull().default(0),
+  unlocked: integer("unlocked", { mode: "boolean" }).notNull().default(false),
+  unlockedAt: text("unlocked_at"),
+  createdAt: text("created_at").notNull(),
+});
+export type GiftCardInvite = typeof giftCardInvites.$inferSelect;
+
 export const giftCardRedemptions = sqliteTable("gift_card_redemptions", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull(),

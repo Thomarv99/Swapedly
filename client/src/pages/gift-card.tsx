@@ -111,10 +111,15 @@ export default function GiftCardPage() {
   const urlRef = new URLSearchParams(window.location.hash.split("?")[1] || "");
   const referralCode = urlRef.get("ref") || "";
 
-  // Auto-fill code from URL if provided
+  // Auto-fill code from URL if provided + track invite click
   useEffect(() => {
     const urlCode = urlRef.get("code");
     if (urlCode) setCode(urlCode.toUpperCase());
+    // Track the invite click for share wall progress
+    const inviteCode = urlRef.get("invite");
+    if (inviteCode) {
+      apiRequest("POST", "/api/gift-card/invite-click", { inviteCode }).catch(() => {});
+    }
   }, []);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,7 +168,8 @@ export default function GiftCardPage() {
       setAuthToken(data.token);
       setNewToken(data.token);
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-      setStep("cards");
+      // Don't show cards yet — first they create a listing, then the share wall
+      navigate("/create-listing?from=gift-card");
     } catch (e: any) {
       toast({ title: "Error", description: e.message, variant: "destructive" });
     } finally {

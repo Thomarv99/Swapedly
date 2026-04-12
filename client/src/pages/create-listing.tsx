@@ -61,6 +61,7 @@ export default function CreateEditListingPage() {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: onboardingData } = useOnboarding();
+  const fromGiftCard = window.location.hash.includes("from=gift-card");
   const [shareModal, setShareModal] = useState<{ listing: any } | null>(null);
   const [showGiftPrompt, setShowGiftPrompt] = useState(false);
   const [postShareDest, setPostShareDest] = useState("/my-listings");

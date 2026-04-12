@@ -33,6 +33,7 @@ import OAuthCallbackPage from "@/pages/oauth-callback";
 import LoginPage from "@/pages/login";
 import GiftCardPage from "@/pages/gift-card";
 import GiftCardSharePage from "@/pages/gift-card-share";
+import GiftCardWallPage from "@/pages/gift-card-wall";
 import TermsPage from "@/pages/terms";
 import PrivacyPage from "@/pages/privacy";
 import RefundsPage from "@/pages/refunds";
@@ -90,6 +91,7 @@ function AppRouter() {
         <Route path="/login" component={LoginPage} />
         <Route path="/gift-card" component={GiftCardPage} />
         <Route path="/gift-card/share" component={GiftCardSharePage} />
+        <Route path="/gift-card/wall" component={GiftCardWallPage} />
       <Route path="/terms" component={TermsPage} />
       <Route path="/privacy" component={PrivacyPage} />
       <Route path="/refunds" component={RefundsPage} />

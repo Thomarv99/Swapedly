@@ -1,6 +1,6 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage, storage_raw } from "./storage";
 import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
@@ -392,6 +392,92 @@ export async function registerRoutes(
     }
   });
 
+
+
+  // ============================================================
+  // GIFT CARD SHARE WALL ENDPOINTS
+  // ============================================================
+
+  const INVITES_REQUIRED = 10;
+  const GIFT_CARD_SB_REWARD = 40;
+
+  // Get or create invite record for current user
+  app.get("/api/gift-card/invite-status", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = req.user as any;
+      let invite: any = storage_raw.query(
+        "SELECT * FROM gift_card_invites WHERE inviter_id = ? LIMIT 1",
+        [user.id]
+      )[0] || null;
+
+      if (!invite) {
+        const inviteCode = "GC-" + user.id + "-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+        storage_raw.run(
+          "INSERT INTO gift_card_invites (inviter_id, invite_code, click_count, unlocked, created_at) VALUES (?, ?, 0, 0, ?)",
+          [user.id, inviteCode, new Date().toISOString()]
+        );
+        invite = { inviter_id: user.id, invite_code: inviteCode, click_count: 0, unlocked: 0 };
+      }
+
+      const inviteLink = `${process.env.FRONTEND_URL || "https://www.swapedly.com"}/#/gift-card?ref=${(user as any).referralCode || ""}&invite=${invite?.invite_code || ""}`;
+
+      return res.json({
+        inviteCode: invite?.invite_code,
+        clickCount: invite?.click_count || 0,
+        invitesRequired: INVITES_REQUIRED,
+        unlocked: !!(invite?.unlocked),
+        inviteLink,
+        sbReward: GIFT_CARD_SB_REWARD,
+      });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Track a click on an invite link
+  app.post("/api/gift-card/invite-click", async (req: Request, res: Response) => {
+    try {
+      const { inviteCode } = req.body;
+      if (!inviteCode) return res.json({ ok: true });
+
+      const invite: any = storage_raw.query(
+        "SELECT * FROM gift_card_invites WHERE invite_code = ? LIMIT 1",
+        [inviteCode]
+      )[0];
+      if (!invite) return res.json({ ok: true });
+
+      const newCount = (invite.click_count || 0) + 1;
+      const shouldUnlock = !invite.unlocked && newCount >= INVITES_REQUIRED;
+      storage_raw.run(
+        "UPDATE gift_card_invites SET click_count = ?, unlocked = ?, unlocked_at = ? WHERE invite_code = ?",
+        [newCount, shouldUnlock ? 1 : invite.unlocked, shouldUnlock ? new Date().toISOString() : invite.unlocked_at, inviteCode]
+      );
+
+      // If just unlocked, credit the SB
+      if (shouldUnlock) {
+        await storage.creditWallet(invite.inviter_id, GIFT_CARD_SB_REWARD);
+        await storage.createLedgerEntry({
+          userId: invite.inviter_id,
+          amount: GIFT_CARD_SB_REWARD,
+          type: "gift_card",
+          description: `Gift card unlocked — ${GIFT_CARD_SB_REWARD} SB credited after ${INVITES_REQUIRED} friend invites!`,
+          relatedListingId: null,
+          relatedTransactionId: null,
+        });
+        await storage.createNotification({
+          userId: invite.inviter_id,
+          type: "system",
+          title: `🎉 ${GIFT_CARD_SB_REWARD} Swap Bucks Unlocked!`,
+          body: `You invited ${INVITES_REQUIRED} friends and unlocked your gift card reward! ${GIFT_CARD_SB_REWARD} SB added to your wallet.`,
+          link: "/wallet",
+        });
+      }
+
+      return res.json({ ok: true, newCount, unlocked: shouldUnlock });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
 
   // ============================================================
   // SOCIAL SHARING REWARD ENDPOINTS

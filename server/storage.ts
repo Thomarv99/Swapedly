@@ -209,6 +209,16 @@ sqlite.exec(`
     user_id INTEGER,
     created_at TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS gift_card_invites (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    inviter_id INTEGER NOT NULL,
+    invite_code TEXT NOT NULL UNIQUE,
+    click_count INTEGER NOT NULL DEFAULT 0,
+    unlocked INTEGER NOT NULL DEFAULT 0,
+    unlocked_at TEXT,
+    created_at TEXT NOT NULL
+  );
+
   CREATE TABLE IF NOT EXISTS gift_card_redemptions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
@@ -256,6 +266,16 @@ try {
 }
 
 export const db = drizzle(sqlite);
+
+// Raw SQL helpers for tables not yet in Drizzle schema
+export const storage_raw = {
+  query: (sql: string, params: any[] = []) => {
+    try { return sqlite.prepare(sql).all(...params); } catch { return []; }
+  },
+  run: (sql: string, params: any[] = []) => {
+    try { sqlite.prepare(sql).run(...params); } catch (e: any) { console.error("rawRun:", e.message); }
+  },
+};
 
 export interface IStorage {
   // Users
