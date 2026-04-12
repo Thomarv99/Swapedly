@@ -154,6 +154,7 @@ const UNLOCKED_ITEMS = [
   { href: "/earn", label: "Earn Swap Bucks", icon: Coins },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
   { href: "/share-earn", label: "Share & Earn", icon: Share2 },
+  { href: "/gift-card/share", label: "Send Gift Card", icon: Gift },
   { href: "/membership", label: "Membership", icon: Crown },
   { href: "/disputes", label: "Disputes", icon: Scale },
   { href: "/settings", label: "Settings", icon: Settings },

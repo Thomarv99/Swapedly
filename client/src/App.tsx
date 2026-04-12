@@ -31,6 +31,8 @@ import LeaderboardPage from "@/pages/leaderboard";
 import TransactionDetailPage from "@/pages/transaction-detail";
 import OAuthCallbackPage from "@/pages/oauth-callback";
 import LoginPage from "@/pages/login";
+import GiftCardPage from "@/pages/gift-card";
+import GiftCardSharePage from "@/pages/gift-card-share";
 import TermsPage from "@/pages/terms";
 import PrivacyPage from "@/pages/privacy";
 import RefundsPage from "@/pages/refunds";
@@ -86,6 +88,8 @@ function AppRouter() {
         <Route path="/transactions/:id" component={TransactionDetailPage} />
         <Route path="/oauth-callback" component={OAuthCallbackPage} />
         <Route path="/login" component={LoginPage} />
+        <Route path="/gift-card" component={GiftCardPage} />
+        <Route path="/gift-card/share" component={GiftCardSharePage} />
       <Route path="/terms" component={TermsPage} />
       <Route path="/privacy" component={PrivacyPage} />
       <Route path="/refunds" component={RefundsPage} />

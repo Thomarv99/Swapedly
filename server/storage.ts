@@ -209,6 +209,15 @@ sqlite.exec(`
     user_id INTEGER,
     created_at TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS gift_card_redemptions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    code TEXT NOT NULL,
+    sb_amount INTEGER NOT NULL DEFAULT 40,
+    referred_by INTEGER,
+    redeemed_at TEXT NOT NULL
+  );
+
   CREATE TABLE IF NOT EXISTS referral_clicks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     referrer_id INTEGER NOT NULL,

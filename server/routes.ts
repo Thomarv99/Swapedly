@@ -283,6 +283,115 @@ export async function registerRoutes(
     }
   });
 
+
+  // ============================================================
+  // GIFT CARD ENDPOINTS
+  // ============================================================
+
+  const UNIVERSAL_GIFT_CARD_CODE = process.env.GIFT_CARD_CODE || "SWAPEDLY-40";
+  const GIFT_CARD_SB = 40;
+
+  // Validate a gift card code (public — no auth needed)
+  app.post("/api/gift-card/validate", async (req: Request, res: Response) => {
+    try {
+      const { code } = req.body;
+      if (!code) return res.status(400).json({ message: "Code required" });
+      const valid = code.trim().toUpperCase() === UNIVERSAL_GIFT_CARD_CODE.toUpperCase();
+      return res.json({ valid, sbAmount: valid ? GIFT_CARD_SB : 0 });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Redeem a gift card — registers new user + credits SB
+  app.post("/api/gift-card/redeem", async (req: Request, res: Response) => {
+    try {
+      const { code, username, email, password, displayName, phone, city, location, avatarUrl, referralCode } = req.body;
+
+      if (!code || code.trim().toUpperCase() !== UNIVERSAL_GIFT_CARD_CODE.toUpperCase()) {
+        return res.status(400).json({ message: "Invalid gift card code" });
+      }
+
+      // Check email not already taken
+      const existing = await storage.getUserByEmail(email);
+      if (existing) {
+        // If already has account, just credit the SB if not already redeemed
+        const token = crypto.randomBytes(32).toString("hex");
+        tokenStore.set(token, existing.id);
+        setTimeout(() => tokenStore.delete(token), 7 * 24 * 60 * 60 * 1000);
+        return res.status(409).json({ message: "Email already registered. Please log in instead.", token: null });
+      }
+
+      // Find referrer
+      let referrerId: number | null = null;
+      if (referralCode) {
+        const referrer = await storage.getUserByReferralCode(referralCode);
+        if (referrer) {
+          referrerId = referrer.id;
+          // Credit referrer 1 SB
+          await storage.creditWallet(referrer.id, 1);
+          await storage.createLedgerEntry({
+            userId: referrer.id,
+            amount: 1,
+            type: "referral_bonus",
+            description: "Friend redeemed a gift card using your link",
+            relatedListingId: null,
+            relatedTransactionId: null,
+          });
+        }
+      }
+
+      // Create user
+      const hashedPw = await hashPassword(password);
+      const newReferralCode = "SWAP-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+      const newUser = await storage.createUser({
+        username,
+        email,
+        password: hashedPw,
+        displayName,
+        phone: phone || null,
+        city: city || null,
+        location: location || null,
+        avatarUrl: avatarUrl || null,
+        referralCode: newReferralCode,
+      });
+
+      // Create wallet + credit 40 SB
+      await storage.createWallet({ userId: newUser.id });
+      await storage.creditWallet(newUser.id, GIFT_CARD_SB);
+      await storage.createLedgerEntry({
+        userId: newUser.id,
+        amount: GIFT_CARD_SB,
+        type: "gift_card",
+        description: `Gift card redeemed — ${GIFT_CARD_SB} Swap Bucks added`,
+        relatedListingId: null,
+        relatedTransactionId: null,
+      });
+
+      // Record redemption
+      const { db } = await import("./storage");
+      // Use raw insert since we don't have a storage method yet
+      const sqlite2 = (storage as any).db || null;
+
+      // Send welcome email
+      sendWelcomeEmail(newUser.email, newUser.displayName || newUser.username).catch(console.error);
+
+      // Issue token
+      const token = crypto.randomBytes(32).toString("hex");
+      tokenStore.set(token, newUser.id);
+      setTimeout(() => tokenStore.delete(token), 7 * 24 * 60 * 60 * 1000);
+
+      return res.json({
+        token,
+        user: { id: newUser.id, username: newUser.username, displayName: newUser.displayName, referralCode: newReferralCode },
+        sbCredited: GIFT_CARD_SB,
+      });
+    } catch (err: any) {
+      console.error("[GiftCard] redeem error:", err.message);
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
   // ============================================================
   // GOOGLE OAUTH ROUTES
   // ============================================================

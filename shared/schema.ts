@@ -408,6 +408,19 @@ export type SocialShare = typeof socialShares.$inferSelect;
 // ============================================================
 // REFERRAL CLICKS (tracks each click on a referral link)
 // ============================================================
+export const giftCardRedemptions = sqliteTable("gift_card_redemptions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull(),
+  code: text("code").notNull(),
+  sbAmount: integer("sb_amount").notNull().default(40),
+  referredBy: integer("referred_by"), // referrer user ID if redeemed via referral link
+  redeemedAt: text("redeemed_at").notNull(),
+});
+
+export const insertGiftCardRedemptionSchema = createInsertSchema(giftCardRedemptions).omit({ id: true });
+export type InsertGiftCardRedemption = z.infer<typeof insertGiftCardRedemptionSchema>;
+export type GiftCardRedemption = typeof giftCardRedemptions.$inferSelect;
+
 export const referralClicks = sqliteTable("referral_clicks", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   referrerId: integer("referrer_id").notNull(), // user who shared the link
