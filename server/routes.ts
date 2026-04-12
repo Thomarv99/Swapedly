@@ -563,6 +563,23 @@ export async function registerRoutes(
     }
   });
 
+
+  // One-time admin setup — promotes admin@swapedly.com to admin role
+  app.post("/api/setup/make-admin", async (req: Request, res: Response) => {
+    try {
+      const { secret } = req.body;
+      if (secret !== (process.env.SESSION_SECRET || "swapedly-session-secret")) {
+        return res.status(403).json({ message: "Invalid secret" });
+      }
+      const user = await storage.getUserByEmail("admin@swapedly.com");
+      if (!user) return res.status(404).json({ message: "Admin user not found. Register first." });
+      await storage.updateUser(user.id, { role: "admin", onboardingComplete: true, onboardingStep: "complete" });
+      return res.json({ success: true, message: "admin@swapedly.com promoted to admin" });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
   // ============================================================
   // GOOGLE OAUTH ROUTES
   // ============================================================
