@@ -63,6 +63,7 @@ export const storage_raw = {
 
 // Initialize all tables on startup
 export async function initializeDatabase() {
+  try {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
@@ -299,6 +300,11 @@ export async function initializeDatabase() {
     );
   `);
   console.log("[DB] All tables initialized");
+  } catch (err: any) {
+    console.error("[DB] Failed to initialize tables:", err.message);
+    console.error("[DB] Check that DATABASE_URL is correct and the database is reachable.");
+    process.exit(1);
+  }
 }
 
 

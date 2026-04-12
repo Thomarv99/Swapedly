@@ -8,10 +8,20 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: SESSION_SECRET
-        generateValue: true
       - key: RENDER
         value: true
+      - key: SESSION_SECRET
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_PUBLISHABLE_KEY
@@ -26,7 +36,7 @@ services:
         sync: false
       - key: STRIPE_PRICE_CREDITS_50
         sync: false
-    disk:
-      name: swapedly-data
-      mountPath: /data
-      sizeGB: 1
+      - key: RESEND_API_KEY
+        sync: false
+      - key: GIFT_CARD_CODE
+        sync: false
