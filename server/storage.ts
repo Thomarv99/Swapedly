@@ -29,8 +29,11 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
+// Render uses postgresql:// but pg requires postgres://
+const dbUrl = process.env.DATABASE_URL?.replace('postgresql://', 'postgres://');
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: dbUrl,
   ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
   max: 20,
   idleTimeoutMillis: 30000,
