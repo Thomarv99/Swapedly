@@ -89,7 +89,7 @@ export default function DashboardPage() {
 
   const { data: onboarding } = useOnboarding();
   const sbBalance = wallet?.totalEarned ?? 0;
-  const sbRequired = 30;
+  const sbRequired = 60;
   const marketplaceUnlocked = onboarding?.canAccessMarketplace ?? false;
   const progressPct = Math.min(100, Math.round((sbBalance / sbRequired) * 100));
 

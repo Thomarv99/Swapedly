@@ -151,7 +151,7 @@ const BASE_ITEMS = [
 
 // Items that unlock after the user creates their first listing
 const UNLOCKED_ITEMS = [
-  { href: "/marketplace", label: "Marketplace", icon: ShoppingBag },
+  { href: "/marketplace", label: "Marketplace", icon: ShoppingBag, requiresMarketplace: true },
   { href: "/earn", label: "Earn Swap Bucks", icon: Coins },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
   { href: "/share-earn", label: "Share & Earn", icon: Share2 },
@@ -169,10 +169,11 @@ function SidebarNav({ onNavClick }: { onNavClick?: () => void }) {
 
   // Marketplace (and rest of sidebar) unlocks after user creates their first listing
   const hasListed = !!(onboarding?.listingsCreated && onboarding.listingsCreated >= 1) || !!onboarding?.onboardingComplete;
+  const canAccessMarketplace = !!onboarding?.canAccessMarketplace;
 
   const sidebarItems = [
     ...BASE_ITEMS,
-    ...(hasListed ? UNLOCKED_ITEMS : []),
+    ...(hasListed ? UNLOCKED_ITEMS.filter((item: any) => !item.requiresMarketplace || canAccessMarketplace) : []),
   ] as any[];
 
   const { data: unreadCount } = useQuery<number>({

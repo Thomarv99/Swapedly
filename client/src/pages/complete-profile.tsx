@@ -530,7 +530,7 @@ export default function CompleteProfilePage() {
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Share a $40 Swap Bucks gift card with your friends. When they redeem it, you earn 5 SB — the fastest way to hit your 30 SB goal!
+                  Share a $40 Swap Bucks gift card with your friends. When they redeem it, you earn 5 SB — the fastest way to hit your 60 SB goal!
                 </p>
                 <Button
                   size="sm"

@@ -2613,15 +2613,15 @@ export async function registerRoutes(
       const userIsPlus = isPlus(fullUser);
       const hasCredits = (fullUser.purchaseCredits || 0) > 0;
       const hasMembership = userIsPlus || hasCredits;
-      const canAccessMarketplace = fullUser.onboardingComplete || sbBalance >= 30;
+      const canAccessMarketplace = fullUser.onboardingComplete || sbBalance >= 60;
 
       // Auto-complete onboarding once the user has earned 30 SB
-      if (!fullUser.onboardingComplete && sbBalance >= 30) {
+      if (!fullUser.onboardingComplete && sbBalance >= 60) {
         await storage.updateUser(user.id, { onboardingStep: "complete", onboardingComplete: true });
       }
 
       return res.json({
-        onboardingComplete: fullUser.onboardingComplete || sbBalance >= 30,
+        onboardingComplete: fullUser.onboardingComplete || sbBalance >= 60,
         step: fullUser.onboardingStep,
         listingsCreated: fullUser.onboardingListingsCount || 0,
         listingsRequired: 1,
@@ -2629,7 +2629,7 @@ export async function registerRoutes(
         isPlus: userIsPlus,
         purchaseCredits: fullUser.purchaseCredits || 0,
         sbBalance,
-        sbRequired: 30,
+        sbRequired: 60,
         canAccessMarketplace,
         hasProfileImage: !!fullUser.avatarUrl,
       });
