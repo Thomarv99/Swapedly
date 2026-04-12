@@ -318,9 +318,7 @@ export async function registerRoutes(
       const existing = await storage.getUserByEmail(email);
       if (existing) {
         // If already has account, just credit the SB if not already redeemed
-        const token = crypto.randomBytes(32).toString("hex");
-        tokenStore.set(token, existing.id);
-          return res.status(409).json({ message: "Email already registered. Please log in instead.", token: null });
+        return res.status(409).json({ message: "Email already registered. Please log in instead.", token: null });
       }
 
       // Find referrer
@@ -368,11 +366,6 @@ export async function registerRoutes(
         relatedListingId: null,
         relatedTransactionId: null,
       });
-
-      // Record redemption
-      const { db } = await import("./storage");
-      // Use raw insert since we don't have a storage method yet
-      const sqlite2 = (storage as any).db || null;
 
       // Send welcome email
       sendWelcomeEmail(newUser.email, newUser.displayName || newUser.username).catch(console.error);
