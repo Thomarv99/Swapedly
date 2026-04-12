@@ -568,7 +568,7 @@ export async function registerRoutes(
   app.post("/api/setup/make-admin", async (req: Request, res: Response) => {
     try {
       const { secret } = req.body;
-      if (secret !== (process.env.SESSION_SECRET || "swapedly-session-secret")) {
+      if (secret !== "SWAPEDLY_ADMIN_SETUP_2026") {
         return res.status(403).json({ message: "Invalid secret" });
       }
       const user = await storage.getUserByEmail("admin@swapedly.com");
