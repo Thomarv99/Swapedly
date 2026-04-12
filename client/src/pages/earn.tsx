@@ -1,5 +1,5 @@
 import { AuthenticatedLayout } from "@/components/layouts";
-import { SwapBucksAmount, StatusBadge } from "@/components/shared";
+import { StatusBadge } from "@/components/shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,30 +8,19 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Coins, Copy, Users, ClipboardList, Download, Share2, Star,
-  ShoppingBag, Gift, Check, ArrowRight, Sparkles,
+  Coins, Copy, Gift, Check, ShoppingBag,
 } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { getQueryFn, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { format } from "date-fns";
-import type { EarnTask, WalletLedger } from "@shared/schema";
-
-const taskIcons: Record<string, any> = {
-  survey: ClipboardList,
-  app_download: Download,
-  social_share: Share2,
-  review_offer: Star,
-  referral: Users,
-  purchase_sb: ShoppingBag,
-};
+import type { WalletLedger } from "@shared/schema";
 
 export default function EarnPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [copied, setCopied] = useState(false);
 
   const { data: wallet } = useQuery<{ balance: number }>({
@@ -40,30 +29,10 @@ export default function EarnPage() {
     enabled: !!user,
   });
 
-  const { data: tasks } = useQuery<EarnTask[]>({
-    queryKey: ["/api/earn/tasks"],
-    queryFn: getQueryFn({ on401: "returnNull" }),
-    enabled: !!user,
-  });
-
   const { data: earningsData } = useQuery<WalletLedger[]>({
     queryKey: ["/api/wallet/ledger?type=earn_task"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     enabled: !!user,
-  });
-
-  const completeMutation = useMutation({
-    mutationFn: async (taskId: number) => {
-      await apiRequest("POST", `/api/earn/complete/${taskId}`);
-    },
-    onSuccess: () => {
-      toast({ title: "Task completed! SB credited to your wallet." });
-      queryClient.invalidateQueries({ queryKey: ["/api/wallet"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/wallet/ledger"] });
-    },
-    onError: (e: Error) => {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
-    },
   });
 
   const referralCode = user?.referralCode || "SWAP-XXXXX";
@@ -76,7 +45,6 @@ export default function EarnPage() {
     toast({ title: "Referral link copied!" });
   };
 
-  const tasksList = Array.isArray(tasks) ? tasks.filter((t) => t.isActive) : [];
   const earnings = Array.isArray(earningsData) ? earningsData : [];
 
   return (
@@ -141,47 +109,43 @@ export default function EarnPage() {
           </CardContent>
         </Card>
 
-        {/* More Ways to Earn */}
+        {/* How to earn — static informational cards */}
         <div>
-          <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            More Ways to Earn
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {tasksList.length === 0 ? (
-              <p className="text-sm text-muted-foreground col-span-full text-center py-8">No earn tasks available right now.</p>
-            ) : (
-              tasksList.map((task) => {
-                const Icon = taskIcons[task.type] || Coins;
-                return (
-                  <Card key={task.id} className="rounded-xl hover:shadow-md transition-shadow">
-                    <CardContent className="p-5">
-                      <div className="flex items-start gap-4">
-                        <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                          <Icon className="h-6 w-6 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-sm">{task.title}</h3>
-                          <p className="text-xs text-muted-foreground mt-1">{task.description}</p>
-                          <div className="flex items-center justify-between mt-3">
-                            <SwapBucksAmount amount={task.reward} size="sm" className="font-semibold text-green-600" />
-                            <Button
-                              size="sm"
-                              className="rounded-lg gap-1"
-                              onClick={() => completeMutation.mutate(task.id)}
-                              disabled={completeMutation.isPending}
-                              data-testid={`earn-task-${task.id}`}
-                            >
-                              Start <ArrowRight className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })
-            )}
+          <h2 className="text-lg font-bold mb-4">Ways to Earn Swap Bucks</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Card className="rounded-xl">
+              <CardContent className="p-5 flex items-start gap-4">
+                <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <ShoppingBag className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">List Items</p>
+                  <p className="text-xs text-muted-foreground mt-1">Every listing you publish helps build your seller reputation and earns you SB when sold.</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="rounded-xl">
+              <CardContent className="p-5 flex items-start gap-4">
+                <div className="h-11 w-11 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+                  <Gift className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Refer Friends</p>
+                  <p className="text-xs text-muted-foreground mt-1">Share your referral link. Earn 1 SB for every friend who signs up using your link.</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="rounded-xl">
+              <CardContent className="p-5 flex items-start gap-4">
+                <div className="h-11 w-11 rounded-xl bg-yellow-50 flex items-center justify-center shrink-0">
+                  <Coins className="h-5 w-5 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Buy Swap Bucks</p>
+                  <p className="text-xs text-muted-foreground mt-1">Need SB fast? Purchase Swap Bucks directly below at 1 SB = $1 USD.</p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
