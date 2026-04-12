@@ -169,7 +169,7 @@ export default function GiftCardPage() {
       setNewToken(data.token);
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       // Don't show cards yet — first they create a listing, then the share wall
-      navigate("/create-listing?from=gift-card");
+      navigate("/welcome-tour");
     } catch (e: any) {
       toast({ title: "Error", description: e.message, variant: "destructive" });
     } finally {

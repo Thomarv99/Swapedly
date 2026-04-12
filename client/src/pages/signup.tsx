@@ -29,7 +29,7 @@ export default function SignUpPage() {
   const password = watch("password", "");
 
   if (isAuthenticated) {
-    navigate("/dashboard");
+    navigate("/welcome-tour");
     return null;
   }
 
@@ -41,7 +41,7 @@ export default function SignUpPage() {
         password: data.password,
         referralCode: data.referralCode || undefined,
       });
-      navigate("/dashboard");
+      navigate("/welcome-tour");
     } catch (e: any) {
       toast({ title: "Registration failed", description: e.message, variant: "destructive" });
     }

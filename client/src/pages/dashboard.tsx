@@ -9,6 +9,7 @@ import {
 import {
   Coins, Package, Mail, Scale, Wallet, PlusCircle, MessageSquare, TrendingUp,
   ArrowUpRight, ArrowDownRight, ShoppingBag, Lock, Gift,
+  Check, Camera, ListPlus, Share2, Facebook, Zap,
 } from "lucide-react";
 import { useOnboarding } from "@/components/onboarding-guard";
 import { useQuery } from "@tanstack/react-query";
@@ -161,6 +162,11 @@ export default function DashboardPage() {
           <p className="text-muted-foreground">Here&apos;s what&apos;s happening with your account.</p>
         </div>
 
+        {/* Getting Started Checklist — shown until onboarding is complete */}
+        {onboarding && !onboarding.onboardingComplete && (
+          <GettingStartedChecklist user={user} onboarding={onboarding} />        
+        )}
+
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat) => {
@@ -303,5 +309,109 @@ export default function DashboardPage() {
         </div>
       </div>
     </AuthenticatedLayout>
+  );
+}
+
+// ─── Getting Started Checklist ───────────────────────────────────────────────
+function GettingStartedChecklist({ user, onboarding }: { user: any; onboarding: any }) {
+  const hasProfile = !!user?.avatarUrl && !!user?.bio && !!user?.city;
+  const hasListing = (onboarding?.listingsCreated || 0) >= 1;
+  const sbBalance = onboarding?.sbBalance || 0;
+
+  const tasks = [
+    {
+      label: "Complete your profile",
+      description: "Add a profile photo, bio, and city to earn SB",
+      reward: "Earn SB",
+      done: hasProfile,
+      href: "/settings",
+      icon: Camera,
+    },
+    {
+      label: "List your first item",
+      description: "It's 100% free — list anything in 2 minutes",
+      reward: "Free",
+      done: hasListing,
+      href: "/create-listing",
+      icon: ListPlus,
+    },
+    {
+      label: "Send a gift card to a friend",
+      description: "Share a $40 gift card and earn SB when they redeem",
+      reward: "+5 SB",
+      done: false, // We don't track this yet, always show as available
+      href: "/gift-card/share",
+      icon: Gift,
+    },
+    {
+      label: "Post about Swapedly on Facebook",
+      description: "Share Swapedly on Facebook and claim 5 SB",
+      reward: "+5 SB",
+      done: false,
+      href: "/gift-card/share",
+      icon: Facebook,
+    },
+  ];
+
+  const completedCount = tasks.filter(t => t.done).length;
+  const progress = (completedCount / tasks.length) * 100;
+
+  return (
+    <Card className="rounded-xl border-2 border-primary/20">
+      <CardContent className="p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="font-bold text-base flex items-center gap-2">
+              <Zap className="h-5 w-5 text-primary" />
+              Getting Started
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Complete these tasks to earn SB and unlock the marketplace
+            </p>
+          </div>
+          <span className="text-sm font-bold text-primary">{completedCount}/{tasks.length}</span>
+        </div>
+
+        {/* Progress bar */}
+        <div className="h-2 bg-slate-100 rounded-full overflow-hidden mb-4">
+          <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
+        </div>
+
+        <div className="space-y-3">
+          {tasks.map((task, i) => {
+            const Icon = task.icon;
+            return (
+              <Link key={i} href={task.href}>
+                <div className={`flex items-center gap-3 p-3 rounded-xl border transition-colors cursor-pointer ${
+                  task.done ? "bg-green-50 border-green-200" : "hover:bg-slate-50 border-slate-200"
+                }`}>
+                  <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${
+                    task.done ? "bg-green-100" : "bg-primary/10"
+                  }`}>
+                    {task.done
+                      ? <Check className="h-5 w-5 text-green-600" />
+                      : <Icon className="h-5 w-5 text-primary" />
+                    }
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`font-semibold text-sm ${task.done ? "line-through text-muted-foreground" : ""}`}>
+                      {task.label}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{task.description}</p>
+                  </div>
+                  <span className={`text-xs font-bold px-2 py-1 rounded-full shrink-0 ${
+                    task.done
+                      ? "bg-green-100 text-green-700"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}>
+                    {task.done ? "✓ Done" : task.reward}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -147,18 +147,18 @@ const BASE_ITEMS = [
   { href: "/messages", label: "Messages", icon: Mail, badgeKey: "unreadMessages" as const },
   { href: "/wallet", label: "Wallet", icon: Wallet },
   { href: "/my-listings", label: "My Listings", icon: Package },
+  { href: "/earn", label: "Earn Swap Bucks", icon: Coins },
+  { href: "/gift-card/share", label: "Send Gift Card", icon: Gift },
+  { href: "/share-earn", label: "Share & Earn", icon: Share2 },
+  { href: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
 // Items that unlock after the user creates their first listing
 const UNLOCKED_ITEMS = [
   { href: "/marketplace", label: "Marketplace", icon: ShoppingBag, requiresMarketplace: true },
-  { href: "/earn", label: "Earn Swap Bucks", icon: Coins },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
-  { href: "/share-earn", label: "Share & Earn", icon: Share2 },
-  { href: "/gift-card/share", label: "Send Gift Card", icon: Gift },
   { href: "/membership", label: "Membership", icon: Crown },
   { href: "/disputes", label: "Disputes", icon: Scale },
-  { href: "/settings", label: "Settings", icon: Settings },
   { href: "/admin", label: "Admin Console", icon: Shield, adminOnly: true },
 ] as const;
 
