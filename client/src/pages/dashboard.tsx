@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import {
   Coins, Package, Mail, Scale, Wallet, PlusCircle, MessageSquare, TrendingUp,
-  ArrowUpRight, ArrowDownRight, ShoppingBag, Lock,
+  ArrowUpRight, ArrowDownRight, ShoppingBag, Lock, Gift,
 } from "lucide-react";
 import { useOnboarding } from "@/components/onboarding-guard";
 import { useQuery } from "@tanstack/react-query";
@@ -136,6 +136,24 @@ export default function DashboardPage() {
             </Link>
           </div>
         )}
+
+        {/* Gift Card Sharing Banner */}
+        <Card className="rounded-xl border-2 border-primary/15 bg-gradient-to-r from-primary/5 via-white to-pink-50" data-testid="gift-card-banner">
+          <CardContent className="p-4 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#5A45FF] to-[#FF4D6D] flex items-center justify-center shrink-0">
+              <Gift className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-sm">Give friends a FREE $40 Gift Card</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Earn <strong className="text-primary">5 SB</strong> every time a friend redeems your link. Invite 6 friends to unlock the marketplace!</p>
+            </div>
+            <Link href="/gift-card/share">
+              <button className="shrink-0 bg-gradient-to-r from-[#5A45FF] to-[#FF4D6D] text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-90 transition-opacity">
+                Send Gift Cards
+              </button>
+            </Link>
+          </CardContent>
+        </Card>
 
         {/* Welcome */}
         <div>

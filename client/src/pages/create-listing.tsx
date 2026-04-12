@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { Coins, Upload, Video, X, Save, Send, ImagePlus, Loader2, Link as LinkIcon, Star, StarOff, Sparkles, Facebook, Copy, Check, ArrowRight } from "lucide-react";
+import { Coins, Upload, Video, X, Save, Send, ImagePlus, Loader2, Link as LinkIcon, Star, StarOff, Sparkles, Facebook, Copy, Check, ArrowRight, Gift } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, getQueryFn, API_BASE, getAuthToken, resolveImageUrl } from "@/lib/queryClient";
@@ -63,6 +63,8 @@ export default function CreateEditListingPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: onboardingData } = useOnboarding();
   const [shareModal, setShareModal] = useState<{ listing: any } | null>(null);
+  const [showGiftPrompt, setShowGiftPrompt] = useState(false);
+  const [postShareDest, setPostShareDest] = useState("/my-listings");
 
   const handleFileUpload = useCallback(async (files: FileList | File[]) => {
     const fileArray = Array.from(files).filter(f => f.type.startsWith("image/"));
@@ -585,21 +587,49 @@ export default function CreateEditListingPage() {
           user={user}
           onDone={() => {
             setShareModal(null);
-            if (onboardingData && !onboardingData.onboardingComplete) {
-              navigate("/membership");
-            } else {
-              navigate("/my-listings");
-            }
+            const dest = onboardingData && !onboardingData.onboardingComplete ? "/membership" : "/my-listings";
+            setPostShareDest(dest);
+            setShowGiftPrompt(true);
           }}
           onSkip={() => {
             setShareModal(null);
-            if (onboardingData && !onboardingData.onboardingComplete) {
-              navigate("/membership");
-            } else {
-              navigate("/my-listings");
-            }
+            const dest = onboardingData && !onboardingData.onboardingComplete ? "/membership" : "/my-listings";
+            setPostShareDest(dest);
+            setShowGiftPrompt(true);
           }}
         />
+      )}
+
+      {/* Gift Card Sharing Prompt — shows after FB share */}
+      {showGiftPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4 text-center">
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-[#5A45FF] to-[#FF4D6D] flex items-center justify-center">
+              <Gift className="h-8 w-8 text-white" />
+            </div>
+            <h2 className="font-black text-xl">Give friends a FREE $40 Gift Card!</h2>
+            <p className="text-sm text-muted-foreground">
+              Share a $40 Swap Bucks gift card with your friends. When they redeem it, <strong className="text-primary">you earn 5 SB</strong> — the fastest way to grow your balance.
+            </p>
+            <div className="bg-yellow-50 rounded-xl p-3 border border-yellow-200">
+              <p className="text-xs font-semibold text-yellow-800">🎁 Invite 6 friends = 30 SB = marketplace access!</p>
+            </div>
+            <Button
+              className="w-full rounded-xl font-semibold gap-2 bg-gradient-to-r from-[#5A45FF] to-[#FF4D6D] hover:opacity-90 h-11"
+              onClick={() => { setShowGiftPrompt(false); navigate("/gift-card/share"); }}
+              data-testid="gift-prompt-share-btn"
+            >
+              <Gift className="h-4 w-4" />
+              Send Gift Cards Now
+            </Button>
+            <button
+              className="text-sm text-muted-foreground hover:text-foreground"
+              onClick={() => { setShowGiftPrompt(false); navigate(postShareDest); }}
+            >
+              Maybe later
+            </button>
+          </div>
+        </div>
       )}
     </AuthenticatedLayout>
   );

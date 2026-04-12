@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Coins,
   Copy,
+  Gift,
   Link2,
   Loader2,
   Package,
@@ -515,6 +516,37 @@ export default function CompleteProfilePage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Gift Card Sharing Prompt */}
+        <Card className="rounded-xl border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-violet-50 overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-start gap-4">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#5A45FF] to-[#FF4D6D] flex items-center justify-center shrink-0">
+                <Gift className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-bold text-sm">Give friends a FREE $40 Gift Card</h3>
+                  <Badge variant="secondary" className="text-xs rounded-lg bg-yellow-100 text-yellow-700 border-0 gap-0.5">
+                    <Coins className="h-3 w-3" /> Earn 5 SB per redemption
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Share a $40 Swap Bucks gift card with your friends. When they redeem it, you earn 5 SB — the fastest way to hit your 30 SB goal!
+                </p>
+                <Button
+                  size="sm"
+                  className="mt-3 rounded-xl bg-gradient-to-r from-[#5A45FF] to-[#FF4D6D] hover:opacity-90 text-white gap-1.5 font-semibold"
+                  onClick={() => navigate("/gift-card/share")}
+                  data-testid="gift-card-prompt-btn"
+                >
+                  <Gift className="h-3.5 w-3.5" />
+                  Send Gift Cards & Earn SB
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </AuthenticatedLayout>
   );
