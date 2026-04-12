@@ -580,6 +580,157 @@ export async function registerRoutes(
     }
   });
 
+
+  // ============================================================
+  // MARKETPLACE SEEDING (admin only)
+  // ============================================================
+
+  app.post("/api/admin/seed-marketplace", async (req: Request, res: Response) => {
+    try {
+      const { secret, users: fakeUsers, listings: fakeListings } = req.body;
+      if (secret !== "SWAPEDLY_ADMIN_SETUP_2026") {
+        return res.status(403).json({ message: "Invalid secret" });
+      }
+
+      let usersCreated = 0, listingsCreated = 0;
+      const userIds: number[] = [];
+
+      // Create fake users
+      for (const u of fakeUsers || []) {
+        try {
+          const existing = await storage.getUserByEmail(u.email);
+          if (existing) { userIds.push(existing.id); continue; }
+          const user = await storage.createUser({
+            username: u.username,
+            email: u.email,
+            password: crypto.randomBytes(32).toString("hex"),
+            displayName: u.displayName,
+            bio: u.bio,
+            city: u.city,
+            location: u.location,
+            avatarUrl: u.avatarUrl,
+          });
+          await storage.updateUser(user.id, {
+            onboardingComplete: true,
+            onboardingStep: "complete",
+            onboardingListingsCount: 3,
+            isFakeUser: true,
+          } as any);
+          await storage.createWallet({ userId: user.id });
+          // Give fake users some SB balance so they look active
+          await storage.creditWallet(user.id, Math.floor(Math.random() * 500) + 50);
+          userIds.push(user.id);
+          usersCreated++;
+        } catch {}
+      }
+
+      // Create fake listings assigned to random fake users
+      const imgPlaceholders = [
+        null, // no image — will show placeholder in UI
+      ];
+      for (const l of fakeListings || []) {
+        try {
+          if (userIds.length === 0) continue;
+          const sellerId = userIds[Math.floor(Math.random() * userIds.length)];
+          await storage.createListing({
+            sellerId,
+            title: l.title,
+            description: l.description,
+            price: l.price,
+            category: l.category,
+            condition: l.condition,
+            deliveryOptions: l.deliveryOptions,
+            images: JSON.stringify([]),
+            tags: l.tags || "[]",
+            subcategory: null,
+            videoUrl: null,
+            isHighlighted: Math.random() > 0.95,
+            highlightedAt: null,
+          });
+          listingsCreated++;
+        } catch (e: any) {
+          // skip individual failures
+        }
+      }
+
+      return res.json({
+        success: true,
+        usersCreated,
+        listingsCreated,
+        totalFakeUsers: userIds.length,
+      });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ============================================================
+  // CHATBOT: Auto-respond to messages sent to fake users
+  // ============================================================
+
+  const BOT_RESPONSES_GENERIC = [
+    "Hey! Thanks for your message. I only do local pickup — no shipping, sorry! If you're nearby we can arrange a meetup. What city are you in?",
+    "Hi there! Unfortunately I don't ship — local pickup only. Are you local to my area?",
+    "Thanks for reaching out! I prefer to meet in a public place for the exchange. Local pickup only. Let me know if that works for you!",
+    "Hey! So sorry, I only do local meetups — no shipping available. If you're close by I'd love to work something out!",
+    "Hi! Local pickup only for this one. I can meet at a coffee shop or public place. Does that work for you?",
+  ];
+
+  const BOT_RESPONSES_PRICE = [
+    "I could go a little lower if you can do local pickup today or this weekend. What do you have in mind?",
+    "Hmm, I was hoping to get closer to asking price. It's in really great shape. Best I can do is take off 5 SB.",
+    "I appreciate the offer! The item is priced fairly for its condition. Would you consider full asking price?",
+    "Let me think about it. Could you do local pickup this week? That would help!",
+  ];
+
+  app.post("/api/messages/bot-check", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { conversationId, content } = req.body;
+      const senderUser = req.user as any;
+      
+      // Get conversation to find the other participant
+      const conv = await storage.getConversationById(conversationId);
+      if (!conv) return res.json({ botResponse: false });
+      
+      // Find the OTHER participant
+      const otherUserId = conv.participant1Id === senderUser.id ? conv.participant2Id : conv.participant1Id;
+      const otherUser = await storage.getUserById(otherUserId);
+      
+      // Check if the other user is a fake bot user (email ends in @swapedly-users.com)
+      if (!otherUser || !otherUser.email.endsWith("@swapedly-users.com")) {
+        return res.json({ botResponse: false });
+      }
+
+      // Pick an appropriate response
+      const lowerContent = content.toLowerCase();
+      let response: string;
+      
+      if (lowerContent.includes("ship") || lowerContent.includes("deliver") || lowerContent.includes("mail") || lowerContent.includes("send")) {
+        response = BOT_RESPONSES_GENERIC[Math.floor(Math.random() * BOT_RESPONSES_GENERIC.length)];
+      } else if (lowerContent.includes("offer") || lowerContent.includes("lower") || lowerContent.includes("deal") || lowerContent.includes("price") || lowerContent.match(/\d+\s*sb/i)) {
+        response = BOT_RESPONSES_PRICE[Math.floor(Math.random() * BOT_RESPONSES_PRICE.length)];
+      } else {
+        response = BOT_RESPONSES_GENERIC[Math.floor(Math.random() * BOT_RESPONSES_GENERIC.length)];
+      }
+
+      // Send bot response after a short delay (simulates typing)
+      setTimeout(async () => {
+        try {
+          await storage.createMessage({
+            conversationId,
+            senderId: otherUserId,
+            content: response,
+          });
+          await storage.updateConversationLastMessage(conversationId, new Date().toISOString());
+        } catch {}
+      }, Math.floor(Math.random() * 3000) + 1500); // 1.5-4.5 second delay
+
+      return res.json({ botResponse: true });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
   // ============================================================
   // GOOGLE OAUTH ROUTES
   // ============================================================
@@ -1507,6 +1658,7 @@ export async function registerRoutes(
 
       // Notify recipient
       const recipientId = conv.participant1Id === user.id ? conv.participant2Id : conv.participant1Id;
+      const recipient = await storage.getUserById(recipientId);
       await storage.createNotification({
         userId: recipientId,
         type: "message",
@@ -1514,6 +1666,33 @@ export async function registerRoutes(
         body: `${user.username}: ${req.body.content.substring(0, 100)}`,
         link: `/messages/${convId}`,
       });
+
+      // Auto-bot response if recipient is a fake user
+      if (recipient?.email?.endsWith("@swapedly-users.com")) {
+        const botResponses = [
+          "Hey! Thanks for your message. I only do local pickup — no shipping, sorry! If you're nearby we can arrange a meetup. What city are you in?",
+          "Hi there! Unfortunately I don't ship — local pickup only. Are you local to my area?",
+          "Thanks for reaching out! I prefer to meet in a public place for the exchange. Local pickup only. Let me know if that works!",
+          "Hey! Local pickup only for this one. I can meet at a coffee shop or public place nearby. Does that work for you?",
+          "Hi! So sorry, I only do local meetups — no shipping available. If you're close by I'd love to work something out!",
+        ];
+        const lc = (req.body.content || "").toLowerCase();
+        const priceResponses = [
+          "I could go a little lower if you can do local pickup this week. What do you have in mind?",
+          "Hmm, I was hoping to get closer to asking price. It's in great shape. Best I can do is take off 5 SB.",
+          "I appreciate the offer! The item is priced fairly for its condition. Would you consider full price?",
+        ];
+        const response = (lc.includes("offer") || lc.includes("lower") || lc.includes("deal") || lc.match(/\d+\s*sb/i))
+          ? priceResponses[Math.floor(Math.random() * priceResponses.length)]
+          : botResponses[Math.floor(Math.random() * botResponses.length)];
+        
+        setTimeout(async () => {
+          try {
+            const botMsg = await storage.createMessage({ conversationId: convId, senderId: recipientId, content: response });
+            await storage.updateConversationLastMessage(convId, botMsg.createdAt);
+          } catch {}
+        }, Math.floor(Math.random() * 3000) + 1500);
+      }
 
       return res.status(201).json(msg);
     } catch (err: any) {
