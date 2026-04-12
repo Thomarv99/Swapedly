@@ -961,7 +961,7 @@ export async function registerRoutes(
   app.get("/api/listings", async (req: Request, res: Response) => {
     try {
       const _q = req.query;
-      const category = (Array.isArray(_q.category) ? _q.category[0] : _q.category) as string;
+      const category = (Array.isArray(_q.category) ? _q.category[0] : (_q.category || _q.categories)) as string;
       const condition = _q.condition as string;
       const minPrice = _q.minPrice as string;
       const maxPrice = _q.maxPrice as string;
@@ -971,7 +971,7 @@ export async function registerRoutes(
       const limit = _q.limit as string;
       const city = _q.city as string;
       const result = await storage.getListings({
-        category: (categories as string) || (category as string), // support both param names
+        category: category,
         condition: condition as string,
         minPrice: minPrice ? parseFloat(minPrice as string) : undefined,
         maxPrice: maxPrice ? parseFloat(maxPrice as string) : undefined,
