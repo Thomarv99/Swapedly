@@ -21,10 +21,15 @@ import { STRIPE_CONFIG, createCheckoutSession, handleStripeWebhook, getStripe } 
 // FILE UPLOAD SETUP
 // ============================================================
 // Use persistent disk on Render (/data/uploads) or local uploads/ otherwise
-const DATA_BASE = process.env.RENDER ? "/data" : process.cwd();
+const DATA_BASE = process.env.RENDER ? "/opt/render/project/src" : process.cwd();
 const UPLOAD_DIR = path.join(DATA_BASE, "uploads");
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+try {
+  if (!fs.existsSync(UPLOAD_DIR)) {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  }
+} catch (e) {
+  console.warn("[uploads] Could not create upload dir:", UPLOAD_DIR, "- using /tmp");
+  // fallback to /tmp if disk not available
 }
 
 const uploadStorage = multer.diskStorage({
