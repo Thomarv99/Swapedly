@@ -328,13 +328,13 @@ export async function registerRoutes(
         const referrer = await storage.getUserByReferralCode(referralCode);
         if (referrer) {
           referrerId = referrer.id;
-          // Credit referrer 1 SB
-          await storage.creditWallet(referrer.id, 1);
+          // Credit referrer 5 SB for gift card redemption
+          await storage.creditWallet(referrer.id, 5);
           await storage.createLedgerEntry({
             userId: referrer.id,
-            amount: 1,
+            amount: 5,
             type: "referral_bonus",
-            description: "Friend redeemed a gift card using your link",
+            description: "Friend redeemed a gift card using your link — 5 SB earned",
             relatedListingId: null,
             relatedTransactionId: null,
           });
@@ -388,6 +388,93 @@ export async function registerRoutes(
       });
     } catch (err: any) {
       console.error("[GiftCard] redeem error:", err.message);
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+
+  // ============================================================
+  // SOCIAL SHARING REWARD ENDPOINTS
+  // ============================================================
+
+  const SHARE_REWARDS: Record<string, { sb: number; label: string; cooldownHours: number }> = {
+    gift_card_share:  { sb: 1,  label: "Gift Card Share",           cooldownHours: 24 },
+    facebook_post:    { sb: 5,  label: "Facebook Post",             cooldownHours: 24 },
+    pinterest_post:   { sb: 5,  label: "Pinterest Post",            cooldownHours: 24 },
+    video_review:     { sb: 30, label: "Video Review on Social Media", cooldownHours: 168 }, // once per week
+  };
+
+  app.post("/api/share-reward/claim", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = req.user as any;
+      const { type, proofUrl } = req.body;
+
+      const reward = SHARE_REWARDS[type];
+      if (!reward) return res.status(400).json({ message: "Invalid reward type" });
+
+      // Check cooldown via ledger — prevent double-claiming within cooldown window
+      const since = new Date(Date.now() - reward.cooldownHours * 60 * 60 * 1000).toISOString();
+      const { entries: recentEntries } = await storage.getLedgerByUserId(user.id, 1, 50);
+      const alreadyClaimed = recentEntries.some(
+        (e: any) => e.type === "share_reward" &&
+          e.description?.includes(reward.label) &&
+          e.createdAt > since
+      );
+
+      if (alreadyClaimed) {
+        const nextAt = new Date(Date.now() + reward.cooldownHours * 60 * 60 * 1000);
+        return res.status(429).json({
+          message: `You already claimed this reward. Come back in ${reward.cooldownHours < 24 ? reward.cooldownHours + " hours" : Math.round(reward.cooldownHours / 24) + " days"}.`,
+          nextClaimAt: nextAt.toISOString(),
+        });
+      }
+
+      await storage.creditWallet(user.id, reward.sb);
+      await storage.createLedgerEntry({
+        userId: user.id,
+        amount: reward.sb,
+        type: "share_reward",
+        description: `${reward.label} — +${reward.sb} SB${proofUrl ? " (proof submitted)" : ""}`,
+        relatedListingId: null,
+        relatedTransactionId: null,
+      });
+
+      await storage.createNotification({
+        userId: user.id,
+        type: "system",
+        title: `+${reward.sb} SB earned!`,
+        body: `You earned ${reward.sb} Swap Bucks for your ${reward.label}.`,
+        link: "/wallet",
+      });
+
+      return res.json({ success: true, sbEarned: reward.sb, label: reward.label });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Get claimed rewards for current user (to show claimed state in UI)
+  app.get("/api/share-reward/status", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = req.user as any;
+      const { entries } = await storage.getLedgerByUserId(user.id, 1, 100);
+      const now = Date.now();
+      const status: Record<string, { claimed: boolean; nextClaimAt?: string }> = {};
+
+      for (const [type, reward] of Object.entries(SHARE_REWARDS)) {
+        const since = new Date(now - reward.cooldownHours * 60 * 60 * 1000).toISOString();
+        const recent = entries.find(
+          (e: any) => e.type === "share_reward" && e.description?.includes(reward.label) && e.createdAt > since
+        );
+        status[type] = {
+          claimed: !!recent,
+          nextClaimAt: recent
+            ? new Date(new Date(recent.createdAt).getTime() + reward.cooldownHours * 60 * 60 * 1000).toISOString()
+            : undefined,
+        };
+      }
+      return res.json(status);
+    } catch (err: any) {
       return res.status(500).json({ message: err.message });
     }
   });
