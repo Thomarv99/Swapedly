@@ -479,9 +479,9 @@ export class DatabaseStorage implements IStorage {
 
   async getAllUsers(page: number, limit: number): Promise<{ users: User[]; total: number }> {
     const offset = (page - 1) * limit;
-    const result = db.select().from(users).limit(limit).offset(offset);
-    const totalResult = db.select({ count: count() }).from(users);
-    return { users: result, total: totalResult?.count ?? 0 };
+    const result = await db.select().from(users).limit(limit).offset(offset);
+    const totalResult = await db.select({ count: count() }).from(users);
+    return { users: result, total: totalResult[0]?.count ?? 0 };
   }
 
   // ===== WALLETS =====
@@ -526,15 +526,15 @@ export class DatabaseStorage implements IStorage {
 
   async getLedgerByUserId(userId: number, page: number, limit: number): Promise<{ entries: WalletLedger[]; total: number }> {
     const offset = (page - 1) * limit;
-    const entries = db.select().from(walletLedger)
+    const entries = await db.select().from(walletLedger)
       .where(eq(walletLedger.userId, userId))
       .orderBy(desc(walletLedger.createdAt))
       .limit(limit)
       .offset(offset)
       ;
-    const totalResult = db.select({ count: count() }).from(walletLedger)
+    const totalResult = await db.select({ count: count() }).from(walletLedger)
       .where(eq(walletLedger.userId, userId));
-    return { entries, total: totalResult?.count ?? 0 };
+    return { entries, total: totalResult[0]?.count ?? 0 };
   }
 
   // ===== LISTINGS =====
@@ -620,17 +620,16 @@ export class DatabaseStorage implements IStorage {
         break;
     }
 
-    const result = db.select().from(listings)
+    const result = await db.select().from(listings)
       .where(whereClause)
       .orderBy(orderClause)
       .limit(limit)
-      .offset(offset)
-      ;
+      .offset(offset);
 
-    const totalResult = db.select({ count: count() }).from(listings)
+    const totalResult = await db.select({ count: count() }).from(listings)
       .where(whereClause);
 
-    return { listings: result, total: totalResult?.count ?? 0 };
+    return { listings: result, total: totalResult[0]?.count ?? 0 };
   }
 
   async updateListing(id: number, data: Partial<Listing>): Promise<Listing | undefined> {
@@ -858,7 +857,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUnreadCount(userId: number): Promise<number> {
-    const result = db.select({ count: count() }).from(notifications)
+    const result = await db.select({ count: count() }).from(notifications)
       .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
     return result?.count ?? 0;
   }
@@ -940,7 +939,7 @@ export class DatabaseStorage implements IStorage {
     newUsersByDay: Array<{ date: string; signups: number }>;
   }> {
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
-    const all = db.select().from(pageViews).where(gte(pageViews.createdAt, since));
+    const all = await db.select().from(pageViews).where(gte(pageViews.createdAt, since));
 
     const totalViews = all.length;
     const uniqueSessions = new Set(all.map(v => v.sessionId).filter(Boolean)).size;
@@ -977,7 +976,7 @@ export class DatabaseStorage implements IStorage {
       .slice(0, 10);
 
     // New users by day
-    const allUsers = db.select().from(users).where(gte(users.joinedAt, since));
+    const allUsers = await db.select().from(users).where(gte(users.joinedAt, since));
     const signupCounts: Record<string, number> = {};
     for (const u of allUsers) {
       const day = u.joinedAt.slice(0, 10);
@@ -1025,7 +1024,7 @@ export class DatabaseStorage implements IStorage {
 
   async markReferralConverted(referralCode: string, convertedUserId: number): Promise<void> {
     // Find the most recent unconverted click for this referral code
-    const click = db.select().from(referralClicks)
+    const click = await db.select().from(referralClicks)
       .where(and(
         eq(referralClicks.referralCode, referralCode),
         sql`${referralClicks.convertedUserId} IS NULL`
@@ -1042,12 +1041,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getReferralStatsByUserId(userId: number): Promise<{ clicks: number; signups: number; creditsEarned: number }> {
-    const clicks = db.select().from(referralClicks)
+    const clicks = await db.select().from(referralClicks)
       .where(eq(referralClicks.referrerId, userId))
       ;
     const signups = clicks.filter(c => c.convertedUserId !== null).length;
     // Each successful referral earns 1 SB — check ledger
-    const ledger = db.select().from(ledgerEntries)
+    const ledger = await db.select().from(ledgerEntries)
       .where(and(
         eq(ledgerEntries.userId, userId),
         eq(ledgerEntries.type, "referral_bonus")
@@ -1058,9 +1057,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllReferralStats(): Promise<Array<{ userId: number; username: string; clicks: number; signups: number; creditsEarned: number }>> {
-    const allUsers = db.select().from(users).orderBy(desc(users.id));
-    const allClicks = db.select().from(referralClicks);
-    const allLedger = db.select().from(ledgerEntries)
+    const allUsers = await db.select().from(users).orderBy(desc(users.id));
+    const allClicks = await db.select().from(referralClicks);
+    const allLedger = await db.select().from(ledgerEntries)
       .where(eq(ledgerEntries.type, "referral_bonus"))
       ;
 
@@ -1081,7 +1080,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async isFavorited(userId: number, listingId: number): Promise<boolean> {
-    const result = db.select().from(favorites)
+    const result = await db.select().from(favorites)
       .where(and(eq(favorites.userId, userId), eq(favorites.listingId, listingId)))
       ;
     return !!result;
@@ -1138,7 +1137,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async hasUserSharedOnPlatform(userId: number, listingId: number, platform: string): Promise<boolean> {
-    const result = db.select().from(socialShares)
+    const result = await db.select().from(socialShares)
       .where(and(
         eq(socialShares.userId, userId),
         eq(socialShares.listingId, listingId),
