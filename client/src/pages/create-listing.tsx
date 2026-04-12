@@ -604,9 +604,7 @@ export default function CreateEditListingPage() {
       {showGiftPrompt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4 text-center">
-            <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-[#5A45FF] to-[#FF4D6D] flex items-center justify-center">
-              <Gift className="h-8 w-8 text-white" />
-            </div>
+            <img src="/gift-card.jpg" alt="Gift Card" className="mx-auto w-48 drop-shadow-lg" />
             <h2 className="font-black text-xl">Give friends a FREE $40 Gift Card!</h2>
             <p className="text-sm text-muted-foreground">
               Share a $40 Swap Bucks gift card with your friends. When they redeem it, <strong className="text-primary">you earn 5 SB</strong> — the fastest way to grow your balance.

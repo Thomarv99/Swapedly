@@ -187,12 +187,8 @@ export default function GiftCardPage() {
       </header>
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="bg-white rounded-3xl shadow-xl max-w-md w-full p-8 text-center space-y-6">
-          {/* Gift card illustration */}
-          <div className="mx-auto w-48 h-28 rounded-2xl bg-gradient-to-br from-[#5A45FF] to-[#FF4D6D] flex flex-col items-center justify-center shadow-lg">
-            <Coins className="h-8 w-8 text-yellow-300 mb-1" />
-            <p className="text-white font-black text-2xl">40 SB</p>
-            <p className="text-white/70 text-xs">Swap Bucks Gift Card</p>
-          </div>
+          {/* Gift card image */}
+          <img src="/gift-card.jpg" alt="Swapedly $40 Gift Card" className="mx-auto w-72 drop-shadow-xl" />
 
           <div>
             <h1 className="text-2xl font-black text-slate-900">You've got a gift! 🎁</h1>

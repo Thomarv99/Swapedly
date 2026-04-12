@@ -140,9 +140,7 @@ export default function DashboardPage() {
         {/* Gift Card Sharing Banner */}
         <Card className="rounded-xl border-2 border-primary/15 bg-gradient-to-r from-primary/5 via-white to-pink-50" data-testid="gift-card-banner">
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#5A45FF] to-[#FF4D6D] flex items-center justify-center shrink-0">
-              <Gift className="h-6 w-6 text-white" />
-            </div>
+            <img src="/gift-card.jpg" alt="Gift Card" className="h-16 w-24 object-contain shrink-0 drop-shadow" />
             <div className="flex-1 min-w-0">
               <p className="font-bold text-sm">Give friends a FREE $40 Gift Card</p>
               <p className="text-xs text-muted-foreground mt-0.5">Earn <strong className="text-primary">5 SB</strong> every time a friend redeems your link. Invite 6 friends to unlock the marketplace!</p>

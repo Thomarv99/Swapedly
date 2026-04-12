@@ -319,17 +319,8 @@ export default function GiftCardSharePage() {
               </Badge>
             </CardTitle>
           </CardHeader>
-          <div className="aspect-[1.9] mx-4">
-            {cardDataUrl ? (
-              <img src={cardDataUrl} alt="Gift card" className="w-full h-full object-cover rounded-xl" />
-            ) : (
-              <div className="w-full h-full rounded-xl bg-gradient-to-br from-[#5A45FF] to-[#FF4D6D] flex items-center justify-center">
-                <div className="text-center text-white">
-                  <Coins className="h-10 w-10 mx-auto mb-2 text-yellow-300" />
-                  <p className="font-black text-3xl">40 SB</p>
-                </div>
-              </div>
-            )}
+          <div className="px-4 py-2">
+            <img src="/gift-card.jpg" alt="Swapedly $40 Gift Card" className="w-full drop-shadow-lg rounded-xl" />
           </div>
           <CardContent className="p-4 space-y-3">
             <div className="flex items-center gap-2 bg-slate-50 rounded-xl px-3 py-2 border">

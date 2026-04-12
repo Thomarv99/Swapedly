@@ -521,9 +521,7 @@ export default function CompleteProfilePage() {
         <Card className="rounded-xl border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-violet-50 overflow-hidden">
           <CardContent className="p-5">
             <div className="flex items-start gap-4">
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#5A45FF] to-[#FF4D6D] flex items-center justify-center shrink-0">
-                <Gift className="h-6 w-6 text-white" />
-              </div>
+              <img src="/gift-card.jpg" alt="Gift Card" className="h-16 w-24 object-contain shrink-0 drop-shadow" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="font-bold text-sm">Give friends a FREE $40 Gift Card</h3>

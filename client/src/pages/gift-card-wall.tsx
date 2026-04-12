@@ -109,9 +109,7 @@ export default function GiftCardWallPage() {
 
           {/* Header */}
           <div className="text-center">
-            <div className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-[#5A45FF] to-[#FF4D6D] flex items-center justify-center mb-4 shadow-lg">
-              <Gift className="h-10 w-10 text-white" />
-            </div>
+            <img src="/gift-card.jpg" alt="Swapedly Gift Card" className="mx-auto w-64 drop-shadow-xl mb-2" />
             <h1 className="text-2xl font-black text-slate-900">One last step!</h1>
             <p className="text-muted-foreground mt-1 text-sm">
               Invite <strong>{required} friends</strong> to Swapedly to unlock your <strong className="text-primary">{status?.sbReward || 40} Swap Bucks</strong>.
