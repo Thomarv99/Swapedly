@@ -66,7 +66,7 @@ app.use((req, res, next) => {
   console.log("[startup] RENDER:", process.env.RENDER);
   console.log("[startup] Starting server...");
   await initializeDatabase();
-  registerRoutes(httpServer, app);
+  await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
