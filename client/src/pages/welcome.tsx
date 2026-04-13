@@ -144,7 +144,7 @@ export default function WelcomePage() {
               <img
                 src="/gift-card.png"
                 alt="Swapedly $40 Gift Card"
-                className="w-72 sm:w-96 drop-shadow-2xl hover:scale-105 transition-transform duration-300"
+                className="w-72 sm:w-96 hover:scale-105 transition-transform duration-300"
               />
               <Link href="/gift-card">
                 <button className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#5A45FF] to-[#FF4D6D] text-white text-sm font-bold px-6 py-2.5 rounded-full shadow-lg hover:opacity-90 transition-opacity whitespace-nowrap">
@@ -283,7 +283,7 @@ export default function WelcomePage() {
               <img
                 src="/gift-card.png"
                 alt="Swapedly $40 Gift Card"
-                className="w-80 drop-shadow-2xl hover:scale-105 transition-transform duration-300"
+                className="w-80 hover:scale-105 transition-transform duration-300"
               />
             </div>
             <div>
