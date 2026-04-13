@@ -68,28 +68,6 @@ export default function CreateEditListingPage() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSuggested, setAiSuggested] = useState(false);
 
-  const triggerAiSuggest = useCallback(async (imageUrl: string) => {
-    setAiLoading(true);
-    setAiSuggested(false);
-    try {
-      const res = await apiRequest("POST", "/api/listings/ai-suggest", { imageUrl });
-      if (!res.ok) return; // silently skip if AI not configured
-      const data = await res.json();
-      if (data.title) setValue("title", data.title);
-      if (data.description) setValue("description", data.description);
-      if (data.suggestedPrice) setValue("price", data.suggestedPrice);
-      if (data.category) setValue("category", data.category);
-      if (data.condition) setValue("condition", data.condition);
-      if (data.tags?.length) setValue("tags", data.tags.join(", "));
-      setAiSuggested(true);
-      toast({ title: "✨ AI filled your listing", description: "Review the suggestions and edit anything you'd like." });
-    } catch {
-      // Silent fail — AI is optional
-    } finally {
-      setAiLoading(false);
-    }
-  }, [setValue, toast]);
-
   const handleFileUpload = useCallback(async (files: FileList | File[]) => {
     const fileArray = Array.from(files).filter(f => f.type.startsWith("image/"));
     if (fileArray.length === 0) {
@@ -192,6 +170,28 @@ export default function CreateEditListingPage() {
   }, [existingListing, isEdit, reset]);
 
   const watchAll = watch();
+
+  const triggerAiSuggest = useCallback(async (imageUrl: string) => {
+    setAiLoading(true);
+    setAiSuggested(false);
+    try {
+      const res = await apiRequest("POST", "/api/listings/ai-suggest", { imageUrl });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.title) setValue("title", data.title);
+      if (data.description) setValue("description", data.description);
+      if (data.suggestedPrice) setValue("price", data.suggestedPrice);
+      if (data.category) setValue("category", data.category);
+      if (data.condition) setValue("condition", data.condition);
+      if (data.tags?.length) setValue("tags", data.tags.join(", "));
+      setAiSuggested(true);
+      toast({ title: "✨ AI filled your listing", description: "Review the suggestions and edit anything you'd like." });
+    } catch {
+      // Silent fail — AI is optional
+    } finally {
+      setAiLoading(false);
+    }
+  }, [setValue, toast]);
 
   const mutation = useMutation({
     mutationFn: async (data: FormValues & { status: string }) => {
