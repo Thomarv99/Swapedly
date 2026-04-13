@@ -120,10 +120,13 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-sm mb-3">Legal</h4>
+              <h4 className="font-semibold text-sm mb-3">Resources</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-foreground">Privacy Policy</a></li>
+                <li><Link href="/blog" className="hover:text-foreground">Blog</Link></li>
+                <li><Link href="/blog/facebook-marketplace-alternatives" className="hover:text-foreground">FB Marketplace Alternatives</Link></li>
+                <li><Link href="/blog/craigslist-alternatives" className="hover:text-foreground">Craigslist Alternatives</Link></li>
+                <li><Link href="/blog/ebay-alternatives" className="hover:text-foreground">eBay Alternatives</Link></li>
+                <li><Link href="/blog/best-places-to-sell-stuff-online" className="hover:text-foreground">Best Places to Sell Online</Link></li>
               </ul>
             </div>
           </div>

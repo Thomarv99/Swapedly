@@ -34,6 +34,7 @@ import LoginPage from "@/pages/login";
 import ForgotPasswordPage from "@/pages/forgot-password";
 import ResetPasswordPage from "@/pages/reset-password";
 import GiftCardPage from "@/pages/gift-card";
+import BlogPage from "@/pages/blog";
 import GiftCardSharePage from "@/pages/gift-card-share";
 import GiftCardWallPage from "@/pages/gift-card-wall";
 import OnboardingPage from "@/pages/onboarding";
@@ -99,6 +100,8 @@ function AppRouter() {
         <Route path="/gift-card/wall" component={GiftCardWallPage} />
         <Route path="/welcome-tour" component={OnboardingPage} />
       <Route path="/terms" component={TermsPage} />
+        <Route path="/blog/:slug" component={BlogPage} />
+        <Route path="/blog" component={BlogPage} />
       <Route path="/privacy" component={PrivacyPage} />
       <Route path="/refunds" component={RefundsPage} />
       <Route path="/signup" component={SignUpPage} />

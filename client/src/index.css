@@ -220,3 +220,48 @@
     inset: -1px;
   }
 }
+
+/* ─── Blog Article Styles ─────────────────────────────────────────────────── */
+.prose-article { font-family: 'Inter', sans-serif; color: #1e293b; line-height: 1.8; }
+.prose-article h1 { font-size: 2rem; font-weight: 900; line-height: 1.2; margin-bottom: 1.5rem; color: #0f172a; }
+.prose-article h2 { font-size: 1.35rem; font-weight: 800; margin-top: 2.5rem; margin-bottom: 0.75rem; color: #1e293b; border-left: 4px solid #5A45FF; padding-left: 0.75rem; }
+.prose-article h3 { font-size: 1.1rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; color: #334155; }
+.prose-article p { margin-bottom: 1.25rem; font-size: 1rem; }
+.prose-article p.lead { font-size: 1.125rem; color: #475569; font-weight: 500; margin-bottom: 2rem; }
+.prose-article ul, .prose-article ol { margin: 1rem 0 1.5rem 1.5rem; }
+.prose-article li { margin-bottom: 0.4rem; font-size: 0.95rem; }
+.prose-article a { color: #5A45FF; text-decoration: underline; text-underline-offset: 3px; }
+.prose-article a:hover { color: #FF4D6D; }
+.prose-article strong { font-weight: 700; color: #0f172a; }
+
+/* Comparison table */
+.prose-article .comparison-table,
+.article-body .comparison-table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.85rem; border-radius: 1rem; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.prose-article .comparison-table th,
+.article-body .comparison-table th { background: #5A45FF; color: white; padding: 0.75rem 1rem; text-align: left; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.prose-article .comparison-table td,
+.article-body .comparison-table td { padding: 0.7rem 1rem; border-bottom: 1px solid #f1f5f9; background: white; }
+.prose-article .comparison-table tr:first-child td,
+.article-body .comparison-table tr:first-child td { background: #f0eeff; font-weight: 700; }
+.prose-article .comparison-table tr:hover td,
+.article-body .comparison-table tr:hover td { background: #fafafe; }
+
+/* Pro/con boxes */
+.prose-article .pro-con,
+.article-body .pro-con { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+.prose-article .pro-con strong,
+.article-body .pro-con strong { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 0.5rem; }
+
+/* CTA box */
+.prose-article .article-cta,
+.article-body .article-cta { background: linear-gradient(135deg, #5A45FF, #FF4D6D); border-radius: 1.5rem; padding: 2rem; text-align: center; margin: 2.5rem 0; }
+.prose-article .article-cta a,
+.article-body .article-cta a { display: inline-block; background: white; color: #5A45FF; font-weight: 800; padding: 0.75rem 2rem; border-radius: 999px; text-decoration: none; font-size: 1rem; transition: transform 0.15s; }
+.prose-article .article-cta a:hover,
+.article-body .article-cta a:hover { transform: scale(1.04); }
+
+/* Mobile table scroll */
+@media (max-width: 640px) {
+  .comparison-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .prose-article .comparison-table, .article-body .comparison-table { min-width: 600px; }
+}

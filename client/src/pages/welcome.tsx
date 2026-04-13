@@ -354,10 +354,14 @@ export default function WelcomePage() {
           <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap justify-center">
             <Link href="/login" className="hover:text-primary">Sign In</Link>
             <Link href="/signup" className="hover:text-primary">Sign Up</Link>
+            <Link href="/blog" className="hover:text-primary font-medium text-primary">Blog</Link>
+            <Link href="/blog/facebook-marketplace-alternatives" className="hover:text-primary">FB Marketplace Alternatives</Link>
+            <Link href="/blog/craigslist-alternatives" className="hover:text-primary">Craigslist Alternatives</Link>
+            <Link href="/blog/ebay-alternatives" className="hover:text-primary">eBay Alternatives</Link>
+            <Link href="/blog/best-places-to-sell-stuff-online" className="hover:text-primary">Best Places to Sell</Link>
             <Link href="/pricing" className="hover:text-primary">Pricing</Link>
             <Link href="/terms" className="hover:text-primary">Terms</Link>
             <Link href="/privacy" className="hover:text-primary">Privacy</Link>
-            <Link href="/refunds" className="hover:text-primary">Refunds</Link>
           </div>
           <PerplexityAttribution />
         </div>
