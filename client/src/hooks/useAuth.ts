@@ -8,7 +8,14 @@ export function useAuth() {
 
   const { data: user, isLoading, error } = useQuery<User | null>({
     queryKey: ["/api/auth/me"],
-    queryFn: getQueryFn({ on401: "returnNull" }),
+    queryFn: async () => {
+      const fn = getQueryFn({ on401: "returnNull" });
+      const result = await fn({ queryKey: ["/api/auth/me"] } as any);
+      if (result && (result as any).token) {
+        setAuthToken((result as any).token);
+      }
+      return result;
+    },
     staleTime: Infinity,
     retry: false,
   });

@@ -985,7 +985,8 @@ export async function registerRoutes(
         return storage.getUserById(userId).then(user => {
           if (user) {
             const { password: _, ...safeUser } = user as any;
-            return res.json(safeUser);
+            // Return token so client can restore it on refresh
+            return res.json({ ...safeUser, token });
           }
           return res.status(401).json({ message: "Not authenticated" });
         }).catch(() => res.status(401).json({ message: "Not authenticated" }));
