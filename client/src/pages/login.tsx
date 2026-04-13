@@ -16,9 +16,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // If already logged in, go to dashboard
+  // Read redirect param from hash query string
+  const redirectTo = new URLSearchParams(window.location.hash.split("?")[1] || "").get("redirect") || "/dashboard";
+
+  // If already logged in, go to redirect target
   if (isAuthenticated) {
-    navigate("/dashboard");
+    navigate(redirectTo);
     return null;
   }
 
@@ -26,7 +29,7 @@ export default function LoginPage() {
     e.preventDefault();
     try {
       await login({ email, password });
-      navigate("/dashboard");
+      navigate(redirectTo);
     } catch (err: any) {
       toast({ title: "Login failed", description: err.message, variant: "destructive" });
     }

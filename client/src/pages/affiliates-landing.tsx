@@ -22,7 +22,7 @@ export default function AffiliatesLandingPage() {
     if (user) {
       setLocation("/affiliate/apply");
     } else {
-      setLocation("/login");
+      setLocation("/login?redirect=/affiliate/apply");
     }
   };
 
