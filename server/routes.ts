@@ -731,6 +731,77 @@ export async function registerRoutes(
     }
   });
 
+
+  // ============================================================
+  // FORGOT PASSWORD / RESET PASSWORD
+  // ============================================================
+
+  app.post("/api/auth/forgot-password", async (req: Request, res: Response) => {
+    try {
+      const { email } = req.body;
+      if (!email) return res.status(400).json({ message: "Email required" });
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        // Don't reveal whether the email exists
+        return res.json({ message: "If that email is registered, a reset link has been sent." });
+      }
+
+      // Generate a reset token and store it
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+
+      // Store in auth_tokens table with a "reset:" prefix
+      await db.insert(authTokens).values({
+        token: "reset:" + resetToken,
+        userId: user.id,
+        expiresAt,
+        createdAt: new Date().toISOString(),
+      });
+
+      // Send reset email
+      const { sendPasswordResetEmail } = await import("./email");
+      sendPasswordResetEmail(user.email, user.displayName || user.username, resetToken).catch(console.error);
+
+      return res.json({ message: "If that email is registered, a reset link has been sent." });
+    } catch (err: any) {
+      console.error("[Auth] forgot-password error:", err.message);
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/auth/reset-password", async (req: Request, res: Response) => {
+    try {
+      const { token, newPassword } = req.body;
+      if (!token || !newPassword) return res.status(400).json({ message: "Token and new password required" });
+      if (newPassword.length < 6) return res.status(400).json({ message: "Password must be at least 6 characters" });
+
+      // Look up the reset token
+      const tokenRow = await db.select().from(authTokens)
+        .where(and(
+          eq(authTokens.token, "reset:" + token),
+          gte(authTokens.expiresAt, new Date().toISOString())
+        ))
+        .limit(1);
+
+      if (!tokenRow[0]) {
+        return res.status(400).json({ message: "Invalid or expired reset link. Please request a new one." });
+      }
+
+      // Hash new password and update
+      const hashedPw = await hashPassword(newPassword);
+      await storage.updateUser(tokenRow[0].userId, { password: hashedPw });
+
+      // Delete the used token
+      await db.delete(authTokens).where(eq(authTokens.token, "reset:" + token));
+
+      return res.json({ message: "Password reset successfully. You can now log in." });
+    } catch (err: any) {
+      console.error("[Auth] reset-password error:", err.message);
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
   // ============================================================
   // GOOGLE OAUTH ROUTES
   // ============================================================

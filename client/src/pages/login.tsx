@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/layouts";
-import { FcGoogle } from "react-icons/fc";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 
 export default function LoginPage() {
@@ -52,23 +51,7 @@ export default function LoginPage() {
             <p className="text-sm text-muted-foreground mt-1">Sign in to your Swapedly account</p>
           </div>
 
-          {/* Google */}
-          <button
-            onClick={handleGoogle}
-            className="w-full flex items-center justify-center gap-3 border-2 rounded-xl h-11 text-sm font-medium hover:bg-slate-50 transition-colors"
-            data-testid="google-login-btn"
-          >
-            <FcGoogle className="h-5 w-5" />
-            Continue with Google
-          </button>
-
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-border" />
-            <span className="text-xs text-muted-foreground">or</span>
-            <div className="flex-1 h-px bg-border" />
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
+<form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -108,6 +91,12 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+            </div>
+
+            <div className="flex justify-end">
+              <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+                Forgot password?
+              </Link>
             </div>
 
             <Button
