@@ -3232,6 +3232,251 @@ export async function registerRoutes(
   // ===== SEED DATABASE =====
   seedDatabase();
 
+  // ── robots.txt ───────────────────────────────────────────────────────────────────
+  app.get("/robots.txt", (_req, res) => {
+    res.type("text/plain").send(`User-agent: *
+Allow: /
+Allow: /listing/
+Allow: /sitemap.xml
+Allow: /blog/
+Allow: /help/
+Allow: /affiliates
+Disallow: /api/
+Disallow: /#/marketplace
+Disallow: /#/dashboard
+Disallow: /#/wallet
+Disallow: /#/messages
+Disallow: /#/admin
+Disallow: /#/transactions
+
+Sitemap: https://www.swapedly.com/sitemap.xml`);
+  });
+
+  // ── sitemap.xml ──────────────────────────────────────────────────────────────────
+  app.get("/sitemap.xml", async (_req, res) => {
+    const BASE = "https://www.swapedly.com";
+    const now = new Date().toISOString().split("T")[0];
+
+    // Static pages
+    const staticPages = [
+      { url: "/", priority: "1.0", freq: "daily" },
+      { url: "/#/gift-card", priority: "0.9", freq: "weekly" },
+      { url: "/#/affiliates", priority: "0.7", freq: "weekly" },
+      { url: "/#/help", priority: "0.7", freq: "weekly" },
+      { url: "/blog", priority: "0.8", freq: "weekly" },
+      { url: "/blog/facebook-marketplace-alternatives", priority: "0.8", freq: "monthly" },
+      { url: "/blog/craigslist-alternatives", priority: "0.8", freq: "monthly" },
+      { url: "/blog/ebay-alternatives", priority: "0.8", freq: "monthly" },
+      { url: "/blog/offerup-alternatives", priority: "0.7", freq: "monthly" },
+      { url: "/blog/mercari-alternatives", priority: "0.7", freq: "monthly" },
+      { url: "/blog/poshmark-alternatives", priority: "0.7", freq: "monthly" },
+      { url: "/blog/etsy-alternatives", priority: "0.7", freq: "monthly" },
+      { url: "/blog/amazon-marketplace-alternatives", priority: "0.7", freq: "monthly" },
+      { url: "/blog/nextdoor-marketplace-alternatives", priority: "0.7", freq: "monthly" },
+      { url: "/blog/best-places-to-sell-stuff-online", priority: "0.8", freq: "monthly" },
+    ];
+
+    // Fetch all active listings
+    let listingUrls: string[] = [];
+    try {
+      const { listings: allListings } = await storage.getListings({ status: "active", limit: 5000, offset: 0 });
+      listingUrls = allListings.map(l => {
+        const slug = l.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
+        return `<url><loc>${BASE}/listing/${slug}-${l.id}</loc><lastmod>${l.updatedAt?.split("T")[0] || now}</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>`;
+      });
+    } catch {}
+
+    const staticXml = staticPages.map(p =>
+      `<url><loc>${BASE}${p.url}</loc><lastmod>${now}</lastmod><changefreq>${p.freq}</changefreq><priority>${p.priority}</priority></url>`
+    ).join("\n");
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${staticXml}
+${listingUrls.join("\n")}
+</urlset>`;
+
+    res.type("application/xml").send(xml);
+  });
+
+  // ── Public SEO listing page ─────────────────────────────────────────────────────
+  app.get("/listing/:slug", async (req, res) => {
+    const slugParam = req.params.slug; // e.g. "vintage-guitar-456"
+    const idMatch = slugParam.match(/-?(\d+)$/);
+    if (!idMatch) return res.status(404).send("Listing not found");
+    const listingId = parseInt(idMatch[1]);
+
+    const listing = await storage.getListingById(listingId).catch(() => null);
+    if (!listing || listing.status !== "active") return res.status(404).send("Listing not found");
+
+    const seller = await storage.getUserById(listing.sellerId).catch(() => null);
+    const images: string[] = (() => { try { return JSON.parse(listing.images || "[]"); } catch { return []; } })();
+    const firstImage = images[0] ? (images[0].startsWith("http") ? images[0] : `https://www.swapedly.com${images[0]}`) : "https://www.swapedly.com/og-default.png";
+    const deliveryOpts = (() => { try { return JSON.parse(listing.deliveryOptions || "{}"); } catch { return {}; } })() as any;
+    const deliveryLabel = deliveryOpts.localPickup && deliveryOpts.shipping ? "Local pickup & ships" : deliveryOpts.shipping ? "Ships nationwide" : "Local pickup only";
+    const conditionLabel: Record<string, string> = { new: "New", like_new: "Like New", good: "Good", fair: "Fair", poor: "Poor" };
+    const BASE = "https://www.swapedly.com";
+
+    // JSON-LD structured data (Product schema)
+    const jsonLd = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: listing.title,
+      description: listing.description,
+      image: images.map(img => img.startsWith("http") ? img : `${BASE}${img}`),
+      offers: {
+        "@type": "Offer",
+        price: listing.price,
+        priceCurrency: "USD",
+        availability: "https://schema.org/InStock",
+        url: `${BASE}/listing/${slugParam}`,
+        seller: { "@type": "Person", name: seller?.displayName || seller?.username || "Swapedly Seller" },
+      },
+      brand: { "@type": "Brand", name: "Swapedly" },
+      itemCondition: `https://schema.org/${listing.condition === "new" ? "NewCondition" : listing.condition === "like_new" ? "LikeNewCondition" : listing.condition === "good" ? "GoodCondition" : listing.condition === "fair" ? "FairCondition" : "UsedCondition"}`,
+      category: listing.category,
+    });
+
+    const tagsArr: string[] = (() => { try { return JSON.parse(listing.tags || "[]"); } catch { return listing.tags?.split(",").map((t: string) => t.trim()) || []; } })();
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${listing.title} — ${listing.price} SB on Swapedly</title>
+  <meta name="description" content="${listing.description.slice(0, 155).replace(/"/g, '&quot;')}" />
+  <meta name="keywords" content="${tagsArr.join(", ")}, ${listing.category}, buy online, Swapedly" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="product" />
+  <meta property="og:title" content="${listing.title} — ${listing.price} SB on Swapedly" />
+  <meta property="og:description" content="${listing.description.slice(0, 200).replace(/"/g, '&quot;')}" />
+  <meta property="og:image" content="${firstImage}" />
+  <meta property="og:url" content="${BASE}/listing/${slugParam}" />
+  <meta property="og:site_name" content="Swapedly" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${listing.title} — ${listing.price} SB" />
+  <meta name="twitter:description" content="${listing.description.slice(0, 155).replace(/"/g, '&quot;')}" />
+  <meta name="twitter:image" content="${firstImage}" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="${BASE}/listing/${slugParam}" />
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">${jsonLd}</script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
+    .nav { background: white; border-bottom: 1px solid #e2e8f0; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #1e293b; font-weight: 900; font-size: 18px; }
+    .nav-logo-icon { width: 32px; height: 32px; background: #5A45FF; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .nav-cta { background: #5A45FF; color: white; padding: 8px 18px; border-radius: 999px; text-decoration: none; font-weight: 600; font-size: 14px; }
+    .container { max-width: 1100px; margin: 32px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+    @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+    .images { display: flex; flex-direction: column; gap: 12px; }
+    .main-image { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 16px; border: 1px solid #e2e8f0; }
+    .thumb-row { display: flex; gap: 8px; }
+    .thumb { width: 72px; height: 72px; object-fit: cover; border-radius: 10px; border: 2px solid #e2e8f0; cursor: pointer; }
+    .info { display: flex; flex-direction: column; gap: 16px; }
+    .badge { display: inline-block; background: #f1f5f9; color: #64748b; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
+    .title { font-size: 26px; font-weight: 900; color: #0f172a; line-height: 1.25; }
+    .price { font-size: 32px; font-weight: 900; color: #5A45FF; }
+    .price span { font-size: 16px; font-weight: 500; color: #94a3b8; margin-left: 4px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; }
+    .meta-item { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 14px; font-size: 13px; color: #475569; }
+    .meta-item strong { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; margin-bottom: 2px; }
+    .desc-title { font-size: 14px; font-weight: 700; color: #374151; margin-bottom: 6px; }
+    .desc { font-size: 15px; color: #475569; line-height: 1.7; }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { background: #eff6ff; color: #3b82f6; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+    .cta-box { background: linear-gradient(135deg, #5A45FF, #7B68EE); border-radius: 20px; padding: 28px; color: white; text-align: center; }
+    .cta-box h3 { font-size: 20px; font-weight: 900; margin-bottom: 8px; }
+    .cta-box p { font-size: 14px; opacity: .85; margin-bottom: 20px; }
+    .cta-btn { display: inline-block; background: white; color: #5A45FF; font-weight: 800; padding: 12px 28px; border-radius: 999px; text-decoration: none; font-size: 15px; }
+    .seller { display: flex; align-items: center; gap: 12px; background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; }
+    .seller-avatar { width: 44px; height: 44px; border-radius: 999px; background: #5A45FF; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px; overflow: hidden; }
+    .seller-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .seller-name { font-weight: 700; font-size: 15px; }
+    .seller-joined { font-size: 12px; color: #94a3b8; }
+    footer { text-align: center; padding: 40px 20px; color: #94a3b8; font-size: 13px; border-top: 1px solid #e2e8f0; margin-top: 60px; }
+    footer a { color: #5A45FF; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="https://www.swapedly.com" class="nav-logo">
+      <div class="nav-logo-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 16L3 12l4-4M17 8l4 4-4 4M14 4l-4 16"/>
+        </svg>
+      </div>
+      Swapedly
+    </a>
+    <a href="https://www.swapedly.com/#/gift-card" class="nav-cta">Get $40 Free</a>
+  </nav>
+
+  <div class="container">
+    <div class="images">
+      <img src="${firstImage}" alt="${listing.title}" class="main-image" id="mainImg" />
+      ${images.length > 1 ? `<div class="thumb-row">${images.slice(0, 6).map(img => { const src = img.startsWith("http") ? img : `${BASE}${img}`; return `<img src="${src}" class="thumb" alt="${listing.title}" onclick="document.getElementById('mainImg').src=this.src" />`; }).join("")}</div>` : ""}
+    </div>
+
+    <div class="info">
+      <div><span class="badge">${listing.category}</span></div>
+      <h1 class="title">${listing.title}</h1>
+      <div class="price">${listing.price} SB <span>Swap Bucks</span></div>
+
+      <div class="meta">
+        <div class="meta-item"><strong>Condition</strong>${conditionLabel[listing.condition] || listing.condition}</div>
+        <div class="meta-item"><strong>Delivery</strong>${deliveryLabel}</div>
+        ${seller?.city ? `<div class="meta-item"><strong>Location</strong>${seller.city}</div>` : ""}
+      </div>
+
+      <div>
+        <p class="desc-title">About this item</p>
+        <p class="desc">${listing.description.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
+      </div>
+
+      ${tagsArr.length ? `<div class="tags">${tagsArr.map((t: string) => `<span class="tag">#${t.trim()}</span>`).join("")}</div>` : ""}
+
+      ${seller ? `
+      <div class="seller">
+        <div class="seller-avatar">
+          ${seller.avatarUrl ? `<img src="${seller.avatarUrl}" alt="${seller.username}" />` : (seller.displayName || seller.username || "S")[0].toUpperCase()}
+        </div>
+        <div>
+          <div class="seller-name">${seller.displayName || seller.username}</div>
+          <div class="seller-joined">Member since ${new Date(seller.joinedAt).getFullYear()}</div>
+        </div>
+      </div>` : ""}
+
+      <div class="cta-box">
+        <h3>Want this item?</h3>
+        <p>Sign up free and get $40 in Swap Bucks to spend in the marketplace.</p>
+        <a href="https://www.swapedly.com/#/gift-card" class="cta-btn">Claim $40 &amp; Buy This →</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; ${new Date().getFullYear()} <a href="https://www.swapedly.com">Swapedly</a> &mdash;
+    <a href="https://www.swapedly.com/#/help">Help</a> &middot;
+    <a href="https://www.swapedly.com/blog">Blog</a> &middot;
+    <a href="https://www.swapedly.com/#/affiliates">Affiliates</a> &middot;
+    <a href="https://www.swapedly.com/#/terms">Terms</a>
+    </p>
+  </footer>
+</body>
+</html>`;
+
+    res.type("text/html").send(html);
+  });
+
   // ── AI Listing Suggester ─────────────────────────────────────────────────
   app.post("/api/listings/ai-suggest", requireAuth, async (req: Request, res: Response) => {
     const { imageUrl } = req.body as { imageUrl: string };
