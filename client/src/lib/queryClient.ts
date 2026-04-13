@@ -16,10 +16,20 @@ export function resolveImageUrl(url: string): string {
 }
 
 // In-memory auth token (survives SPA navigation, lost on full page reload)
+const TOKEN_KEY = "swapedly_auth_token";
 let authToken: string | null = null;
+
+// Restore token from sessionStorage on load (survives page refresh, not tab close)
+try {
+  authToken = sessionStorage.getItem(TOKEN_KEY);
+} catch {}
 
 export function setAuthToken(token: string | null) {
   authToken = token;
+  try {
+    if (token) sessionStorage.setItem(TOKEN_KEY, token);
+    else sessionStorage.removeItem(TOKEN_KEY);
+  } catch {}
 }
 
 export function getAuthToken(): string | null {
