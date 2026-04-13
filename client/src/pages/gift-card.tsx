@@ -3,14 +3,10 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
 import { Logo } from "@/components/layouts";
-import { apiRequest, setAuthToken, queryClient, resolveImageUrl } from "@/lib/queryClient";
+import { apiRequest, setAuthToken, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Gift, Coins, ShoppingBag, Shield, Users, Star, Zap, ArrowRight,
-  ChevronLeft, ChevronRight, Check, Mail, Upload, MapPin,
-} from "lucide-react";
+import { ArrowRight, Check, Mail, Upload, MapPin } from "lucide-react";
 
 const UNIVERSAL_CODE = "SWAPEDLY-40";
 const SB_AMOUNT = 40;
@@ -88,9 +84,8 @@ export default function GiftCardPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
-  // Steps: "redeem" | "profile" | "polish" | "cards" | "done"
-  const [step, setStep] = useState<"redeem" | "profile" | "polish" | "cards" | "done">("redeem");
-  const [code, setCode] = useState(UNIVERSAL_CODE);
+  // Steps: "profile" | "polish"
+  const [step, setStep] = useState<"profile" | "polish">("profile");
   const [cardIndex, setCardIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [newToken, setNewToken] = useState("");
@@ -112,11 +107,8 @@ export default function GiftCardPage() {
   const urlRef = new URLSearchParams(window.location.hash.split("?")[1] || "");
   const referralCode = urlRef.get("ref") || "";
 
-  // Auto-fill code from URL if provided + track invite click
+  // Track invite click from URL
   useEffect(() => {
-    const urlCode = urlRef.get("code");
-    if (urlCode) setCode(urlCode.toUpperCase());
-    // Track the invite click for share wall progress
     const inviteCode = urlRef.get("invite");
     if (inviteCode) {
       apiRequest("POST", "/api/gift-card/invite-click", { inviteCode }).catch(() => {});
@@ -150,15 +142,7 @@ export default function GiftCardPage() {
       }
     } catch {}
     setPolishLoading(false);
-    navigate("/welcome-tour");
-  };
-
-  const handleRedeem = async () => {
-    if (code.trim().toUpperCase() !== UNIVERSAL_CODE) {
-      toast({ title: "Invalid code", description: "Please enter a valid gift card code.", variant: "destructive" });
-      return;
-    }
-    setStep("profile");
+    navigate("/create-listing");
   };
 
   const handleCreateAccount = async () => {
@@ -169,7 +153,7 @@ export default function GiftCardPage() {
     setLoading(true);
     try {
       const res = await apiRequest("POST", "/api/gift-card/redeem", {
-        code: code.trim().toUpperCase(),
+        code: UNIVERSAL_CODE,
         username,
         email,
         password,
@@ -190,6 +174,7 @@ export default function GiftCardPage() {
   };
 
   const handleFinish = () => navigate("/create-listing");
+
 
   // ── Polish Step ──────────────────────────────────────────────────────────────
   if (step === "polish") return (
@@ -272,57 +257,18 @@ export default function GiftCardPage() {
     </div>
   );
 
-  // ── Redeem Step ──────────────────────────────────────────────────────────────
-  if (step === "redeem") return (
+  // ── Profile Step ─────────────────────────────────────────────────────────────
+  if (step === "profile") return (
     <div className="min-h-screen bg-gradient-to-br from-[#5A45FF]/10 via-white to-[#FF4D6D]/5 flex flex-col">
       <header className="p-5 flex justify-center">
         <Logo />
       </header>
       <div className="flex-1 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-xl max-w-md w-full p-8 text-center space-y-6">
-          {/* Gift card image */}
-          <img src="/gift-card.png" alt="Swapedly $40 Gift Card" className="mx-auto w-72" />
-
-          <div>
-            <h1 className="text-2xl font-black text-slate-900">You've got a gift! 🎁</h1>
-            <p className="text-muted-foreground text-sm mt-1">Redeem your Swapedly gift card and get $40 in Swap Bucks to start trading.</p>
-          </div>
-
-          <div className="space-y-2 text-left">
-            <Label>Gift Card Code</Label>
-            <Input
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              className="rounded-xl text-center font-mono text-lg tracking-widest font-bold h-12"
-              placeholder="SWAPEDLY-40"
-              data-testid="gift-card-code"
-            />
-          </div>
-
-          <Button onClick={handleRedeem} className="w-full rounded-xl h-12 text-base font-bold gap-2" data-testid="redeem-btn">
-            <Gift className="h-5 w-5" />
-            Redeem My Gift Card
-          </Button>
-          <p className="text-xs text-muted-foreground">Already have an account? <a href="/#/login" className="text-primary hover:underline">Log in</a> to apply your code.</p>
-        </div>
-      </div>
-    </div>
-  );
-
-  // ── Profile Step ─────────────────────────────────────────────────────────────
-  if (step === "profile") return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <header className="p-5 flex justify-center border-b bg-white">
-        <Logo />
-      </header>
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-sm border max-w-md w-full p-8 space-y-5">
+        <div className="bg-white rounded-3xl shadow-xl max-w-md w-full p-8 space-y-5">
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 font-semibold text-sm px-4 py-1.5 rounded-full mb-3">
-              <Check className="h-4 w-4" /> Code valid — 40 SB ready to claim!
-            </div>
-            <h2 className="text-xl font-bold">Create your account</h2>
-            <p className="text-sm text-muted-foreground mt-1">One quick step to claim your Swap Bucks</p>
+            <img src="/gift-card.png" alt="$40 Gift Card" className="mx-auto w-48 mb-4" />
+            <h2 className="text-2xl font-black text-slate-900">Claim your $40 in Swap Bucks</h2>
+            <p className="text-sm text-muted-foreground mt-1">Spend it on anything in the marketplace. No catch, no credit card.</p>
           </div>
 
           <div className="space-y-3">
@@ -359,70 +305,6 @@ export default function GiftCardPage() {
       </div>
     </div>
   );
-
-  // ── Onboarding Cards Step ────────────────────────────────────────────────────
-  if (step === "cards") {
-    const card = CARDS[cardIndex];
-    const Icon = card.icon;
-    const isLast = cardIndex === CARDS.length - 1;
-    const progress = ((cardIndex + 1) / CARDS.length) * 100;
-
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col">
-        <header className="p-5 flex justify-center border-b bg-white">
-          <Logo />
-        </header>
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="max-w-lg w-full space-y-4">
-            {/* Progress */}
-            <div className="flex items-center gap-3">
-              <Progress value={progress} className="flex-1 h-2" />
-              <span className="text-xs text-muted-foreground shrink-0">{cardIndex + 1} / {CARDS.length}</span>
-            </div>
-
-            {/* Card */}
-            <div className={`rounded-3xl bg-gradient-to-br ${card.color} p-8 text-white shadow-xl min-h-[320px] flex flex-col justify-between`}>
-              <div>
-                <div className="h-14 w-14 rounded-2xl bg-white/20 flex items-center justify-center mb-5">
-                  <Icon className={`h-7 w-7 ${card.iconColor}`} />
-                </div>
-                <h2 className="text-2xl font-black mb-3">{card.title}</h2>
-                <p className="text-white/85 text-base leading-relaxed">{card.body}</p>
-              </div>
-              <div className="mt-6 bg-white/15 rounded-xl px-4 py-2.5">
-                <p className="text-sm font-semibold text-white/90">{card.highlight}</p>
-              </div>
-            </div>
-
-            {/* Navigation */}
-            <div className="flex gap-3">
-              {cardIndex > 0 && (
-                <Button variant="outline" className="rounded-xl gap-1.5 flex-1" onClick={() => setCardIndex(i => i - 1)}>
-                  <ChevronLeft className="h-4 w-4" /> Back
-                </Button>
-              )}
-              <Button
-                className="rounded-xl gap-1.5 flex-1 font-semibold"
-                onClick={() => isLast ? handleFinish() : setCardIndex(i => i + 1)}
-                data-testid={isLast ? "finish-onboarding-btn" : "next-card-btn"}
-              >
-                {isLast ? <>List My First Item <Zap className="h-4 w-4" /></> : <>Next <ChevronRight className="h-4 w-4" /></>}
-              </Button>
-            </div>
-
-            {/* Dot indicators */}
-            <div className="flex justify-center gap-1.5">
-              {CARDS.map((_, i) => (
-                <button key={i} onClick={() => setCardIndex(i)}
-                  className={`h-2 rounded-full transition-all ${i === cardIndex ? "w-6 bg-primary" : "w-2 bg-slate-300"}`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return null;
 }
