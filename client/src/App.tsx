@@ -36,6 +36,7 @@ import ResetPasswordPage from "@/pages/reset-password";
 import GiftCardPage from "@/pages/gift-card";
 import BlogPage from "@/pages/blog";
 import HelpPage from "@/pages/help";
+import { PWAInstallPrompt } from "@/components/pwa-install-prompt";
 import GiftCardSharePage from "@/pages/gift-card-share";
 import GiftCardWallPage from "@/pages/gift-card-wall";
 import OnboardingPage from "@/pages/onboarding";
@@ -153,6 +154,7 @@ function App() {
           <OnboardingGuard>
             <AppRouter />
           </OnboardingGuard>
+          <PWAInstallPrompt />
         </Router>
       </TooltipProvider>
     </QueryClientProvider>
