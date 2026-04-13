@@ -188,7 +188,7 @@ export default function GiftCardPage() {
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="bg-white rounded-3xl shadow-xl max-w-md w-full p-8 text-center space-y-6">
           {/* Gift card image */}
-          <img src="/gift-card.jpg" alt="Swapedly $40 Gift Card" className="mx-auto w-72 drop-shadow-xl" />
+          <img src="/gift-card.png" alt="Swapedly $40 Gift Card" className="mx-auto w-72 drop-shadow-xl" />
 
           <div>
             <h1 className="text-2xl font-black text-slate-900">You've got a gift! 🎁</h1>

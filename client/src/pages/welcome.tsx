@@ -142,7 +142,7 @@ export default function WelcomePage() {
           <div className="mt-10 flex justify-center">
             <div className="relative">
               <img
-                src="/gift-card.jpg"
+                src="/gift-card.png"
                 alt="Swapedly $40 Gift Card"
                 className="w-72 sm:w-96 drop-shadow-2xl hover:scale-105 transition-transform duration-300"
               />
@@ -284,7 +284,7 @@ export default function WelcomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
             <div className="flex justify-center">
               <img
-                src="/gift-card.jpg"
+                src="/gift-card.png"
                 alt="Swapedly $40 Gift Card"
                 className="w-80 drop-shadow-2xl hover:scale-105 transition-transform duration-300"
               />

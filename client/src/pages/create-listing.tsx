@@ -237,7 +237,7 @@ export default function CreateEditListingPage() {
         {/* Gift card context banner */}
         {fromGiftCard && (
           <div className="rounded-xl bg-gradient-to-r from-[#5A45FF] to-[#FF4D6D] p-4 flex items-center gap-4">
-            <img src="/gift-card.jpg" alt="Gift Card" className="h-16 w-24 object-contain shrink-0 drop-shadow" />
+            <img src="/gift-card.png" alt="Gift Card" className="h-16 w-24 object-contain shrink-0 drop-shadow" />
             <div>
               <p className="text-white font-black text-lg leading-tight">🎁 Redeem Your Gift Card</p>
               <p className="text-white/90 text-sm mt-0.5">
@@ -616,7 +616,7 @@ export default function CreateEditListingPage() {
       {showGiftPrompt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4 text-center">
-            <img src="/gift-card.jpg" alt="Gift Card" className="mx-auto w-48 drop-shadow-lg" />
+            <img src="/gift-card.png" alt="Gift Card" className="mx-auto w-48 drop-shadow-lg" />
             <h2 className="font-black text-xl">Give friends a FREE $40 Gift Card!</h2>
             <p className="text-sm text-muted-foreground">
               Share a $40 Swap Bucks gift card with your friends. When they redeem it, <strong className="text-primary">you earn 5 SB</strong> — the fastest way to grow your balance.

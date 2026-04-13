@@ -320,7 +320,7 @@ export default function GiftCardSharePage() {
             </CardTitle>
           </CardHeader>
           <div className="px-4 py-2">
-            <img src="/gift-card.jpg" alt="Swapedly $40 Gift Card" className="w-full drop-shadow-lg rounded-xl" />
+            <img src="/gift-card.png" alt="Swapedly $40 Gift Card" className="w-full drop-shadow-lg rounded-xl" />
           </div>
           <CardContent className="p-4 space-y-3">
             <div className="flex items-center gap-2 bg-slate-50 rounded-xl px-3 py-2 border">
