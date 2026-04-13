@@ -9,7 +9,7 @@ import { apiRequest, setAuthToken, queryClient, resolveImageUrl } from "@/lib/qu
 import { useToast } from "@/hooks/use-toast";
 import {
   Gift, Coins, ShoppingBag, Shield, Users, Star, Zap, ArrowRight,
-  ChevronLeft, ChevronRight, Check, Upload, Phone, MapPin, Mail, User,
+  ChevronLeft, ChevronRight, Check, Mail, Upload, MapPin,
 } from "lucide-react";
 
 const UNIVERSAL_CODE = "SWAPEDLY-40";
@@ -88,23 +88,24 @@ export default function GiftCardPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
-  // Steps: "redeem" | "profile" | "cards" | "done"
-  const [step, setStep] = useState<"redeem" | "profile" | "cards" | "done">("redeem");
+  // Steps: "redeem" | "profile" | "polish" | "cards" | "done"
+  const [step, setStep] = useState<"redeem" | "profile" | "polish" | "cards" | "done">("redeem");
   const [code, setCode] = useState(UNIVERSAL_CODE);
   const [cardIndex, setCardIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [newToken, setNewToken] = useState("");
 
   // Profile fields
-  const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("");
+  // Polish step fields
+  const [displayName, setDisplayName] = useState("");
   const [city, setCity] = useState("");
-  const [state, setState] = useState("");
+  const [locationState, setLocationState] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [avatarPreview, setAvatarPreview] = useState("");
+  const [polishLoading, setPolishLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Pull referral code from URL
@@ -125,8 +126,7 @@ export default function GiftCardPage() {
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const preview = URL.createObjectURL(file);
-    setAvatarPreview(preview);
+    setAvatarPreview(URL.createObjectURL(file));
     const formData = new FormData();
     formData.append("image", file);
     try {
@@ -134,6 +134,23 @@ export default function GiftCardPage() {
       const data = await res.json();
       if (data.url) setAvatarUrl(data.url);
     } catch {}
+  };
+
+  const handlePolishSave = async () => {
+    setPolishLoading(true);
+    try {
+      const updates: Record<string, string> = {};
+      if (displayName) updates.displayName = displayName;
+      if (city) updates.city = city;
+      if (locationState) updates.location = locationState ? `${city}, ${locationState}` : city;
+      if (avatarUrl) updates.avatarUrl = avatarUrl;
+      if (Object.keys(updates).length > 0) {
+        await apiRequest("PATCH", "/api/auth/me", updates);
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      }
+    } catch {}
+    setPolishLoading(false);
+    navigate("/welcome-tour");
   };
 
   const handleRedeem = async () => {
@@ -145,7 +162,7 @@ export default function GiftCardPage() {
   };
 
   const handleCreateAccount = async () => {
-    if (!displayName || !username || !email || !password) {
+    if (!email || !password || !username) {
       toast({ title: "Missing fields", description: "Please fill in all required fields.", variant: "destructive" });
       return;
     }
@@ -156,11 +173,7 @@ export default function GiftCardPage() {
         username,
         email,
         password,
-        displayName,
-        phone,
-        city,
-        location: state ? `${city}, ${state}` : city,
-        avatarUrl,
+        displayName: displayName || username,
         referralCode,
       });
       const data = await res.json();
@@ -168,8 +181,7 @@ export default function GiftCardPage() {
       setAuthToken(data.token);
       setNewToken(data.token);
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-      // Don't show cards yet — first they create a listing, then the share wall
-      navigate("/welcome-tour");
+      setStep("polish");
     } catch (e: any) {
       toast({ title: "Error", description: e.message, variant: "destructive" });
     } finally {
@@ -178,6 +190,87 @@ export default function GiftCardPage() {
   };
 
   const handleFinish = () => navigate("/create-listing");
+
+  // ── Polish Step ──────────────────────────────────────────────────────────────
+  if (step === "polish") return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <header className="p-5 flex justify-center border-b bg-white">
+        <Logo />
+      </header>
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl shadow-sm border max-w-md w-full p-8 space-y-6">
+          <div className="text-center">
+            <div className="text-3xl mb-2">🎉</div>
+            <h2 className="text-xl font-black text-slate-900">You're in! 40 SB added.</h2>
+            <p className="text-sm text-muted-foreground mt-1">Add a photo and your location so buyers know who they're dealing with.</p>
+          </div>
+
+          {/* Avatar */}
+          <div className="flex flex-col items-center gap-2">
+            <button
+              onClick={() => fileRef.current?.click()}
+              className="h-24 w-24 rounded-full bg-slate-100 border-2 border-dashed border-slate-300 hover:border-primary flex items-center justify-center overflow-hidden transition-colors"
+              data-testid="avatar-upload"
+            >
+              {avatarPreview ? (
+                <img src={avatarPreview} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                <div className="text-center">
+                  <Upload className="h-6 w-6 text-muted-foreground mx-auto" />
+                  <p className="text-[10px] text-muted-foreground mt-1">Add photo</p>
+                </div>
+              )}
+            </button>
+            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+            <p className="text-xs text-muted-foreground">Profile photo (optional)</p>
+          </div>
+
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label>Display Name</Label>
+              <Input
+                value={displayName}
+                onChange={e => setDisplayName(e.target.value)}
+                placeholder="Jane Smith"
+                className="rounded-xl"
+                data-testid="polish-name"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>City</Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input value={city} onChange={e => setCity(e.target.value)} placeholder="Chicago" className="pl-9 rounded-xl" data-testid="polish-city" />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label>State</Label>
+                <Input value={locationState} onChange={e => setLocationState(e.target.value)} placeholder="IL" className="rounded-xl" data-testid="polish-state" />
+              </div>
+            </div>
+          </div>
+
+          <Button
+            onClick={handlePolishSave}
+            disabled={polishLoading}
+            className="w-full rounded-xl h-12 font-bold gap-2"
+            data-testid="polish-continue-btn"
+          >
+            {polishLoading ? "Saving..." : <>Continue <ArrowRight className="h-4 w-4" /></>}
+          </Button>
+          <p className="text-center">
+            <button
+              onClick={() => navigate("/welcome-tour")}
+              className="text-xs text-muted-foreground hover:text-primary underline-offset-2 hover:underline"
+            >
+              Skip for now
+            </button>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 
   // ── Redeem Step ──────────────────────────────────────────────────────────────
   if (step === "redeem") return (
@@ -232,69 +325,24 @@ export default function GiftCardPage() {
             <p className="text-sm text-muted-foreground mt-1">One quick step to claim your Swap Bucks</p>
           </div>
 
-          {/* Avatar upload */}
-          <div className="flex flex-col items-center gap-2">
-            <button
-              onClick={() => fileRef.current?.click()}
-              className="h-20 w-20 rounded-full bg-slate-100 border-2 border-dashed border-slate-300 hover:border-primary flex items-center justify-center overflow-hidden transition-colors"
-              data-testid="avatar-upload"
-            >
-              {avatarPreview ? (
-                <img src={avatarPreview} alt="avatar" className="w-full h-full object-cover" />
-              ) : (
-                <div className="text-center">
-                  <Upload className="h-5 w-5 text-muted-foreground mx-auto" />
-                  <p className="text-[10px] text-muted-foreground mt-0.5">Add photo</p>
-                </div>
-              )}
-            </button>
-            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
-            <p className="text-xs text-muted-foreground">Profile photo (optional)</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5 col-span-2">
-              <Label>Full Name *</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="Jane Smith" className="pl-9 rounded-xl" data-testid="profile-name" />
-              </div>
-            </div>
-            <div className="space-y-1.5 col-span-2">
+          <div className="space-y-3">
+            <div className="space-y-1.5">
               <Label>Username *</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">@</span>
                 <Input value={username} onChange={e => setUsername(e.target.value.toLowerCase().replace(/\s/g, ""))} placeholder="janesmith" className="pl-7 rounded-xl" data-testid="profile-username" />
               </div>
             </div>
-            <div className="space-y-1.5 col-span-2">
+            <div className="space-y-1.5">
               <Label>Email *</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="jane@example.com" className="pl-9 rounded-xl" data-testid="profile-email" />
               </div>
             </div>
-            <div className="space-y-1.5 col-span-2">
+            <div className="space-y-1.5">
               <Label>Password *</Label>
               <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Create a password" className="rounded-xl" data-testid="profile-password" />
-            </div>
-            <div className="space-y-1.5 col-span-2">
-              <Label>Phone Number</Label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="(555) 555-5555" className="pl-9 rounded-xl" data-testid="profile-phone" />
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label>City</Label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input value={city} onChange={e => setCity(e.target.value)} placeholder="Chicago" className="pl-9 rounded-xl" data-testid="profile-city" />
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label>State</Label>
-              <Input value={state} onChange={e => setState(e.target.value)} placeholder="IL" className="rounded-xl" data-testid="profile-state" />
             </div>
           </div>
 
