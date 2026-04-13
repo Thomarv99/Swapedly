@@ -3206,7 +3206,6 @@ export async function registerRoutes(
   seedDatabase();
 
   return httpServer;
-}
 
   // ── Help Center Chatbot ────────────────────────────────────────────────────
   app.post("/api/help/chat", async (req, res) => {
@@ -3220,7 +3219,6 @@ export async function registerRoutes(
 
     const q = question.toLowerCase();
 
-    // Score every article by keyword overlap
     type Hit = { score: number; slug: string; title: string; cluster: string; content: string; faqs: any[] };
     const hits: Hit[] = [];
 
@@ -3237,16 +3235,13 @@ export async function registerRoutes(
     const best = hits[0];
 
     if (!best || best.score < 2) {
-      // Low confidence — try LLM fallback if RESEND_API_KEY is available (we reuse the env check as a proxy for "paid features enabled")
       return res.json({
-        answer: "I'm not sure about that one. Try searching the help center, or browse by topic — I'm sure we have an article that covers it.",
+        answer: "I\'m not sure about that one. Try searching the help center, or browse by topic — I\'m sure we have an article that covers it.",
         articleSlug: null,
         articleTitle: null,
       });
     }
 
-    // Build a concise answer from the best article's FAQs + summary
-    // Check if any FAQ directly matches
     const matchedFaq = best.faqs.find((f: any) =>
       f.q.toLowerCase().split(/\s+/).filter((w: string) => w.length > 3).some((w: string) => q.includes(w))
     );
@@ -3255,7 +3250,6 @@ export async function registerRoutes(
     if (matchedFaq) {
       answer = matchedFaq.a;
     } else {
-      // Strip HTML tags from content for a plain-text excerpt
       const plain = best.content.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
       answer = plain.slice(0, 280).trim();
       if (plain.length > 280) answer += "…";
@@ -3267,3 +3261,5 @@ export async function registerRoutes(
       articleTitle: best.title,
     });
   });
+
+}
