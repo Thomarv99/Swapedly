@@ -156,9 +156,6 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* Latest Products Slider */}
-      <LatestProductsSlider />
-
       {/* Social Proof Strip */}
       <section className="py-8 bg-gray-50 border-y">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
