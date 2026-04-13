@@ -3205,7 +3205,64 @@ export async function registerRoutes(
   // ===== SEED DATABASE =====
   seedDatabase();
 
-  return httpServer;
+  // ── AI Listing Suggester ─────────────────────────────────────────────────
+  app.post("/api/listings/ai-suggest", requireAuth, async (req: Request, res: Response) => {
+    const { imageUrl } = req.body as { imageUrl: string };
+    if (!imageUrl) return res.status(400).json({ error: "imageUrl required" });
+
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) return res.status(503).json({ error: "AI suggestions not configured" });
+
+    try {
+      const { default: OpenAI } = await import("openai");
+      const client = new OpenAI({ apiKey });
+
+      // Resolve to absolute URL if it's a relative path
+      const absoluteUrl = imageUrl.startsWith("http")
+        ? imageUrl
+        : `${process.env.APP_URL || "https://swapedly.onrender.com"}${imageUrl}`;
+
+      const response = await client.chat.completions.create({
+        model: "gpt-4o-mini",
+        max_tokens: 500,
+        messages: [{
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `You are a marketplace listing assistant for Swapedly, a peer-to-peer trading platform where items are priced in Swap Bucks (SB), where 1 SB = $1 USD.
+
+Analyze this product photo and return ONLY valid JSON (no markdown, no explanation) with exactly these fields:
+{
+  "title": "catchy SEO-optimized listing title, max 60 chars",
+  "description": "2-3 sentence selling description highlighting key features and condition",
+  "suggestedPrice": <integer, fair market price in USD which equals SB>,
+  "category": <one of: "Electronics", "Gaming", "Fashion", "Home & Garden", "Sports & Outdoors", "Books & Media", "Toys & Hobbies", "Auto & Parts", "Musical Instruments", "Art & Collectibles", "Services", "Other">,
+  "condition": <one of: "new", "like_new", "good", "fair", "poor">,
+  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"]
+}
+
+Be specific and accurate. Base price on realistic secondhand market value.`,
+            },
+            {
+              type: "image_url",
+              image_url: { url: absoluteUrl, detail: "low" },
+            },
+          ],
+        }],
+      });
+
+      const text = response.choices[0]?.message?.content || "{}";
+      // Strip markdown code fences if present
+      const clean = text.replace(/```json\n?|```/g, "").trim();
+      const suggestion = JSON.parse(clean);
+
+      return res.json(suggestion);
+    } catch (err: any) {
+      console.error("AI suggest error:", err.message);
+      return res.status(500).json({ error: "AI suggestion failed", detail: err.message });
+    }
+  });
 
   // ── Help Center Chatbot ────────────────────────────────────────────────────
   app.post("/api/help/chat", async (req, res) => {
@@ -3482,4 +3539,5 @@ export async function registerRoutes(
     }
   });
 
+  return httpServer;
 }

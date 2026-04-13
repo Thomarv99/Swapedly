@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { Coins, Upload, Video, X, Save, Send, ImagePlus, Loader2, Link as LinkIcon, Star, StarOff, Sparkles, Facebook, Copy, Check, ArrowRight, Gift } from "lucide-react";
+import { Coins, Upload, Video, X, Save, Send, ImagePlus, Loader2, Link as LinkIcon, Star, StarOff, Sparkles, Facebook, Copy, Check, ArrowRight, Gift, Wand2, RefreshCw } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, getQueryFn, API_BASE, getAuthToken, resolveImageUrl } from "@/lib/queryClient";
@@ -65,6 +65,30 @@ export default function CreateEditListingPage() {
   const [shareModal, setShareModal] = useState<{ listing: any } | null>(null);
   const [showGiftPrompt, setShowGiftPrompt] = useState(false);
   const [postShareDest, setPostShareDest] = useState("/my-listings");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiSuggested, setAiSuggested] = useState(false);
+
+  const triggerAiSuggest = useCallback(async (imageUrl: string) => {
+    setAiLoading(true);
+    setAiSuggested(false);
+    try {
+      const res = await apiRequest("POST", "/api/listings/ai-suggest", { imageUrl });
+      if (!res.ok) return; // silently skip if AI not configured
+      const data = await res.json();
+      if (data.title) setValue("title", data.title);
+      if (data.description) setValue("description", data.description);
+      if (data.suggestedPrice) setValue("price", data.suggestedPrice);
+      if (data.category) setValue("category", data.category);
+      if (data.condition) setValue("condition", data.condition);
+      if (data.tags?.length) setValue("tags", data.tags.join(", "));
+      setAiSuggested(true);
+      toast({ title: "✨ AI filled your listing", description: "Review the suggestions and edit anything you'd like." });
+    } catch {
+      // Silent fail — AI is optional
+    } finally {
+      setAiLoading(false);
+    }
+  }, [setValue, toast]);
 
   const handleFileUpload = useCallback(async (files: FileList | File[]) => {
     const fileArray = Array.from(files).filter(f => f.type.startsWith("image/"));
@@ -99,13 +123,18 @@ export default function CreateEditListingPage() {
       const { urls } = await response.json();
       setImageUrls(prev => [...prev, ...urls]);
       toast({ title: `${urls.length} image${urls.length > 1 ? "s" : ""} uploaded` });
+
+      // Auto-trigger AI suggest on first image upload (new listings only)
+      if (!isEdit && urls.length > 0) {
+        triggerAiSuggest(urls[0]);
+      }
     } catch (err: any) {
       toast({ title: "Upload failed", description: err.message, variant: "destructive" });
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
-  }, [imageUrls.length, toast]);
+  }, [imageUrls.length, toast, isEdit]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -132,7 +161,7 @@ export default function CreateEditListingPage() {
     enabled: isEdit,
   });
 
-  const { register, handleSubmit, control, watch, reset, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, control, watch, reset, setValue, formState: { errors } } = useForm<FormValues>({
     defaultValues: {
       condition: "good",
       localPickup: true,
@@ -266,7 +295,32 @@ export default function CreateEditListingPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Basic Info */}
             <Card className="rounded-xl">
-              <CardHeader><CardTitle>Basic Information</CardTitle></CardHeader>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Basic Information</CardTitle>
+                  {aiLoading && (
+                    <div className="flex items-center gap-2 text-sm text-[#5A45FF] font-medium animate-pulse">
+                      <Wand2 className="h-4 w-4" />
+                      AI analyzing your photo…
+                    </div>
+                  )}
+                  {aiSuggested && !aiLoading && imageUrls.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => triggerAiSuggest(imageUrls[0])}
+                      className="flex items-center gap-1.5 text-xs text-[#5A45FF] hover:underline font-medium"
+                    >
+                      <RefreshCw className="h-3 w-3" /> Re-analyze
+                    </button>
+                  )}
+                </div>
+                {aiSuggested && !aiLoading && (
+                  <div className="flex items-center gap-2 mt-1 text-xs bg-[#5A45FF]/8 text-[#5A45FF] px-3 py-2 rounded-lg">
+                    <Wand2 className="h-3.5 w-3.5 shrink-0" />
+                    <span>AI filled these fields from your photo — review and edit anything before posting.</span>
+                  </div>
+                )}
+              </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="title">Title</Label>
