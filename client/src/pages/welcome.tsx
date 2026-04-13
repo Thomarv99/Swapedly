@@ -451,11 +451,19 @@ export default function WelcomePage() {
 // ============================
 // Latest Products Auto-Scrolling Slider
 // ============================
+const CONDITION_LABEL: Record<string, string> = {
+  new: "New",
+  like_new: "Like New",
+  good: "Good",
+  fair: "Fair",
+  poor: "Poor",
+};
+
 function LatestProductsSlider() {
   const { data } = useQuery<{ listings: Listing[]; total: number }>({
     queryKey: ["/api/listings-landing"],
     queryFn: async () => {
-      const res = await fetch("/api/listings?limit=20");
+      const res = await fetch("/api/listings?limit=24&sort=newest");
       if (!res.ok) return { listings: [], total: 0 };
       return res.json();
     },
@@ -465,54 +473,86 @@ function LatestProductsSlider() {
   const listings = data?.listings || [];
   if (listings.length === 0) return null;
 
-  // Duplicate the list for seamless infinite scroll
+  // Duplicate for seamless infinite scroll
   const doubled = [...listings, ...listings];
 
   return (
-    <section className="py-10 overflow-hidden" data-testid="product-slider">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-5">
-        <p className="text-center text-sm font-medium text-muted-foreground">
-          <Sparkles className="h-3.5 w-3.5 inline mr-1.5" />
-          Just listed by traders like you
-        </p>
+    <section className="py-12 overflow-hidden bg-gray-50/60" data-testid="product-slider">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-6">
+        <div className="flex items-center justify-center gap-2">
+          <span className="h-px w-12 bg-gray-200" />
+          <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest">
+            Live Listings
+          </p>
+          <span className="h-px w-12 bg-gray-200" />
+        </div>
       </div>
+
       <div className="relative">
         {/* Fade edges */}
-        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-gray-50/60 to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-gray-50/60 to-transparent z-10 pointer-events-none" />
 
         <div
-          className="flex gap-4 animate-scroll"
+          className="flex gap-4 px-4"
           style={{
             width: "max-content",
-            animation: `scroll ${listings.length * 3}s linear infinite`,
+            animation: `scroll ${listings.length * 4}s linear infinite`,
           }}
         >
           {doubled.map((listing, i) => {
-            const images = listing.images ? JSON.parse(listing.images) : [];
+            const rawImages = listing.images;
+            let images: string[] = [];
+            if (Array.isArray(rawImages)) {
+              images = rawImages;
+            } else if (typeof rawImages === "string") {
+              try { images = JSON.parse(rawImages); } catch { images = []; }
+            }
             const imgSrc = images[0]
               ? resolveImageUrl(images[0])
-              : "https://placehold.co/200x200/e2e8f0/94a3b8?text=No+Image";
+              : `https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400&h=400&fit=crop`;
+
+            const conditionKey = listing.condition?.toLowerCase().replace(" ", "_") || "";
+            const conditionLabel = CONDITION_LABEL[conditionKey] || listing.condition || "";
+
+            let deliveryIcon = "📦";
+            let deliveryLabel = "Ships";
+            const delivery = (listing.deliveryOptions || "").toLowerCase();
+            if (delivery.includes("local") && !delivery.includes("ship")) {
+              deliveryIcon = "📍"; deliveryLabel = "Local pickup";
+            } else if (delivery.includes("both") || (delivery.includes("local") && delivery.includes("ship"))) {
+              deliveryIcon = "🚚"; deliveryLabel = "Ships or pickup";
+            }
 
             return (
               <div
                 key={`${listing.id}-${i}`}
-                className="shrink-0 w-48 rounded-xl overflow-hidden border bg-white shadow-sm hover:shadow-md transition-shadow"
+                className="shrink-0 w-56 rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
               >
-                <div className="aspect-square overflow-hidden bg-muted">
+                {/* Photo */}
+                <div className="relative h-44 overflow-hidden bg-gray-100">
                   <img
                     src={imgSrc}
                     alt={listing.title}
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
+                  {/* Condition badge top-left */}
+                  {conditionLabel && (
+                    <span className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm text-gray-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-gray-200">
+                      {conditionLabel}
+                    </span>
+                  )}
+                  {/* Price badge top-right */}
+                  <span className="absolute top-2 right-2 bg-[#5A45FF] text-white text-xs font-bold px-2.5 py-1 rounded-full shadow">
+                    {listing.price} SB
+                  </span>
                 </div>
-                <div className="p-2.5">
-                  <p className="text-xs font-medium line-clamp-1">{listing.title}</p>
-                  <div className="flex items-center gap-1 mt-1">
-                    <Coins className="h-3 w-3 text-yellow-500" />
-                    <span className="text-xs font-bold">{listing.price} SB</span>
-                  </div>
+
+                {/* Info */}
+                <div className="p-3">
+                  <p className="text-sm font-semibold text-gray-900 line-clamp-1 mb-1">{listing.title}</p>
+                  <p className="text-[11px] text-gray-400">{deliveryIcon} {deliveryLabel}</p>
                 </div>
               </div>
             );
