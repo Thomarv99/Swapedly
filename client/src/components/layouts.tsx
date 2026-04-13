@@ -124,6 +124,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/help" className="hover:text-foreground">Help Center</Link></li>
                 <li><Link href="/blog" className="hover:text-foreground">Blog</Link></li>
+                <li><Link href="/affiliates" className="hover:text-foreground">Affiliates</Link></li>
                 <li><Link href="/blog/facebook-marketplace-alternatives" className="hover:text-foreground">FB Marketplace Alternatives</Link></li>
                 <li><Link href="/blog/craigslist-alternatives" className="hover:text-foreground">Craigslist Alternatives</Link></li>
                 <li><Link href="/blog/ebay-alternatives" className="hover:text-foreground">eBay Alternatives</Link></li>

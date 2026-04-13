@@ -44,6 +44,9 @@ import PrivacyPage from "@/pages/privacy";
 import RefundsPage from "@/pages/refunds";
 import NotFound from "@/pages/not-found";
 import { OnboardingGuard } from "@/components/onboarding-guard";
+import AffiliatesLandingPage from "@/pages/affiliates-landing";
+import AffiliateApplyPage from "@/pages/affiliate-apply";
+import AffiliateDashboardPage from "@/pages/affiliate-dashboard";
 
 // Generates a random session ID persisted for the tab's lifetime
 function getSessionId(): string {
@@ -128,6 +131,11 @@ function AppRouter() {
       <Route path="/settings" component={SettingsPage} />
       <Route path="/notifications" component={NotificationsPage} />
       <Route path="/admin" component={AdminPage} />
+
+      {/* Affiliate */}
+      <Route path="/affiliates" component={AffiliatesLandingPage} />
+      <Route path="/affiliate/apply" component={AffiliateApplyPage} />
+      <Route path="/affiliate/dashboard" component={AffiliateDashboardPage} />
 
       {/* Fallback */}
       <Route component={NotFound} />

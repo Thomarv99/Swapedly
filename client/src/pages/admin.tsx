@@ -215,6 +215,7 @@ export default function AdminPage() {
             <TabsTrigger value="tasks" className="rounded-lg" data-testid="admin-tasks-tab">Earn Tasks</TabsTrigger>
             <TabsTrigger value="referrals" className="rounded-lg" data-testid="admin-referrals-tab">Referrals</TabsTrigger>
             <TabsTrigger value="analytics" className="rounded-lg" data-testid="admin-analytics-tab">Analytics</TabsTrigger>
+            <TabsTrigger value="affiliates" className="rounded-lg" data-testid="admin-affiliates-tab">Affiliates</TabsTrigger>
           </TabsList>
 
           {/* Users Tab */}
@@ -510,6 +511,11 @@ export default function AdminPage() {
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="mt-6">
             <AnalyticsTab />
+          </TabsContent>
+
+          {/* Affiliates Tab */}
+          <TabsContent value="affiliates" className="mt-6">
+            <AffiliatesTab />
           </TabsContent>
         </Tabs>
       </div>
@@ -897,6 +903,312 @@ function AnalyticsTab() {
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+// ============================================================
+// AFFILIATES TAB
+// ============================================================
+function AffiliatesTab() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [payoutModal, setPayoutModal] = useState<{ affiliateId: number; name: string } | null>(null);
+  const [payoutForm, setPayoutForm] = useState({ amountUsd: "", method: "paypal", reference: "", note: "" });
+  const [activeSubTab, setActiveSubTab] = useState<"affiliates" | "conversions">("affiliates");
+
+  const { data: affiliates = [], isLoading } = useQuery<any[]>({
+    queryKey: ["/api/admin/affiliates"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/admin/affiliates");
+      return res.json();
+    },
+  });
+
+  const { data: conversions = [], isLoading: conversionsLoading } = useQuery<any[]>({
+    queryKey: ["/api/admin/affiliates/conversions"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/admin/affiliates/conversions");
+      return res.json();
+    },
+  });
+
+  const suspendMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      const res = await apiRequest("PATCH", `/api/admin/affiliates/${id}`, { status });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/affiliates"] });
+      toast({ title: "Affiliate updated" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const payoutMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      const res = await apiRequest("POST", `/api/admin/affiliates/${id}/payout`, data);
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Payout failed");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/affiliates"] });
+      setPayoutModal(null);
+      setPayoutForm({ amountUsd: "", method: "paypal", reference: "", note: "" });
+      toast({ title: "Payout recorded" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const totalPending = affiliates.reduce((s: number, a: any) => s + (a.pendingBalance ?? 0), 0);
+  const totalPaid = affiliates.reduce((s: number, a: any) => s + (a.paidBalance ?? 0), 0);
+  const totalCommission = conversions.reduce((s: number, c: any) => s + (c.commissionUsd ?? 0), 0);
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="rounded-xl">
+          <CardContent className="pt-4 pb-4">
+            <p className="text-sm text-muted-foreground mb-1">Total Affiliates</p>
+            <p className="text-2xl font-bold">{affiliates.length}</p>
+          </CardContent>
+        </Card>
+        <Card className="rounded-xl">
+          <CardContent className="pt-4 pb-4">
+            <p className="text-sm text-muted-foreground mb-1">Total Commissions Owed</p>
+            <p className="text-2xl font-bold text-yellow-600">${totalPending.toFixed(2)}</p>
+          </CardContent>
+        </Card>
+        <Card className="rounded-xl">
+          <CardContent className="pt-4 pb-4">
+            <p className="text-sm text-muted-foreground mb-1">Total Paid Out</p>
+            <p className="text-2xl font-bold text-green-600">${totalPaid.toFixed(2)}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Sub-tabs */}
+      <div className="flex gap-2 border-b">
+        <button
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${activeSubTab === "affiliates" ? "border-[#5A45FF] text-[#5A45FF]" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          onClick={() => setActiveSubTab("affiliates")}
+        >
+          Affiliates
+        </button>
+        <button
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${activeSubTab === "conversions" ? "border-[#5A45FF] text-[#5A45FF]" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          onClick={() => setActiveSubTab("conversions")}
+        >
+          All Conversions
+        </button>
+      </div>
+
+      {activeSubTab === "affiliates" && (
+        <Card className="rounded-xl">
+          <CardContent className="pt-4">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#5A45FF] border-t-transparent" />
+              </div>
+            ) : affiliates.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">No affiliates yet</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Code</TableHead>
+                    <TableHead>Platform</TableHead>
+                    <TableHead>Signups</TableHead>
+                    <TableHead>Pending $</TableHead>
+                    <TableHead>Paid $</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {affiliates.map((aff: any) => (
+                    <TableRow key={aff.id}>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium text-sm">{aff.name}</p>
+                          <p className="text-xs text-muted-foreground">{aff.email}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded">{aff.code}</span>
+                      </TableCell>
+                      <TableCell className="text-sm capitalize">{aff.platform}</TableCell>
+                      <TableCell className="text-sm">{aff.stats?.signups ?? 0}</TableCell>
+                      <TableCell className="font-semibold text-yellow-600 text-sm">${(aff.pendingBalance ?? 0).toFixed(2)}</TableCell>
+                      <TableCell className="font-semibold text-green-600 text-sm">${(aff.paidBalance ?? 0).toFixed(2)}</TableCell>
+                      <TableCell>
+                        <Badge variant={aff.status === "active" ? "default" : "secondary"} className="text-xs">
+                          {aff.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs rounded-lg h-7"
+                            onClick={() => setPayoutModal({ affiliateId: aff.id, name: aff.name })}
+                          >
+                            Mark Paid
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className={`text-xs rounded-lg h-7 ${aff.status === "active" ? "border-red-200 text-red-600 hover:bg-red-50" : "border-green-200 text-green-600 hover:bg-green-50"}`}
+                            onClick={() => suspendMutation.mutate({
+                              id: aff.id,
+                              status: aff.status === "active" ? "suspended" : "active",
+                            })}
+                          >
+                            {aff.status === "active" ? "Suspend" : "Activate"}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {activeSubTab === "conversions" && (
+        <Card className="rounded-xl">
+          <CardContent className="pt-4">
+            {conversionsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#5A45FF] border-t-transparent" />
+              </div>
+            ) : conversions.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">No conversions yet</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Affiliate ID</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Revenue</TableHead>
+                    <TableHead>Commission</TableHead>
+                    <TableHead>Rate</TableHead>
+                    <TableHead>Paid</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {conversions.map((c: any) => (
+                    <TableRow key={c.id}>
+                      <TableCell className="text-xs">{new Date(c.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-xs font-mono">{c.affiliateId}</TableCell>
+                      <TableCell className="text-xs capitalize">
+                        {c.type === "sb_purchase" ? "SB Purchase" : c.type === "plus_subscription" ? "Plus Sub" : "Credits"}
+                      </TableCell>
+                      <TableCell className="text-sm">${c.revenueUsd?.toFixed(2)}</TableCell>
+                      <TableCell className="text-sm font-semibold text-[#5A45FF]">${c.commissionUsd?.toFixed(2)}</TableCell>
+                      <TableCell className="text-xs">{Math.round((c.commissionRate ?? 0) * 100)}%</TableCell>
+                      <TableCell>
+                        <Badge variant={c.paid ? "default" : "secondary"} className="text-xs">
+                          {c.paid ? "Paid" : "Pending"}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Payout Modal */}
+      {payoutModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+            <h3 className="font-semibold text-base mb-4">Record Payout — {payoutModal.name}</h3>
+            <div className="space-y-4">
+              <div>
+                <Label>Amount (USD) *</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="25.00"
+                  value={payoutForm.amountUsd}
+                  onChange={e => setPayoutForm(f => ({ ...f, amountUsd: e.target.value }))}
+                  className="mt-1 rounded-xl"
+                />
+              </div>
+              <div>
+                <Label>Method</Label>
+                <Input
+                  placeholder="paypal"
+                  value={payoutForm.method}
+                  onChange={e => setPayoutForm(f => ({ ...f, method: e.target.value }))}
+                  className="mt-1 rounded-xl"
+                />
+              </div>
+              <div>
+                <Label>Reference (PayPal Transaction ID)</Label>
+                <Input
+                  placeholder="PAYPAL-123456"
+                  value={payoutForm.reference}
+                  onChange={e => setPayoutForm(f => ({ ...f, reference: e.target.value }))}
+                  className="mt-1 rounded-xl"
+                />
+              </div>
+              <div>
+                <Label>Note</Label>
+                <Input
+                  placeholder="Optional note"
+                  value={payoutForm.note}
+                  onChange={e => setPayoutForm(f => ({ ...f, note: e.target.value }))}
+                  className="mt-1 rounded-xl"
+                />
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1 rounded-xl"
+                  onClick={() => setPayoutModal(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 rounded-xl bg-[#5A45FF] hover:bg-[#4835EF]"
+                  disabled={payoutMutation.isPending || !payoutForm.amountUsd}
+                  onClick={() => {
+                    payoutMutation.mutate({
+                      id: payoutModal.affiliateId,
+                      data: {
+                        amountUsd: parseFloat(payoutForm.amountUsd),
+                        method: payoutForm.method,
+                        reference: payoutForm.reference,
+                        note: payoutForm.note,
+                      },
+                    });
+                  }}
+                >
+                  {payoutMutation.isPending ? "Saving..." : "Record Payout"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

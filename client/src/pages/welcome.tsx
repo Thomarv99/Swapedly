@@ -361,6 +361,7 @@ export default function WelcomePage() {
             <Link href="/blog/ebay-alternatives" className="hover:text-primary">eBay Alternatives</Link>
             <Link href="/blog/best-places-to-sell-stuff-online" className="hover:text-primary">Best Places to Sell</Link>
             <Link href="/pricing" className="hover:text-primary">Pricing</Link>
+            <Link href="/affiliates" className="hover:text-primary">Affiliates</Link>
             <Link href="/terms" className="hover:text-primary">Terms</Link>
             <Link href="/privacy" className="hover:text-primary">Privacy</Link>
           </div>

@@ -19,6 +19,9 @@ import {
   type ReferralClick, type InsertReferralClick, referralClicks,
   type PageView, type InsertPageView, pageViews,
   authTokens,
+  type Affiliate, type InsertAffiliate, affiliates,
+  type AffiliateConversion, type InsertAffiliateConversion, affiliateConversions,
+  type AffiliatePayout, affiliatePayouts,
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
@@ -444,6 +447,20 @@ export interface IStorage {
   getSocialSharesByListingId(listingId: number): Promise<SocialShare[]>;
   hasUserSharedOnPlatform(userId: number, listingId: number, platform: string): Promise<boolean>;
   updateSocialShareStatus(id: number, data: Partial<SocialShare>): Promise<SocialShare | undefined>;
+
+  // Affiliates
+  createAffiliate(data: InsertAffiliate): Promise<Affiliate>;
+  getAffiliateByUserId(userId: number): Promise<Affiliate | null>;
+  getAffiliateByCode(code: string): Promise<Affiliate | null>;
+  getAffiliateById(id: number): Promise<Affiliate | null>;
+  getAllAffiliates(): Promise<Affiliate[]>;
+  updateAffiliate(id: number, data: Partial<Affiliate>): Promise<Affiliate>;
+  createAffiliateConversion(data: InsertAffiliateConversion): Promise<AffiliateConversion>;
+  getConversionsByAffiliate(affiliateId: number): Promise<AffiliateConversion[]>;
+  getAllConversions(): Promise<AffiliateConversion[]>;
+  createAffiliatePayout(data: Omit<AffiliatePayout, 'id' | 'createdAt'>): Promise<AffiliatePayout>;
+  getPayoutsByAffiliate(affiliateId: number): Promise<AffiliatePayout[]>;
+  getAllPayouts(): Promise<AffiliatePayout[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1149,6 +1166,79 @@ export class DatabaseStorage implements IStorage {
 
   async updateSocialShareStatus(id: number, data: Partial<SocialShare>): Promise<SocialShare | undefined> {
     return await db.update(socialShares).set(data).where(eq(socialShares.id, id)).returning();
+  }
+
+  // ===== AFFILIATES =====
+  async createAffiliate(data: InsertAffiliate): Promise<Affiliate> {
+    const [row] = await db.insert(affiliates).values({
+      ...data,
+      status: "active",
+      pendingBalance: 0,
+      paidBalance: 0,
+      createdAt: new Date().toISOString(),
+    }).returning();
+    return row;
+  }
+
+  async getAffiliateByUserId(userId: number): Promise<Affiliate | null> {
+    const [row] = await db.select().from(affiliates).where(eq(affiliates.userId, userId));
+    return row ?? null;
+  }
+
+  async getAffiliateByCode(code: string): Promise<Affiliate | null> {
+    const [row] = await db.select().from(affiliates).where(eq(affiliates.code, code));
+    return row ?? null;
+  }
+
+  async getAffiliateById(id: number): Promise<Affiliate | null> {
+    const [row] = await db.select().from(affiliates).where(eq(affiliates.id, id));
+    return row ?? null;
+  }
+
+  async getAllAffiliates(): Promise<Affiliate[]> {
+    return await db.select().from(affiliates).orderBy(desc(affiliates.createdAt));
+  }
+
+  async updateAffiliate(id: number, data: Partial<Affiliate>): Promise<Affiliate> {
+    const [row] = await db.update(affiliates).set(data).where(eq(affiliates.id, id)).returning();
+    return row;
+  }
+
+  async createAffiliateConversion(data: InsertAffiliateConversion): Promise<AffiliateConversion> {
+    const [row] = await db.insert(affiliateConversions).values({
+      ...data,
+      paid: false,
+      createdAt: new Date().toISOString(),
+    }).returning();
+    return row;
+  }
+
+  async getConversionsByAffiliate(affiliateId: number): Promise<AffiliateConversion[]> {
+    return await db.select().from(affiliateConversions)
+      .where(eq(affiliateConversions.affiliateId, affiliateId))
+      .orderBy(desc(affiliateConversions.createdAt));
+  }
+
+  async getAllConversions(): Promise<AffiliateConversion[]> {
+    return await db.select().from(affiliateConversions).orderBy(desc(affiliateConversions.createdAt));
+  }
+
+  async createAffiliatePayout(data: Omit<AffiliatePayout, 'id' | 'createdAt'>): Promise<AffiliatePayout> {
+    const [row] = await db.insert(affiliatePayouts).values({
+      ...data,
+      createdAt: new Date().toISOString(),
+    }).returning();
+    return row;
+  }
+
+  async getPayoutsByAffiliate(affiliateId: number): Promise<AffiliatePayout[]> {
+    return await db.select().from(affiliatePayouts)
+      .where(eq(affiliatePayouts.affiliateId, affiliateId))
+      .orderBy(desc(affiliatePayouts.createdAt));
+  }
+
+  async getAllPayouts(): Promise<AffiliatePayout[]> {
+    return await db.select().from(affiliatePayouts).orderBy(desc(affiliatePayouts.createdAt));
   }
 }
 

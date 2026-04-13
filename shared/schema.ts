@@ -388,3 +388,60 @@ export const giftCardRedemptions = pgTable("gift_card_redemptions", {
 export const insertGiftCardRedemptionSchema = createInsertSchema(giftCardRedemptions).omit({ id: true });
 export type InsertGiftCardRedemption = z.infer<typeof insertGiftCardRedemptionSchema>;
 export type GiftCardRedemption = typeof giftCardRedemptions.$inferSelect;
+
+// ============================================================
+// AFFILIATES
+// ============================================================
+export const affiliates = pgTable("affiliates", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().unique(),
+  code: text("code").notNull().unique(),           // vanity code e.g. "johndoe"
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  platform: text("platform").notNull(),            // youtube | tiktok | instagram | twitter | blog | other
+  platformUrl: text("platform_url"),
+  audienceSize: text("audience_size"),             // "1k-10k" | "10k-100k" | "100k+"
+  niche: text("niche"),                            // "tech" | "fashion" | "gaming" | "lifestyle" | "other"
+  status: text("status").notNull().default("active"), // active | suspended | pending
+  pendingBalance: real("pending_balance").notNull().default(0),
+  paidBalance: real("paid_balance").notNull().default(0),
+  paypalEmail: text("paypal_email"),
+  notes: text("notes"),
+  createdAt: text("created_at").notNull(),
+});
+export const insertAffiliateSchema = createInsertSchema(affiliates).omit({ id: true, createdAt: true, pendingBalance: true, paidBalance: true, status: true });
+export type InsertAffiliate = z.infer<typeof insertAffiliateSchema>;
+export type Affiliate = typeof affiliates.$inferSelect;
+
+// ============================================================
+// AFFILIATE CONVERSIONS
+// ============================================================
+export const affiliateConversions = pgTable("affiliate_conversions", {
+  id: serial("id").primaryKey(),
+  affiliateId: integer("affiliate_id").notNull(),
+  referredUserId: integer("referred_user_id").notNull(),
+  type: text("type").notNull(),                   // "sb_purchase" | "plus_subscription" | "purchase_credits"
+  revenueUsd: real("revenue_usd").notNull(),      // gross revenue of the event
+  commissionUsd: real("commission_usd").notNull(), // affiliate's cut
+  commissionRate: real("commission_rate").notNull(), // 0.25 | 0.15 | 0.10
+  stripePaymentId: text("stripe_payment_id"),
+  paid: boolean("paid").notNull().default(false),
+  createdAt: text("created_at").notNull(),
+});
+export const insertAffiliateConversionSchema = createInsertSchema(affiliateConversions).omit({ id: true, createdAt: true, paid: true });
+export type InsertAffiliateConversion = z.infer<typeof insertAffiliateConversionSchema>;
+export type AffiliateConversion = typeof affiliateConversions.$inferSelect;
+
+// ============================================================
+// AFFILIATE PAYOUTS
+// ============================================================
+export const affiliatePayouts = pgTable("affiliate_payouts", {
+  id: serial("id").primaryKey(),
+  affiliateId: integer("affiliate_id").notNull(),
+  amountUsd: real("amount_usd").notNull(),
+  method: text("method").notNull().default("paypal"),
+  reference: text("reference"),                   // PayPal transaction ID or note
+  note: text("note"),
+  createdAt: text("created_at").notNull(),
+});
+export type AffiliatePayout = typeof affiliatePayouts.$inferSelect;

@@ -3262,4 +3262,224 @@ export async function registerRoutes(
     });
   });
 
+  // ============================================================
+  // AFFILIATE ROUTES
+  // ============================================================
+
+  // Helper: find affiliate for a referred user
+  async function findAffiliateForUser(userId: number) {
+    const user = await storage.getUserById(userId);
+    if (!user?.referredBy) return null;
+    return await storage.getAffiliateByUserId(user.referredBy);
+  }
+
+  // Vanity URL redirect
+  app.get("/join/:code", (req: Request, res: Response) => {
+    const { code } = req.params;
+    res.redirect(`/#/gift-card?ref=${encodeURIComponent(code)}`);
+  });
+
+  // Check if affiliate code is available
+  app.get("/api/affiliates/check-code/:code", async (req: Request, res: Response) => {
+    try {
+      const { code } = req.params;
+      const existing = await storage.getAffiliateByCode(code);
+      res.json({ available: !existing });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Apply to become an affiliate
+  app.post("/api/affiliates/apply", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = req.user as any;
+      // Check not already an affiliate
+      const existing = await storage.getAffiliateByUserId(user.id);
+      if (existing) {
+        return res.status(409).json({ message: "You are already an affiliate", affiliate: existing });
+      }
+      const { name, platform, platformUrl, audienceSize, niche, code, paypalEmail } = req.body;
+      if (!name || !platform || !code) {
+        return res.status(400).json({ message: "name, platform, and code are required" });
+      }
+      // Check code availability
+      const codeCheck = await storage.getAffiliateByCode(code);
+      if (codeCheck) {
+        return res.status(409).json({ message: "That affiliate code is already taken" });
+      }
+      const affiliate = await storage.createAffiliate({
+        userId: user.id,
+        code: code.toLowerCase().replace(/[^a-z0-9_-]/g, ""),
+        name,
+        email: user.email,
+        platform,
+        platformUrl: platformUrl || null,
+        audienceSize: audienceSize || null,
+        niche: niche || null,
+        paypalEmail: paypalEmail || null,
+        notes: null,
+      });
+      res.json(affiliate);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Get own affiliate profile + stats
+  app.get("/api/affiliates/me", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = req.user as any;
+      const affiliate = await storage.getAffiliateByUserId(user.id);
+      if (!affiliate) {
+        return res.status(404).json({ message: "Not an affiliate" });
+      }
+      // Compute stats from referral clicks using referredBy on users
+      const allUsers = await storage.getAllUsers(1, 10000);
+      const signups = allUsers.users.filter(u => u.referredBy === user.id).length;
+      const conversions = await storage.getConversionsByAffiliate(affiliate.id);
+      res.json({
+        ...affiliate,
+        stats: {
+          clicks: 0, // clicks tracked via referralClicks but keyed on userId
+          signups,
+          conversions: conversions.length,
+          pendingBalance: affiliate.pendingBalance,
+          paidBalance: affiliate.paidBalance,
+        },
+      });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Update own affiliate profile
+  app.patch("/api/affiliates/me", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = req.user as any;
+      const affiliate = await storage.getAffiliateByUserId(user.id);
+      if (!affiliate) {
+        return res.status(404).json({ message: "Not an affiliate" });
+      }
+      const { paypalEmail, platformUrl } = req.body;
+      const updated = await storage.updateAffiliate(affiliate.id, {
+        ...(paypalEmail !== undefined ? { paypalEmail } : {}),
+        ...(platformUrl !== undefined ? { platformUrl } : {}),
+      });
+      res.json(updated);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Get own conversions
+  app.get("/api/affiliates/me/conversions", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = req.user as any;
+      const affiliate = await storage.getAffiliateByUserId(user.id);
+      if (!affiliate) {
+        return res.status(404).json({ message: "Not an affiliate" });
+      }
+      const conversions = await storage.getConversionsByAffiliate(affiliate.id);
+      res.json(conversions);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Get own payouts
+  app.get("/api/affiliates/me/payouts", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = req.user as any;
+      const affiliate = await storage.getAffiliateByUserId(user.id);
+      if (!affiliate) {
+        return res.status(404).json({ message: "Not an affiliate" });
+      }
+      const payouts = await storage.getPayoutsByAffiliate(affiliate.id);
+      res.json(payouts);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Admin: get all affiliates with stats
+  app.get("/api/admin/affiliates", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const allAffiliates = await storage.getAllAffiliates();
+      const allConversions = await storage.getAllConversions();
+      const allUsers = await storage.getAllUsers(1, 10000);
+
+      const result = allAffiliates.map(aff => {
+        const conversions = allConversions.filter(c => c.affiliateId === aff.id);
+        const signups = allUsers.users.filter(u => u.referredBy === aff.userId).length;
+        return {
+          ...aff,
+          stats: {
+            signups,
+            conversions: conversions.length,
+            totalCommission: conversions.reduce((s, c) => s + c.commissionUsd, 0),
+          },
+        };
+      });
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Admin: update affiliate status/notes
+  app.patch("/api/admin/affiliates/:id", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status, notes } = req.body;
+      const updated = await storage.updateAffiliate(id, {
+        ...(status !== undefined ? { status } : {}),
+        ...(notes !== undefined ? { notes } : {}),
+      });
+      res.json(updated);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Admin: record a payout
+  app.post("/api/admin/affiliates/:id/payout", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const affiliate = await storage.getAffiliateById(id);
+      if (!affiliate) {
+        return res.status(404).json({ message: "Affiliate not found" });
+      }
+      const { amountUsd, method, reference, note } = req.body;
+      if (!amountUsd || amountUsd <= 0) {
+        return res.status(400).json({ message: "Invalid payout amount" });
+      }
+      // Record payout
+      const payout = await storage.createAffiliatePayout({
+        affiliateId: id,
+        amountUsd,
+        method: method || "paypal",
+        reference: reference || null,
+        note: note || null,
+      });
+      // Mark conversions as paid and update balances
+      const newPending = Math.max(0, affiliate.pendingBalance - amountUsd);
+      const newPaid = affiliate.paidBalance + amountUsd;
+      await storage.updateAffiliate(id, { pendingBalance: newPending, paidBalance: newPaid });
+      res.json(payout);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Admin: get all conversions
+  app.get("/api/admin/affiliates/conversions", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const conversions = await storage.getAllConversions();
+      res.json(conversions);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
 }
