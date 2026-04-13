@@ -732,6 +732,25 @@ export async function registerRoutes(
   });
 
 
+
+  // Bulk update listing images (admin seeding)
+  app.post("/api/admin/bulk-update-images", async (req: Request, res: Response) => {
+    try {
+      const { secret, updates } = req.body;
+      if (secret !== "SWAPEDLY_ADMIN_SETUP_2026") return res.status(403).json({ message: "Invalid secret" });
+      let updated = 0;
+      for (const u of (updates || [])) {
+        try {
+          await storage.updateListing(u.id, { images: u.images });
+          updated++;
+        } catch {}
+      }
+      return res.json({ success: true, updated });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
   // ============================================================
   // FORGOT PASSWORD / RESET PASSWORD
   // ============================================================
