@@ -265,3 +265,17 @@
   .comparison-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .prose-article .comparison-table, .article-body .comparison-table { min-width: 600px; }
 }
+
+/* ─── Help Article Styles ─────────────────────────────────────────────────── */
+.help-article-body { color: #334155; line-height: 1.75; font-size: 0.95rem; }
+.help-article-body h2 { font-size: 1.1rem; font-weight: 800; color: #1e293b; margin: 1.75rem 0 0.6rem; padding-left: 0.75rem; border-left: 3px solid #5A45FF; }
+.help-article-body h3 { font-size: 1rem; font-weight: 700; color: #334155; margin: 1.25rem 0 0.4rem; }
+.help-article-body p { margin-bottom: 1rem; }
+.help-article-body ol, .help-article-body ul { margin: 0.75rem 0 1.25rem 1.5rem; }
+.help-article-body li { margin-bottom: 0.4rem; }
+.help-article-body a { color: #5A45FF; text-decoration: underline; text-underline-offset: 2px; }
+.help-article-body strong { font-weight: 700; color: #0f172a; }
+.help-article-body .tip-box { background: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 0.5rem; padding: 0.875rem 1.25rem; margin: 1.25rem 0; font-size: 0.875rem; color: #1e40af; }
+.help-article-body .tip-box::before { content: "💡 Tip: "; font-weight: 700; }
+.help-article-body .warning-box { background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 0.5rem; padding: 0.875rem 1.25rem; margin: 1.25rem 0; font-size: 0.875rem; color: #92400e; }
+.help-article-body .warning-box::before { content: "⚠️ Note: "; font-weight: 700; }

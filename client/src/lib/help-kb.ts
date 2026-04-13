@@ -1,0 +1,1464 @@
+export const HELP_KB = [
+  {
+    "id": "getting-started",
+    "title": "Getting Started",
+    "emoji": "🚀",
+    "description": "New to Swapedly? Learn how to create your account, claim your $40 welcome gift card, and get comfortable navigating the platform.",
+    "articles": [
+      {
+        "id": "create-account",
+        "title": "How to Create an Account",
+        "slug": "create-account",
+        "summary": "Sign up for a free Swapedly account in just a few steps and start buying and selling with Swap Bucks.",
+        "content": "<h2>Welcome to Swapedly</h2><p>Creating your Swapedly account is free, takes about two minutes, and immediately puts you on the path to earning and spending Swap Bucks — Swapedly's virtual currency where 1 SB = $1 USD in value. Whether you're here to clear out your closet, score a great deal, or both, this is where it all starts.</p><h2>Step-by-Step: Creating Your Account</h2><ol><li><strong>Visit swapedly.com</strong> — Open your browser and navigate to <a href=\"https://www.swapedly.com\" target=\"_blank\">swapedly.com</a>. You can sign up from any device — desktop, tablet, or phone.</li><li><strong>Click \"Sign Up\"</strong> — Look for the Sign Up button in the top-right corner of the homepage.</li><li><strong>Enter your details</strong> — Provide your full name, a valid email address, and a secure password. Choose a password you don't use elsewhere for best security.</li><li><strong>Verify your email</strong> — Check your inbox for a verification email from Swapedly. Click the confirmation link inside it. If you don't see it within a couple of minutes, check your spam or junk folder.</li><li><strong>Complete your profile</strong> — After verifying, you'll be prompted to add a profile photo, write a short bio, and set your general location. A complete profile builds trust with other users right away.</li><li><strong>Claim your $40 gift card</strong> — Every new account is eligible for 40 Swap Bucks at <a href=\"https://www.swapedly.com/#/gift-card\">swapedly.com/#/gift-card</a>. This brings you most of the way to the 60 SB needed to unlock the marketplace — don't skip it.</li></ol><h2>What Happens After You Sign Up</h2><p>Once your account is active, you'll be taken through a short <a href=\"/#/help/welcome-tour\">welcome tour</a> that introduces the key concepts of the platform: Swap Bucks, listings, escrow, and how transactions work. It only takes a couple of minutes and answers most of the questions new users have.</p><p>Before you can browse the full marketplace and make purchases, you'll need at least <strong>60 Swap Bucks</strong> in your wallet. Your $40 welcome gift covers most of that gap. See <a href=\"/#/help/earn-sb\">Ways to Earn Swap Bucks</a> to top up the remaining 20 SB quickly.</p><div class=\"tip-box\">Tip: Refer friends after signing up to earn extra SB fast — each friend who signs up with your referral link adds 1 SB to your wallet. Twenty referrals and you've unlocked the marketplace without spending a cent.</div><h2>Trouble Signing Up?</h2><p>If the verification email doesn't arrive, double-check that the email address you entered is correct and look in your spam folder. If you're locked out or have an issue with your password, you can reset it at <a href=\"https://www.swapedly.com/#/forgot-password\">swapedly.com/#/forgot-password</a> at any time. For anything else, our support team is happy to help.</p><div class=\"warning-box\">Warning: Each person may only maintain one active Swapedly account. Creating duplicate accounts violates our terms and may result in all accounts being suspended.</div>",
+        "faqs": [
+          {
+            "q": "Is it free to create a Swapedly account?",
+            "a": "Yes, completely free. There are no sign-up fees. Purchase Credits are only needed when you're ready to buy an item and pay the transaction fee."
+          },
+          {
+            "q": "Do I need to verify my email before I can use Swapedly?",
+            "a": "Yes. Email verification is required to activate your account and access all platform features, including claiming your welcome gift card."
+          },
+          {
+            "q": "Can I sign up with a social account like Google or Facebook?",
+            "a": "Social sign-in options may be available depending on your platform version. Check the sign-up screen for available options."
+          },
+          {
+            "q": "What if I forget my password right after signing up?",
+            "a": "Visit https://www.swapedly.com/#/forgot-password to reset it. You'll receive a password reset link by email within a few minutes."
+          },
+          {
+            "q": "How old do I need to be to create an account?",
+            "a": "You must be at least 18 years old to use Swapedly."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": true
+      },
+      {
+        "id": "redeem-gift-card-signup",
+        "title": "Claiming Your $40 Gift Card",
+        "slug": "redeem-gift-card-signup",
+        "summary": "New Swapedly users can claim a $40 welcome gift card — 40 Swap Bucks added directly to your wallet.",
+        "content": "<h2>Your Welcome Gift: 40 Free Swap Bucks</h2><p>Every new Swapedly account is eligible for a <strong>$40 welcome gift card</strong> — that's 40 Swap Bucks (SB) credited directly to your wallet the moment you claim it. Since 1 SB = $1 USD in value, this is a genuine $40 head start toward making your first purchase on the platform.</p><h2>How to Claim Your Gift Card</h2><ol><li><strong>Create your account first</strong> — The gift card is for new users, so you'll need a verified Swapedly account before claiming. See <a href=\"/#/help/create-account\">How to Create an Account</a> if you haven't done that yet.</li><li><strong>Go to the gift card page</strong> — Navigate to <a href=\"https://www.swapedly.com/#/gift-card\">swapedly.com/#/gift-card</a>. You can find this link in your welcome email, on the homepage, or during the welcome tour.</li><li><strong>Follow the on-screen steps</strong> — The page will recognize your logged-in account and walk you through claiming your 40 SB. There's nothing to purchase and no card number to enter for the welcome bonus.</li><li><strong>Check your wallet</strong> — Once claimed, the 40 SB appear in your wallet immediately. Head to <a href=\"/#/help/sb-wallet\">Understanding Your Wallet</a> if you're not sure where to find it.</li></ol><h2>What Can You Do with 40 SB?</h2><p>The welcome gift puts you at 40 SB — just 20 short of the 60 SB minimum required to unlock the marketplace and start buying. Here's how to bridge that gap fast:</p><ul><li><strong>Refer 20 friends</strong> — Each sign-up via your referral link earns you 1 SB. See <a href=\"/#/help/referrals\">Referring Friends for Swap Bucks</a>.</li><li><strong>List and sell an item</strong> — Even one small sale can push you over the threshold.</li><li><strong>Complete your profile</strong> — Swapedly may offer bonus SB for finishing your profile setup.</li></ul><div class=\"tip-box\">Tip: Claim the gift card the same day you sign up. Don't leave 40 free SB sitting on the table while you're exploring the platform.</div><h2>Gift Card Eligibility and Terms</h2><p>The $40 welcome gift card is available once per account, to new users only. It is non-transferable, has no cash value outside the Swapedly platform, and may have a claim window after account creation. Once the SB are in your wallet, they do not expire.</p><div class=\"warning-box\">Warning: Only claim your gift card through the official page at swapedly.com/#/gift-card. Ignore any third-party sites or messages claiming to offer Swapedly gift codes — these are scams.</div>",
+        "faqs": [
+          {
+            "q": "Can I claim the $40 gift card more than once?",
+            "a": "No. The welcome gift card is a one-time offer per account. Each eligible account can claim it exactly once."
+          },
+          {
+            "q": "Do I need a credit card or payment info to claim the gift card?",
+            "a": "No. The welcome gift card is completely free — no payment information required."
+          },
+          {
+            "q": "What if the gift card page says I'm not eligible?",
+            "a": "This usually means the gift card has already been claimed on your account, or your account doesn't meet the new-user eligibility criteria. Contact support if you believe this is an error."
+          },
+          {
+            "q": "Does the gift card expire after I claim it?",
+            "a": "The claim window may be time-limited after account creation, so claim it promptly. Once the SB are in your wallet, they do not expire."
+          },
+          {
+            "q": "I have 40 SB from the gift card — can I start buying now?",
+            "a": "You need at least 60 SB in your wallet to unlock the marketplace. Earn 20 more through referrals, profile completion, or selling, and you'll be ready to shop."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "complete-profile",
+        "title": "Setting Up Your Profile",
+        "slug": "complete-profile",
+        "summary": "A complete Swapedly profile builds trust with buyers and sellers — here's everything you should fill in and why it matters.",
+        "content": "<h2>Why Your Profile Is Your First Impression</h2><p>On Swapedly, your profile is the first thing buyers and sellers look at before deciding whether to transact with you. A complete, professional-looking profile signals that you're a real, trustworthy person — and that goes a long way in a community marketplace. Accounts with photos and bios consistently attract more offers and close deals faster than blank profiles.</p><h2>What to Fill In</h2><ol><li><strong>Profile photo</strong> — Upload a clear, current photo of your face. It doesn't need to be professional, just recognizable. Avoid logos, avatars, or photos of your pet as your main profile image — other users want to know they're dealing with a real person.</li><li><strong>Display name</strong> — This is your publicly visible name. Use something recognizable, whether it's your first name, a nickname, or a selling handle you consistently use.</li><li><strong>Bio</strong> — Write 2–4 sentences about yourself. Mention what kinds of things you sell or buy, how quickly you respond to messages, and anything that helps people know what to expect from you. Keep it genuine and friendly.</li><li><strong>Location</strong> — Add your city or general region. This helps buyers assess whether local pickup is feasible for them, and helps you appear in local search results. Your exact address is never shown — only your general area.</li><li><strong>Notification preferences</strong> — While setting up, take a moment to configure how you want to receive alerts about offers, messages, and sales. See <a href=\"/#/help/notifications\">Managing Notifications</a>.</li></ol><h2>How to Access Profile Settings</h2><p>Log in and tap your avatar or name in the top navigation to open your profile. Look for an \"Edit Profile\" button to make changes. You can update your profile at any time — there's no limit on edits. See <a href=\"/#/help/edit-profile\">Editing Your Profile</a> for a detailed walkthrough.</p><h2>What Other Users Can See</h2><p>Your profile photo, display name, bio, general location, active listings, and transaction reviews are all publicly visible to Swapedly users. Your email address, wallet balance, and payment information are always private. For full details on what's shared, see <a href=\"/#/help/privacy\">Your Privacy on Swapedly</a>.</p><div class=\"tip-box\">Tip: A specific, helpful bio stands out. Instead of \"I sell stuff,\" try something like \"Selling electronics, books, and home goods — fast shipper, always honest about condition.\" That kind of detail builds instant confidence.</div><div class=\"warning-box\">Warning: Never include your phone number, home address, or personal payment details in your public bio. Keep that information private and communicate only through Swapedly's messaging system.</div>",
+        "faqs": [
+          {
+            "q": "Is a profile photo required to use Swapedly?",
+            "a": "It's not strictly required, but strongly recommended. Profiles without photos receive less engagement and may appear less trustworthy to other users."
+          },
+          {
+            "q": "Can other users see my exact location?",
+            "a": "No. Only your general location (city or region) is displayed publicly. Your home address is never shared on your profile."
+          },
+          {
+            "q": "Can I change my username or display name later?",
+            "a": "Display name changes are generally allowed from your profile settings. Username changes may be more restricted — contact support if you need help."
+          },
+          {
+            "q": "Does completing my profile earn me Swap Bucks?",
+            "a": "Swapedly may offer bonus SB for profile completion as part of onboarding. Check your notifications or the Earn SB page for any active offers."
+          },
+          {
+            "q": "How long should my bio be?",
+            "a": "Two to four sentences is ideal. Cover what you sell or buy, your general response time, and any details that help others know what to expect from transacting with you."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "welcome-tour",
+        "title": "Understanding the Welcome Tour",
+        "slug": "welcome-tour",
+        "summary": "The welcome tour walks new Swapedly users through the platform's key features in about two minutes — here's what it covers.",
+        "content": "<h2>What Is the Welcome Tour?</h2><p>When you first create a Swapedly account, you'll be guided through a short interactive welcome tour. Think of it as a friendly two-minute orientation — it introduces you to how the platform works so you're not left figuring everything out on your own. The tour is especially helpful for users who are new to community marketplaces.</p><h2>What the Welcome Tour Covers</h2><ul><li><strong>Swap Bucks (SB) explained</strong> — You'll learn that SB is Swapedly's virtual currency, that 1 SB = $1 USD in value, and why the platform uses it instead of direct cash payments.</li><li><strong>The marketplace</strong> — A quick look at how listings are organized, how to search and filter, and what you'll find once you're inside the marketplace.</li><li><strong>Buying basics</strong> — A brief overview of how a purchase works from start to finish, including how Swap Bucks are held in escrow during a transaction to protect both parties.</li><li><strong>Selling basics</strong> — An intro to creating a listing, setting a price in SB, and how you receive payment once a buyer confirms delivery.</li><li><strong>Your wallet</strong> — A quick tour of where your SB balance lives, how to track your transaction history, and how Purchase Credits work alongside Swap Bucks.</li><li><strong>Claiming your gift card</strong> — The tour will prompt you to visit <a href=\"https://www.swapedly.com/#/gift-card\">swapedly.com/#/gift-card</a> to claim your 40 SB welcome bonus if you haven't already.</li></ul><h2>Can I Skip the Tour?</h2><p>Yes, the tour is optional — you can skip it and dive straight in. That said, completing it takes about two minutes and answers most of the questions new users ask support in their first week. If you're not familiar with escrow, virtual currencies, or community marketplaces, the tour is worth your time.</p><h2>What If I Want to Revisit It?</h2><p>If you skipped the tour or want to refresh your memory, this help center covers everything the tour does and more. A good place to start is <a href=\"/#/help/what-is-sb\">What Are Swap Bucks?</a> and <a href=\"/#/help/buy-item\">How to Buy an Item</a>. You can also explore the platform by navigating through the main menu — see <a href=\"/#/help/navigation\">Getting Around Swapedly</a> for a full orientation.</p><div class=\"tip-box\">Tip: Even if you've used similar marketplaces before, it's worth completing the tour. Swapedly's SB currency, 60 SB marketplace unlock, and escrow system work differently from most platforms — the tour explains all of it clearly.</div>",
+        "faqs": [
+          {
+            "q": "Is the welcome tour mandatory?",
+            "a": "No, it's optional. But completing it takes about two minutes and helps you avoid common early mistakes around Swap Bucks and marketplace access."
+          },
+          {
+            "q": "How long does the welcome tour take?",
+            "a": "Most users complete the welcome tour in under two minutes."
+          },
+          {
+            "q": "Can I replay the welcome tour after completing it?",
+            "a": "Check your account settings for a replay option. Otherwise, this help center covers all the same ground in more detail."
+          },
+          {
+            "q": "Will the tour show me how to claim my gift card?",
+            "a": "Yes — the tour includes a prompt to visit swapedly.com/#/gift-card to claim your 40 SB welcome bonus."
+          },
+          {
+            "q": "What if I get interrupted during the tour?",
+            "a": "You can typically restart or resume the tour from the beginning if you're interrupted. Check your notification or onboarding section in settings."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "navigation",
+        "title": "Getting Around Swapedly",
+        "slug": "navigation",
+        "summary": "A quick orientation to Swapedly's main pages and menus so you can find anything you need without getting lost.",
+        "content": "<h2>Your Swapedly Map</h2><p>Swapedly is designed to be intuitive whether you're on a desktop browser or a mobile device, but knowing where each key section lives saves you time from day one. Here's a breakdown of everything in the main navigation and what each area is for.</p><h2>Main Navigation Sections</h2><ul><li><strong>Home / Feed</strong> — Your landing page after logging in. Shows featured listings, recently added items, and personalized recommendations based on your activity. A good place to browse casually and see what's new.</li><li><strong>Marketplace</strong> — The full catalog of active listings from all sellers on the platform. This is where you search, filter, and browse to find items to buy. Note: you need at least 60 SB in your wallet to access this section. See <a href=\"/#/help/marketplace-unlock\">Unlocking the Marketplace</a>.</li><li><strong>Sell / Create Listing</strong> — Tap the \"Sell\" button or the \"+\" icon (usually prominently placed in the nav bar) to create a new listing. This opens the listing creation form. See <a href=\"/#/help/create-listing\">How to Create a Listing</a>.</li><li><strong>My Listings</strong> — A dashboard showing all your active, pending, sold, and paused listings. Use it to edit prices, manage inventory, and track your selling activity. See <a href=\"/#/help/manage-listings\">Managing Your Listings</a>.</li><li><strong>Wallet</strong> — Your financial hub. View your current Swap Bucks balance, escrowed SB, Purchase Credits, and full transaction history. See <a href=\"/#/help/sb-wallet\">Understanding Your Wallet</a>.</li><li><strong>Messages</strong> — Direct messaging between you and other users. Coordinate shipping, ask questions about listings, and handle offer negotiations — all within the platform.</li><li><strong>Profile</strong> — Your public-facing page showing your photo, bio, active listings, and transaction reviews.</li><li><strong>Settings</strong> — Manage your account details, password, email, notification preferences, and Swapedly Plus subscription.</li></ul><h2>Mobile Navigation</h2><p>On mobile, the main navigation lives in a tab bar at the bottom of your screen. You'll typically see icons for Home, Marketplace, Sell, Messages, and Profile. Tap any icon to jump to that section instantly.</p><h2>Search Bar</h2><p>The search bar appears at the top of the marketplace section. Use it to search by keyword, brand, product name, or category. For tips on getting the best results, see <a href=\"/#/help/search-filter\">Searching and Filtering Listings</a>.</p><div class=\"tip-box\">Tip: Bookmark the help center at swapedly.com so you can get back to it quickly when you have a question. Most answers are just a search away.</div>",
+        "faqs": [
+          {
+            "q": "Where do I find my Swap Bucks balance?",
+            "a": "Your SB balance is displayed in the Wallet section. You can access it from the main navigation menu on any page."
+          },
+          {
+            "q": "How do I access the marketplace?",
+            "a": "Tap or click \"Marketplace\" in the main navigation. You'll need at least 60 SB in your wallet to browse and buy listings."
+          },
+          {
+            "q": "Where do I create a new listing?",
+            "a": "Tap the \"Sell\" button or the \"+\" icon in the navigation bar to open the listing creation form."
+          },
+          {
+            "q": "How do I send a message to a seller?",
+            "a": "Open a listing and tap the message or contact button on the listing detail page. You can also access all your conversations from the Messages section in the main nav."
+          },
+          {
+            "q": "Where do I manage my Swapedly Plus subscription?",
+            "a": "Go to Settings from your profile or main menu. You'll find subscription management options there, including upgrading or cancelling Plus."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      }
+    ]
+  },
+  {
+    "id": "buying",
+    "title": "Buying",
+    "emoji": "🛒",
+    "description": "Find items you love, understand Purchase Credits and transaction fees, make offers, and buy with confidence using Swapedly's transaction protection.",
+    "articles": [
+      {
+        "id": "buy-item",
+        "title": "How to Buy an Item",
+        "slug": "buy-item",
+        "summary": "Learn how to find, purchase, and receive items on Swapedly using Swap Bucks and Purchase Credits.",
+        "content": "<h2>Ready to Buy? Here's the Full Picture</h2><p>Buying on Swapedly works a bit differently from traditional marketplaces. Items are priced in <strong>Swap Bucks (SB)</strong> — Swapedly's virtual currency where 1 SB = $1 USD in value — and a small transaction fee is paid separately in USD via Purchase Credits. Once you understand the two-currency system, the actual buying process is fast and straightforward.</p><h2>Before Your First Purchase</h2><p>You'll need two things ready before you can buy:</p><ul><li><strong>At least 60 SB in your wallet</strong> — Required to unlock marketplace access. See <a href=\"/#/help/marketplace-unlock\">Unlocking the Marketplace</a> if you're not there yet.</li><li><strong>Purchase Credits</strong> — Used to pay the 10% transaction fee (capped at $20) in USD. Credits cost $0.49 each, with a minimum purchase of $5. See <a href=\"/#/help/purchase-credits\">What Are Purchase Credits?</a></li></ul><h2>Step-by-Step: Making a Purchase</h2><ol><li><strong>Browse and search</strong> — Open the Marketplace and use the search bar and filters to find what you want. See <a href=\"/#/help/search-filter\">Searching and Filtering Listings</a>.</li><li><strong>Review the listing</strong> — Read the description carefully, examine all photos, check the condition rating, and note the delivery method (shipping or local pickup).</li><li><strong>Check the seller</strong> — Tap the seller's name to view their profile, ratings, and transaction history. See <a href=\"/#/help/view-seller\">Viewing a Seller's Profile</a>.</li><li><strong>Consider making an offer</strong> — If the price isn't quite right, you can make an offer below the listed amount. See <a href=\"/#/help/make-offer\">Making an Offer on a Listing</a>.</li><li><strong>Tap \"Buy Now\"</strong> — When you're ready, confirm the purchase. Your Swap Bucks move into escrow immediately — held securely until the transaction completes.</li><li><strong>Coordinate delivery</strong> — Arrange shipping or local pickup with the seller through Swapedly messages.</li><li><strong>Inspect and confirm</strong> — Once you receive the item, inspect it thoroughly. If everything checks out, confirm delivery in the app to release the seller's SB from escrow. See <a href=\"/#/help/confirm-delivery\">Confirming Delivery</a>.</li></ol><h2>Transaction Fees</h2><p>A <strong>10% transaction fee</strong>, capped at $20, is charged to both buyer and seller separately in USD. You pay yours via Purchase Credits; the seller pays theirs independently. This fee funds platform operations and transaction protection.</p><div class=\"tip-box\">Tip: Check the seller's recent reviews before buying, especially for higher-value items. A seller with dozens of positive reviews is a much safer bet than one with no history at all.</div><div class=\"warning-box\">Warning: Never agree to complete a transaction outside of Swapedly — via cash, Venmo, or any off-platform method. Doing so voids your transaction protection, and Swapedly cannot help if something goes wrong.</div>",
+        "faqs": [
+          {
+            "q": "What currency do I use to pay for items?",
+            "a": "Items are priced and paid for in Swap Bucks (SB). The 10% transaction fee is paid separately in USD via Purchase Credits."
+          },
+          {
+            "q": "What is the transaction fee and who pays it?",
+            "a": "The fee is 10% of the item's SB price, capped at $20. Both buyer and seller pay this fee independently in USD — it's not shared."
+          },
+          {
+            "q": "What if the item I receive doesn't match the listing description?",
+            "a": "Do not confirm delivery. Open a dispute through the platform immediately. See our guide on What to Do If Something Goes Wrong."
+          },
+          {
+            "q": "Can I buy from a seller in a different city or state?",
+            "a": "Yes — for listings that offer shipping, distance doesn't matter. The seller sets whether they offer shipping, local pickup, or both."
+          },
+          {
+            "q": "When are my Swap Bucks released to the seller?",
+            "a": "Your SB are held in escrow and released to the seller only after you confirm delivery. You'll receive a notification when this happens."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": true
+      },
+      {
+        "id": "search-filter",
+        "title": "Searching and Filtering Listings",
+        "slug": "search-filter",
+        "summary": "Find exactly what you're looking for in the Swapedly marketplace using search, filters, and sort options.",
+        "content": "<h2>Finding What You Want</h2><p>The Swapedly marketplace can have a large volume of active listings at any time, spanning everything from electronics and clothing to furniture and collectibles. The search and filter tools are your best friends for cutting through the noise and surfacing exactly what you're looking for.</p><h2>Using the Search Bar</h2><ol><li><strong>Open the Marketplace</strong> from the main navigation. Remember, you'll need at least 60 SB in your wallet to access it.</li><li><strong>Type keywords into the search bar</strong> at the top of the page. The search works best with specific terms — brand names, model numbers, item types, or distinctive features. For example, \"Sony WH-1000XM5\" will return more relevant results than just \"headphones.\"</li><li><strong>Hit search</strong> to see matching listings.</li></ol><h2>Using Filters to Narrow Results</h2><p>Once you have search results, use the filter panel to zero in:</p><ul><li><strong>Category</strong> — Browse by item type: electronics, clothing, furniture, sports equipment, books, and more.</li><li><strong>Condition</strong> — Filter by New, Like New, Good, Fair, or Poor. See the <a href=\"/#/help/condition-guide\">Condition Guide</a> for what each rating means in practice.</li><li><strong>Price Range</strong> — Set a minimum and maximum price in Swap Bucks to stay within your budget.</li><li><strong>Location</strong> — Narrow results to your area, especially useful when you're interested in local pickup.</li><li><strong>Shipping Available</strong> — Toggle this to show only listings that offer shipping if you can't do local pickup.</li></ul><h2>Sorting Your Results</h2><p>Sort listings to find what you need faster:</p><ul><li><strong>Newest</strong> — See freshly posted listings first. Great for catching items before other buyers do.</li><li><strong>Price: Low to High</strong> — Find the best deals within your budget.</li><li><strong>Price: High to Low</strong> — Useful when shopping for higher-end items.</li><li><strong>Nearest</strong> — If location is enabled, sort by distance for local pickup prioritization.</li></ul><div class=\"tip-box\">Tip: Try multiple search terms for the same item. Sellers describe things differently — \"couch\" and \"sofa\" may return different results even for the same type of item. Broad first, then filter down.</div><h2>Saving a Search</h2><p>If you're hunting for a specific item, look for a \"Save Search\" or \"Watch\" option on the results page. Swapedly may notify you when new listings matching your criteria are posted, so you can act fast.</p>",
+        "faqs": [
+          {
+            "q": "Why am I not finding the item I'm looking for?",
+            "a": "Try broader search terms, remove some filters, or check back later — new listings are added regularly. Also try alternate names or spellings for the item."
+          },
+          {
+            "q": "Can I filter by seller location for local pickup?",
+            "a": "Yes. Use the location filter or the \"Nearest\" sort option to find items close to you that may be available for local pickup."
+          },
+          {
+            "q": "How do I search within a specific category?",
+            "a": "Use the Category filter after running a search, or tap a category directly from the marketplace homepage to browse within it."
+          },
+          {
+            "q": "How do I clear all my filters at once?",
+            "a": "Look for a \"Clear All\" or \"Reset Filters\" button near the top of the filter panel to start fresh."
+          },
+          {
+            "q": "Can I save a listing to revisit later?",
+            "a": "Look for a heart, save, or bookmark icon on each listing. Saved items can usually be found in your profile or a dedicated \"Saved\" section."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "purchase-credits",
+        "title": "What Are Purchase Credits?",
+        "slug": "purchase-credits",
+        "summary": "Purchase Credits are Swapedly's USD-based currency for paying transaction fees — separate from Swap Bucks.",
+        "content": "<h2>Two Currencies, Two Purposes</h2><p>Swapedly uses two distinct currencies: <strong>Swap Bucks (SB)</strong> for pricing and paying for items, and <strong>Purchase Credits</strong> for covering transaction fees in real USD. Understanding the difference — and making sure you have both on hand — is essential for smooth buying and selling.</p><h2>What Are Purchase Credits, Exactly?</h2><p>Purchase Credits are USD-denominated credits you load into your Swapedly account and use exclusively to pay the platform's transaction fee when completing a purchase or sale. They are <em>not</em> interchangeable with Swap Bucks and cannot be used to buy items directly.</p><ul><li><strong>Cost:</strong> $0.49 per credit</li><li><strong>Minimum purchase:</strong> $5.00 (approximately 10 credits)</li><li><strong>Use:</strong> Paying the 10% transaction fee (capped at $20 per transaction)</li></ul><h2>How the Transaction Fee Works</h2><p>Every completed transaction on Swapedly incurs a <strong>10% fee capped at a maximum of $20</strong>, paid separately by both buyer and seller in USD via Purchase Credits. Here are some examples:</p><ul><li>Item priced at 20 SB → fee = 2 SB equivalent → approximately $1.98 in Purchase Credits</li><li>Item priced at 80 SB → fee = 8 SB equivalent → approximately $7.84 in Purchase Credits</li><li>Item priced at 250 SB → fee would be 25, but is <strong>capped at $20</strong></li></ul><h2>How to Buy Purchase Credits</h2><ol><li>Go to your <strong>Wallet</strong> from the main navigation.</li><li>Tap <strong>\"Buy Purchase Credits\"</strong> or a similar option.</li><li>Enter the dollar amount you want to load (minimum $5.00).</li><li>Complete payment with a debit or credit card.</li><li>Credits appear in your wallet immediately and are ready to use.</li></ol><div class=\"tip-box\">Tip: Load a buffer of extra credits so you're never caught short when you spot an item you want to buy right away. Running out mid-transaction is a frustrating delay.</div><div class=\"warning-box\">Warning: Purchase Credits are non-refundable once purchased. They can only be used to pay Swapedly transaction fees and cannot be converted to Swap Bucks or cash.</div>",
+        "faqs": [
+          {
+            "q": "Why can't I just pay the transaction fee in Swap Bucks?",
+            "a": "The transaction fee is collected in real USD to cover platform operating costs. Purchase Credits are how Swapedly handles this separately from the SB economy."
+          },
+          {
+            "q": "What's the minimum amount of Purchase Credits I can buy?",
+            "a": "The minimum purchase is $5.00, which gets you approximately 10 credits at $0.49 each."
+          },
+          {
+            "q": "Do both buyers and sellers pay the transaction fee?",
+            "a": "Yes. Both buyer and seller each independently pay a 10% transaction fee (capped at $20) via Purchase Credits."
+          },
+          {
+            "q": "Do Purchase Credits expire?",
+            "a": "Credits typically do not expire, but check the terms in your wallet section for any conditions. Unused credits carry over between transactions."
+          },
+          {
+            "q": "Can I get a refund on Purchase Credits I haven't used?",
+            "a": "Purchase Credits are generally non-refundable. Contact support if you have a specific situation to discuss."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "make-offer",
+        "title": "Making an Offer on a Listing",
+        "slug": "make-offer",
+        "summary": "Not happy with the listed price? Learn how to make an offer and negotiate with sellers on Swapedly.",
+        "content": "<h2>Negotiating Is Part of the Culture</h2><p>Swapedly is a community marketplace, and negotiating on price is a normal, expected part of the experience. If a listed price is higher than you'd like to pay, making an offer is a respectful way to start a conversation. Sellers who enable offers are explicitly open to hearing what you're willing to pay.</p><h2>How to Make an Offer</h2><ol><li><strong>Open the listing</strong> you're interested in purchasing.</li><li><strong>Tap \"Make an Offer\"</strong> — This button appears on listings where the seller has enabled the offer feature. If you don't see it, that seller isn't accepting offers on that listing.</li><li><strong>Enter your offer price in Swap Bucks</strong> — Be thoughtful about the number. Offers significantly below the listed price (more than 30-40% off) are usually declined and can create an awkward dynamic.</li><li><strong>Add an optional message</strong> — A short, friendly note can make a real difference. Explaining that you're a serious buyer ready to complete quickly, or that you love the item, humanizes the offer and can tip the scales.</li><li><strong>Submit the offer</strong> — The seller receives a notification and has a set window to respond.</li></ol><h2>What Happens After You Submit</h2><ul><li><strong>Accepted:</strong> The transaction proceeds at your offer price. Your SB move into escrow and the deal is on.</li><li><strong>Declined:</strong> Your offer was too low or the seller prefers the listed price. You can try a higher offer or move on.</li><li><strong>Counter-offer:</strong> The seller suggests a price somewhere between your offer and their list price. You can accept or decline the counter.</li><li><strong>Expired:</strong> If the seller doesn't respond within the offer window, the offer expires automatically and you're free to try again.</li></ul><div class=\"tip-box\">Tip: Research comparable items in the marketplace before making an offer. If you can see that similar items are selling for 20-30% less, that gives you a solid, defensible basis for a lower offer.</div><h2>Offer Etiquette</h2><p>Low-ball offers can come across as disrespectful and may get you blocked by sellers. Keep offers within a reasonable range and always be polite in your messages. A friendly, fair offer is far more likely to result in a successful negotiation than an aggressive low-ball.</p><div class=\"warning-box\">Warning: Once a seller accepts your offer, you're committing to complete the purchase. Repeatedly accepting offers and then backing out can negatively affect your standing on the platform.</div>",
+        "faqs": [
+          {
+            "q": "Can all sellers receive offers on their listings?",
+            "a": "No. Sellers choose whether to enable offers when creating a listing. If the \"Make an Offer\" button isn't visible, that listing doesn't accept offers."
+          },
+          {
+            "q": "How long does a seller have to respond to my offer?",
+            "a": "Sellers typically have 24–48 hours to respond before the offer expires. If you don't hear back, the offer lapses and you can try again."
+          },
+          {
+            "q": "Can I make offers on multiple listings at the same time?",
+            "a": "Yes. You can have pending offers on multiple listings simultaneously. Just be prepared to follow through on any that get accepted."
+          },
+          {
+            "q": "Can I withdraw an offer I've already made?",
+            "a": "You may be able to cancel a pending offer before the seller responds. Check the offer status in your messages or activity feed for a cancel option."
+          },
+          {
+            "q": "Is the transaction fee calculated on my offer price or the listed price?",
+            "a": "The 10% transaction fee is based on the final agreed price — your offer price if the seller accepts, or the counter-offer price if you accept a counter."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "transaction-protection",
+        "title": "How Transaction Protection Works",
+        "slug": "transaction-protection",
+        "summary": "Every Swapedly transaction is protected by an escrow system that holds Swap Bucks securely until both parties confirm the exchange.",
+        "content": "<h2>Built-In Protection for Every Transaction</h2><p>Every single transaction on Swapedly — whether it's a $5 book or a $500 piece of electronics — is backed by transaction protection. The core of this system is an <strong>escrow arrangement</strong>: your Swap Bucks are held securely by Swapedly and only released to the seller after you confirm you received what you paid for. Neither party can access the funds during the exchange, which protects everyone involved.</p><h2>How the Escrow Process Works</h2><ol><li><strong>You initiate a purchase</strong> — Tap \"Buy Now\" on a listing. Your Swap Bucks are immediately moved from your wallet into a secure escrow account held by Swapedly.</li><li><strong>The seller fulfills the order</strong> — The seller ships the item or arranges a local pickup. Your SB remain in escrow while this happens — the seller can't touch them yet.</li><li><strong>You receive the item</strong> — Whether by shipping or local pickup, the item arrives with you.</li><li><strong>You inspect and confirm</strong> — Check the item against the listing description and photos. If you're satisfied, confirm delivery in the Swapedly app.</li><li><strong>SB are released to the seller</strong> — Only after your confirmation does Swapedly release the escrowed Swap Bucks to the seller's wallet. The transaction is complete.</li></ol><h2>What Transaction Protection Covers</h2><ul><li>Sellers who take your SB into escrow but never ship or deliver the item</li><li>Items that arrive significantly different from how they were described or photographed</li><li>Delivery disputes where the seller claims delivery but you never received it</li></ul><h2>What Is Not Covered</h2><p>Transaction protection <strong>only applies to purchases made entirely within Swapedly</strong>. If you agree to pay or receive payment through any outside channel — cash, Venmo, PayPal, or anything else — you lose all protection. Swapedly cannot investigate or recover funds for off-platform deals.</p><div class=\"tip-box\">Tip: If something looks wrong with an item when it arrives, document it with photos immediately and open a dispute before you do anything else. Once you confirm delivery, the protection window closes. See <a href=\"/#/help/dispute-resolution\">What to Do If Something Goes Wrong</a>.</div><div class=\"warning-box\">Warning: Never confirm delivery before you've physically received and inspected the item. Confirming prematurely releases Swap Bucks to the seller and ends your protection coverage for that transaction.</div>",
+        "faqs": [
+          {
+            "q": "When exactly are my Swap Bucks released to the seller?",
+            "a": "Only after you confirm delivery in the Swapedly app. Don't confirm until you've fully inspected what you received."
+          },
+          {
+            "q": "What if I never receive my item?",
+            "a": "Do not confirm delivery. Open a dispute through the platform and Swapedly will investigate. Your escrowed SB remain frozen until the case is resolved."
+          },
+          {
+            "q": "Is transaction protection free?",
+            "a": "Yes. It's built into every transaction on Swapedly at no additional cost to either party."
+          },
+          {
+            "q": "Does transaction protection cover local pickup transactions?",
+            "a": "Yes, as long as the transaction was initiated and the payment processed through Swapedly. Always complete the in-app confirmation at the meetup."
+          },
+          {
+            "q": "How long do I have to open a dispute if something goes wrong?",
+            "a": "There is a window after the expected delivery date during which you can open a dispute. Check the transaction details for your specific deadline."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "view-seller",
+        "title": "Viewing a Seller's Profile",
+        "slug": "view-seller",
+        "summary": "Reviewing a seller's history, ratings, and reviews before buying helps you make confident, informed purchasing decisions.",
+        "content": "<h2>Know Who You're Buying From</h2><p>Swapedly is a community marketplace, and while most sellers are genuine and trustworthy, it's always smart to do a quick check before completing a purchase. Swapedly makes this easy — every seller has a public profile packed with useful information to help you evaluate whether to buy.</p><h2>How to View a Seller's Profile</h2><ol><li><strong>Open any listing</strong> from the marketplace or search results.</li><li><strong>Tap the seller's name or photo</strong> near the top of the listing detail page.</li><li>You'll be taken to their full public profile.</li></ol><h2>What You'll Find on a Seller's Profile</h2><ul><li><strong>Profile photo and bio</strong> — A quick sense of who they are and what they typically sell.</li><li><strong>Member since date</strong> — How long they've been active on Swapedly. Longevity is generally a positive signal.</li><li><strong>Completed transaction count</strong> — The number of successful transactions they've completed. More is better.</li><li><strong>Star rating</strong> — An aggregate rating from verified buyers who've transacted with this seller.</li><li><strong>Reviews</strong> — Written feedback from previous buyers. Pay close attention to what they say about item descriptions, packaging, communication, and delivery speed.</li><li><strong>Active listings</strong> — All the items they're currently selling. Useful for seeing how they photograph and describe their items.</li><li><strong>Response rate and time</strong> — If displayed, this shows how reliable they are at responding to messages.</li></ul><h2>Red Flags to Watch For</h2><ul><li>Account created very recently with no completed transactions</li><li>Few or no reviews, or reviews that mention discrepancies with item descriptions</li><li>Listing photos that look like stock images rather than photos of the actual item</li><li>Any suggestion — in the listing or via message — to complete payment outside of Swapedly</li></ul><div class=\"tip-box\">Tip: Focus on the written reviews, not just the star rating. A seller can have 4.5 stars overall but reviews that specifically mention \"item not as described\" — a detail worth catching before you buy.</div><div class=\"warning-box\">Warning: If a seller asks you to pay via cash, Venmo, or any method outside Swapedly, that's a serious red flag. Report them using <a href=\"/#/help/report-user\">these steps</a> and do not complete the transaction.</div>",
+        "faqs": [
+          {
+            "q": "Can I message a seller before buying to ask questions?",
+            "a": "Yes. Most listings have a message button. It's a great way to ask about condition specifics, get more photos, or confirm shipping details before committing."
+          },
+          {
+            "q": "Are reviews on Swapedly verified?",
+            "a": "Yes. Reviews can only be left by users who completed a transaction with that seller, making them more reliable than anonymous reviews."
+          },
+          {
+            "q": "What if a seller has no reviews at all?",
+            "a": "Everyone starts with zero reviews. Look at other signals: how long they've been a member, how detailed their listings are, how quickly they respond to messages, and the quality of their profile."
+          },
+          {
+            "q": "Can I block a seller I don't want to interact with?",
+            "a": "Yes. You can block users through their profile page or via account settings. A blocked user cannot message you or see your listings."
+          },
+          {
+            "q": "Can I report a seller directly from their profile?",
+            "a": "Yes. Look for a three-dot menu or \"Report\" button on the seller's profile page. See our full guide on Reporting a User or Listing."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      }
+    ]
+  },
+  {
+    "id": "selling",
+    "title": "Selling",
+    "emoji": "📸",
+    "description": "Create great listings, price your items in Swap Bucks, take compelling photos, manage offers, and turn your stuff into SB.",
+    "articles": [
+      {
+        "id": "create-listing",
+        "title": "How to Create a Listing",
+        "slug": "create-listing",
+        "summary": "List any item for sale on Swapedly in minutes — it's free to list, items are priced in Swap Bucks, and you're in control of the details.",
+        "content": "<h2>Selling on Swapedly Is Free</h2><p>There are no listing fees on Swapedly — you pay nothing until an item actually sells, at which point a 10% transaction fee (capped at $20) applies in USD. This makes Swapedly a low-risk way to turn items you no longer need into Swap Bucks you can spend on things you actually want.</p><h2>Step-by-Step: Creating Your Listing</h2><ol><li><strong>Tap \"Sell\" or the \"+\" button</strong> in the main navigation to open the listing creation form.</li><li><strong>Add photos</strong> — This is the most important step. Upload clear, well-lit photos from multiple angles. You can typically add up to 8–10 images. See <a href=\"/#/help/listing-photos\">Taking Great Listing Photos</a> for detailed guidance.</li><li><strong>Write a title</strong> — Make it descriptive and specific. Include the brand, model, size, color, or other key details. Good example: \"Patagonia Down Sweater Jacket – Men's Medium – Navy Blue.\"</li><li><strong>Write a description</strong> — Include everything a buyer would want to know: dimensions, age, what's included in the sale (accessories, original packaging, etc.), any flaws, and why you're selling it. The more detail, the fewer questions you'll field later.</li><li><strong>Select a category</strong> — Choose the most accurate category so your listing appears in the right browse results.</li><li><strong>Choose a condition rating</strong> — Be honest. Use our <a href=\"/#/help/condition-guide\">Condition Guide</a> to pick the right level. Accurate condition ratings reduce disputes significantly.</li><li><strong>Set your price in Swap Bucks</strong> — Since 1 SB = $1 USD in value, think of the price in dollars. See <a href=\"/#/help/pricing-sb\">How to Price Your Item in Swap Bucks</a> for smart pricing strategies.</li><li><strong>Choose delivery method</strong> — Decide whether you'll offer shipping, local pickup only, or both. This is entirely your call as the seller.</li><li><strong>Enable or disable offers</strong> — Choose whether buyers can submit offers below your listed price.</li><li><strong>Review and publish</strong> — Look everything over, then tap \"Publish.\" Your listing is live in the marketplace immediately.</li></ol><div class=\"tip-box\">Tip: Listings with 5 or more high-quality photos and a detailed description get significantly more views and inquiries than minimal listings. Take the extra five minutes — it's worth it.</div><div class=\"warning-box\">Warning: Do not list prohibited items such as counterfeit goods, weapons, regulated pharmaceuticals, or any items that violate Swapedly's content policies. Violations result in listing removal and may lead to account suspension.</div>",
+        "faqs": [
+          {
+            "q": "Is it free to list items on Swapedly?",
+            "a": "Yes. Listing is completely free. A 10% transaction fee (capped at $20) applies in USD only when an item successfully sells."
+          },
+          {
+            "q": "How many photos can I include in a listing?",
+            "a": "You can typically upload up to 8–10 photos per listing. The more angles and detail shots you include, the more confident buyers will be."
+          },
+          {
+            "q": "Can I edit a listing after I've published it?",
+            "a": "Yes. You can edit the title, description, photos, price, and other details from your My Listings page at any time before the item sells."
+          },
+          {
+            "q": "Can I offer both shipping and local pickup on the same listing?",
+            "a": "Yes. Enabling both options gives buyers flexibility and can increase the number of interested buyers."
+          },
+          {
+            "q": "How long does a listing stay active?",
+            "a": "Listings stay active until the item sells, you pause or delete it, or it expires per platform policy. Regularly check and refresh listings that aren't getting traction."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": true
+      },
+      {
+        "id": "pricing-sb",
+        "title": "How to Price Your Item in Swap Bucks",
+        "slug": "pricing-sb",
+        "summary": "Set a competitive, fair Swap Bucks price that sells your item quickly while getting you the return you're looking for.",
+        "content": "<h2>The Golden Rule of Swapedly Pricing</h2><p>Pricing in Swap Bucks is intuitive once you internalize the key fact: <strong>1 SB = $1 USD in value</strong>. So if you'd price something at $45 on another marketplace, you'd list it at 45 SB on Swapedly. The tricky part is finding the right number — high enough to make the sale worthwhile, low enough to actually attract buyers.</p><h2>Researching a Fair Price</h2><ol><li><strong>Search similar listings on Swapedly</strong> — Browse the marketplace for the same or comparable items to see what other sellers are charging right now. This is your most important data point.</li><li><strong>Check what's actually sold</strong> — If Swapedly shows recently sold prices, use those. Listed prices tell you what sellers <em>want</em>; sold prices tell you what buyers <em>actually pay</em>.</li><li><strong>Compare condition fairly</strong> — A \"Like New\" item can reasonably be priced 20–40% above a \"Good\" condition equivalent. Be honest about where your item sits. See <a href=\"/#/help/condition-guide\">Choosing the Right Condition</a>.</li><li><strong>Consider what's included</strong> — Original packaging, accessories, manuals, or extras add value. Highlight them in both the description and the price.</li><li><strong>Factor in the transaction fee</strong> — You'll pay a 10% fee (capped at $20) in USD from your Purchase Credits when the item sells. Make sure your net SB earnings meet your goal after this is accounted for.</li></ol><h2>Pricing Strategies That Work</h2><ul><li><strong>Price to sell fast:</strong> List 5–15% below the going market rate. A faster sale means less time managing the listing and messaging interested buyers.</li><li><strong>Price with wiggle room:</strong> If you expect to negotiate, list 10–20% above your minimum acceptable price so you can meet buyers in the middle and everyone feels good about the deal.</li><li><strong>Bundle items:</strong> Group related items (e.g., a camera with lenses and a bag) for a higher total price than you'd get selling each piece separately.</li></ul><div class=\"tip-box\">Tip: Swapedly Plus members earn <strong>1.5x Swap Bucks on every sale</strong>. If you're a regular seller, that boost can justify the $9.99/month cost very quickly. See <a href=\"/#/help/what-is-plus\">What Is Swapedly Plus?</a></div><h2>When Your Listing Isn't Moving</h2><p>If a listing sits for a week or more with minimal interest, that's feedback. Consider dropping the price by 10–15%, improving your photos, or refreshing the description. Re-listing (deleting and reposting) can also give it fresh placement in the marketplace.</p>",
+        "faqs": [
+          {
+            "q": "Can I price my item in dollars instead of Swap Bucks?",
+            "a": "All Swapedly listings are priced in Swap Bucks. Since 1 SB = $1 USD in value, the conversion is always straightforward."
+          },
+          {
+            "q": "Can I change the price after the listing is live?",
+            "a": "Yes. You can edit the price at any time from your My Listings page, as long as the item hasn't sold."
+          },
+          {
+            "q": "How does the 10% transaction fee affect my net earnings?",
+            "a": "The fee is paid in USD from your Purchase Credits — it doesn't come out of your SB earnings. Your wallet receives the full SB sale price."
+          },
+          {
+            "q": "Should I price high and leave room to negotiate?",
+            "a": "That's a valid strategy. Add 10–20% above your minimum to create negotiation room, and enable offers on the listing so buyers can make a move."
+          },
+          {
+            "q": "What if no one buys at my current price?",
+            "a": "Lower the price, update your photos, or refresh the description. If the listing has been up a while, consider deleting and reposting to regain fresh visibility."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "listing-photos",
+        "title": "Taking Great Listing Photos",
+        "slug": "listing-photos",
+        "summary": "Great photos are the single biggest factor in whether your listing sells — here's how to take them with just your phone.",
+        "content": "<h2>Photos Do the Selling for You</h2><p>On Swapedly, buyers can't hold your item, smell it, or try it on before purchasing. Your photos are the entire buying experience for them. Listings with clear, bright, multi-angle photos consistently sell faster, attract more offers, and command higher prices than listings with blurry or sparse images. Taking great photos is the highest-return investment of time you can make as a seller.</p><h2>Essential Photo Tips</h2><ul><li><strong>Use natural light</strong> — Position the item near a window during daylight hours. Natural light captures true colors and textures far better than overhead artificial lighting, which creates unflattering shadows and color casts.</li><li><strong>Use a clean, neutral background</strong> — A white wall, a wooden floor, or a plain sheet provides a backdrop that keeps all attention on the item. Busy backgrounds (cluttered rooms, patterned carpets) are distracting.</li><li><strong>Clean the item first</strong> — Wipe down surfaces, remove dust, lint, or pet hair, and make the item look as presentable as possible before shooting.</li><li><strong>Photograph from multiple angles</strong> — Front, back, both sides, top, and bottom at minimum. For clothing, include a flat lay and a detail of the tag or label. For electronics, show ports, buttons, and the screen.</li><li><strong>Include close-ups of any flaws</strong> — If there's a scratch, stain, wear mark, or dent, photograph it clearly. This is counterintuitive but critical: buyers who see flaws upfront are less likely to open disputes afterward, and it shows you're trustworthy.</li><li><strong>Show scale</strong> — Include a hand, a common object, or a tape measure to help buyers understand the size of the item. Dimensions in the description help too.</li></ul><h2>What to Avoid</h2><ul><li>Blurry or out-of-focus shots — tap the screen on your phone to focus before shooting</li><li>Dark, shadowy images — move closer to a light source</li><li>Distracting or messy backgrounds</li><li>Only one or two photos for a complex item</li><li>Stock photos or images pulled from the internet — you must photograph the actual item you're selling</li></ul><div class=\"tip-box\">Tip: Most modern smartphones take excellent photos in good lighting. You don't need a DSLR camera — just natural light, a steady hand, and a neutral background. Portrait mode can also create a nice depth-of-field effect for smaller items.</div><div class=\"warning-box\">Warning: Using stock photos or images that don't represent your actual item is a violation of Swapedly's listing policies and can result in your listing being removed.</div>",
+        "faqs": [
+          {
+            "q": "How many photos should I include in a listing?",
+            "a": "Aim for at least 5–6 photos. Include overall shots from multiple angles, any flaw close-ups, and scale reference. More is almost always better."
+          },
+          {
+            "q": "Can I use photos from the manufacturer's website?",
+            "a": "No. You must photograph the actual item you are selling. Stock or manufacturer photos don't represent the real condition of your specific item."
+          },
+          {
+            "q": "What file format should my photos be in?",
+            "a": "Standard formats like JPEG and PNG are accepted. Smartphone cameras save in JPEG by default, which is perfect."
+          },
+          {
+            "q": "Should I edit or filter my photos?",
+            "a": "Light editing for brightness and contrast is fine. Avoid heavy filters or edits that alter how the item appears — that's misleading and can lead to disputes."
+          },
+          {
+            "q": "Can I add or replace photos after a listing is published?",
+            "a": "Yes. You can edit photos from your My Listings page at any time before the item sells."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "condition-guide",
+        "title": "Choosing the Right Condition",
+        "slug": "condition-guide",
+        "summary": "Accurately rating your item's condition is one of the most important things you can do as a seller — here's what each level means.",
+        "content": "<h2>Why Condition Accuracy Matters So Much</h2><p>Condition misrepresentation is the number one cause of buyer disputes on community marketplaces. When a buyer expects \"Like New\" and receives something that's clearly \"Fair,\" the transaction breaks down. Choosing the correct condition rating protects you from disputes, negative reviews, and the stress of a failed transaction — and it builds the kind of reputation that leads to repeat buyers and fast sales.</p><h2>Condition Levels Explained</h2><ul><li><strong>New</strong> — Unused, in original sealed packaging with all original tags, inserts, or accessories. Has never been opened, worn, or used in any way. Appropriate only for genuinely brand-new items.</li><li><strong>Like New</strong> — Used once or only a handful of times with no visible flaws whatsoever. May or may not have original packaging. Looks and functions exactly as new. If there is any visible imperfection at all, step down to Good.</li><li><strong>Good</strong> — Moderate use with minor cosmetic wear such as small scratches, light scuffs, or slight fading. Fully functional with no missing parts. Flaws should be clearly photographed and described. This is the most commonly listed condition.</li><li><strong>Fair</strong> — Heavy use with clearly visible wear — scratches, stains, dents, or significant fading. Still functional but obviously used. May be missing some accessories or non-essential parts. Price should reflect the condition honestly.</li><li><strong>Poor</strong> — Significant damage, major cosmetic issues, or functional limitations. May have cracked components, heavy staining, or other substantial problems. Items listed as Poor should still have some utility or value, and the price should reflect the extent of the issues.</li></ul><h2>When You're Unsure</h2><p>If your item falls between two conditions, always choose the lower one and use the description to explain the nuance. It's always better for a buyer to be pleasantly surprised than disappointed. A buyer who opens a box and finds the item is better than expected is a happy reviewer; one who finds it's worse than expected is a dispute.</p><div class=\"tip-box\">Tip: Photograph flaws clearly and describe them honestly in the listing. Counterintuitively, this actually increases buyer confidence — it shows you're trustworthy and nothing is being hidden.</div><h2>Condition and Pricing</h2><p>Condition directly impacts what buyers will pay. A well-priced \"Good\" item may sell faster than an overpriced \"Like New\" equivalent. See <a href=\"/#/help/pricing-sb\">How to Price Your Item in Swap Bucks</a> for guidance on how to factor condition into your pricing.</p><div class=\"warning-box\">Warning: Knowingly misrepresenting an item's condition — listing something as \"Like New\" when it has visible damage — can lead to disputes, forced resolution in the buyer's favor, and negative reviews that damage your seller reputation.</div>",
+        "faqs": [
+          {
+            "q": "What if my item falls exactly between two condition levels?",
+            "a": "Choose the lower condition and use the description field to note what's there and what isn't. Transparency always wins with buyers."
+          },
+          {
+            "q": "Can I change the condition rating after publishing a listing?",
+            "a": "Yes. You can edit the condition from your My Listings page at any time before the item sells."
+          },
+          {
+            "q": "Does condition affect how my listing shows up in search?",
+            "a": "Yes. Buyers frequently filter by condition, so accurate labeling ensures your listing appears when relevant shoppers search."
+          },
+          {
+            "q": "What counts as a flaw that I need to disclose?",
+            "a": "Any scratch, scuff, stain, dent, crack, missing part, or functional limitation should be disclosed in the description and photographed. If you can see it, mention it."
+          },
+          {
+            "q": "I'm selling something brand new that I never used — New or Like New?",
+            "a": "If it's genuinely unused and still in sealed original packaging, choose New. If the packaging has been opened or removed even though the item was never used, Like New is more accurate."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "manage-listings",
+        "title": "Managing Your Listings",
+        "slug": "manage-listings",
+        "summary": "Edit, pause, relist, or remove your listings from the My Listings dashboard — your central hub for everything you're selling.",
+        "content": "<h2>Your Selling Command Center</h2><p>The My Listings section of your Swapedly account is where you manage everything you're selling. Whether you need to update a price, respond to buyer questions, pause a listing while you're on vacation, or pull an item that sold elsewhere, it all happens here.</p><h2>Accessing My Listings</h2><p>Navigate to My Listings from the main menu or your profile page. You'll see all your listings organized by status: active, pending (in a transaction), sold, paused, and expired.</p><h2>What You Can Do from My Listings</h2><ul><li><strong>Edit a listing</strong> — Update the title, description, photos, price, condition rating, or delivery method at any time before the item sells. Staying current with your listings keeps buyers' interest fresh.</li><li><strong>Pause a listing</strong> — Temporarily hide a listing from the marketplace without deleting it. Useful when you're traveling, sick, or temporarily unable to fulfill orders. The listing remains saved and can be reactivated with one tap.</li><li><strong>Mark as sold</strong> — If you sold or gave away an item outside of a Swapedly transaction, mark it sold here to remove it from the marketplace and keep your inventory accurate.</li><li><strong>Delete a listing</strong> — Permanently remove a listing. Note: if there's an active offer or pending transaction on the listing, handle those first.</li><li><strong>Relist an item</strong> — Quickly repost an expired or sold listing with the same details. Useful for sellers with recurring inventory or items you list multiple times.</li><li><strong>Add a listing highlight</strong> — Boost your listing's visibility in search results. See <a href=\"/#/help/listing-highlights\">Highlighting Your Listings</a>.</li></ul><h2>Managing Offers</h2><p>When a buyer submits an offer, you'll receive a notification. Review and respond from the listing page or the Messages section. See <a href=\"/#/help/accepting-offer\">Accepting and Declining Offers</a> for the full process.</p><h2>Monitoring Performance</h2><p>Many listing pages display view counts and the number of people who have saved the item. Use this data to gauge interest. Low views after several days may mean your title or photos need work. Lots of views but no offers may mean your price is too high.</p><div class=\"tip-box\">Tip: Review your active listings every few days. Drop prices on slow-moving items, update photos that aren't performing, and respond quickly to any messages or offers — responsiveness is one of the top factors in successful selling.</div>",
+        "faqs": [
+          {
+            "q": "Can I have an unlimited number of active listings at once?",
+            "a": "Yes. There's no stated limit on how many listings you can have active simultaneously."
+          },
+          {
+            "q": "What happens if I delete a listing that has a pending offer?",
+            "a": "Deleting the listing cancels any pending offers. Communicate with interested buyers before doing so to maintain a good reputation."
+          },
+          {
+            "q": "How will I know if someone is interested in my listing?",
+            "a": "You'll receive notifications for new offers, messages, and saves (wishlists). Make sure your notification preferences are set up — see Managing Notifications."
+          },
+          {
+            "q": "Can I duplicate a listing to create a similar one quickly?",
+            "a": "Check your listing options for a duplicate or copy feature. It can save significant time when listing multiple similar items."
+          },
+          {
+            "q": "What happens to a listing if no one buys it after a long time?",
+            "a": "Listings may expire after a set period per platform policy. You'll be notified if this happens and can relist with a fresh post."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "accepting-offer",
+        "title": "Accepting and Declining Offers",
+        "slug": "accepting-offer",
+        "summary": "Learn how to review, accept, counter, or decline buyer offers on your Swapedly listings.",
+        "content": "<h2>When a Buyer Makes an Offer</h2><p>If you've enabled offers on a listing, buyers can propose a price below your listed amount. You'll receive a notification when an offer comes in, and you have a set response window — typically 24–48 hours — before the offer expires. Responding promptly is important: buyers with active offers often have multiple listings in mind, and a slow response can cost you a sale.</p><h2>How to Review and Respond to an Offer</h2><ol><li><strong>Open the notification</strong> — Tap the offer notification or find it in your messages or offers inbox.</li><li><strong>Review the details</strong> — See the buyer's proposed price, check their profile and transaction history, and read any note they included with the offer.</li><li><strong>Choose your response:</strong></li></ol><ul><li><strong>Accept</strong> — You agree to the buyer's price. Their Swap Bucks immediately move into escrow and the transaction proceeds at the offer price. This is binding — be sure before you accept.</li><li><strong>Decline</strong> — You're not interested at that price. The buyer's offer is rejected, and they may choose to offer a higher amount, buy at the listed price, or move on.</li><li><strong>Counter-offer</strong> — You propose a different price, typically somewhere between the buyer's offer and your listed price. The buyer can then accept or decline your counter. Counter-offers are a great tool for keeping a negotiation alive without accepting a price you're unhappy with.</li></ul><h2>Handling Multiple Offers</h2><p>If your listing receives multiple offers at the same time, review them in chronological order. Once you accept one offer, mark the listing as pending or communicate with other interested buyers to avoid confusion. Do not accept multiple offers on the same item.</p><h2>Counter-Offer Strategy</h2><p>A buyer who makes an offer is genuinely interested. If their offer is within reasonable range (say, 10–25% below your price), a counter-offer meeting them halfway often closes the deal. Being flexible without underselling yourself is the sweet spot of successful negotiating.</p><div class=\"tip-box\">Tip: A friendly, quick response to offers — even to say you're declining — builds a positive reputation. Buyers remember sellers who communicate well and are more likely to return or leave good reviews.</div><div class=\"warning-box\">Warning: Accepting an offer is a commitment to complete the transaction. Only accept when you are fully ready to proceed with delivery. Repeatedly backing out of accepted offers can result in account penalties.</div>",
+        "faqs": [
+          {
+            "q": "How long do I have to respond to an offer?",
+            "a": "Typically 24–48 hours before the offer expires. Respond promptly — slow responses lose sales."
+          },
+          {
+            "q": "Can I accept more than one offer on the same listing?",
+            "a": "No. Once you accept one offer, the listing should be marked as pending or sold. You can only sell the item once."
+          },
+          {
+            "q": "What if I accidentally accept an offer I didn't mean to?",
+            "a": "Contact the buyer immediately via messages to explain the situation and reach out to Swapedly support for assistance."
+          },
+          {
+            "q": "Can I send a counter-offer to every incoming offer?",
+            "a": "Yes. Counter-offers are always an option. Just keep counters reasonable — multiple rounds of back-and-forth can frustrate buyers."
+          },
+          {
+            "q": "What if the buyer accepts my counter-offer but then disappears?",
+            "a": "Open a dispute or report the issue to Swapedly support. Buyers who repeatedly agree to deals and don't follow through may face account consequences."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "listing-highlights",
+        "title": "Highlighting Your Listings",
+        "slug": "listing-highlights",
+        "summary": "A listing highlight boosts your item's visibility in search results and the marketplace feed, helping it sell faster.",
+        "content": "<h2>What Is a Listing Highlight?</h2><p>A listing highlight is a paid visibility boost that elevates your listing above standard results in the marketplace. Highlighted listings receive a prominent placement in search results and the browsing feed, along with a visual badge that distinguishes them from non-highlighted listings. If you have an item that isn't getting the attention it deserves, a highlight can make a significant difference.</p><h2>What Highlighting Your Listing Does</h2><ul><li><strong>Increased placement</strong> — Your listing appears higher in search results and marketplace browsing feeds, so more buyers see it.</li><li><strong>Visual badge</strong> — A highlighted indicator on your listing catches the eye of browsers who might otherwise scroll past.</li><li><strong>More impressions</strong> — More views translates directly to more offers and faster sales, especially for popular item categories.</li></ul><h2>How to Add a Highlight</h2><ol><li>Go to <strong>My Listings</strong> from the main navigation.</li><li>Find the listing you want to boost.</li><li>Tap the <strong>\"Highlight\"</strong> option on the listing card or inside the listing edit screen.</li><li>Confirm the highlight — it activates immediately and the boost starts working right away.</li></ol><h2>Swapedly Plus and Free Highlights</h2><p><a href=\"/#/help/what-is-plus\">Swapedly Plus</a> members receive <strong>5 free listing highlights every month</strong> as part of their $9.99/month subscription. These refresh at the start of each billing cycle. For active sellers, the 5 monthly highlights alone can be worth more than the subscription cost in additional sales velocity.</p><p>Non-Plus members may be able to purchase highlights individually at a per-use rate. Check the listing options screen for current pricing and availability in your market.</p><div class=\"tip-box\">Tip: Use highlights strategically. Apply them to your highest-value listings, items that have been sitting for a while without traction, or listings you urgently need to move. Don't waste a highlight on a listing with weak photos or an uncompetitive price — fix those issues first, then highlight.</div><div class=\"warning-box\">Warning: Monthly highlight allocations from Swapedly Plus typically do not carry over to the next billing cycle. Use your 5 highlights before your billing date resets or they'll expire unused.</div>",
+        "faqs": [
+          {
+            "q": "How many highlights does a Swapedly Plus subscription include?",
+            "a": "Swapedly Plus includes 5 highlights per month, which refresh at the start of each new billing cycle."
+          },
+          {
+            "q": "Do unused highlights roll over to next month?",
+            "a": "No. Monthly highlights from Plus do not carry over. Use them before your billing cycle resets."
+          },
+          {
+            "q": "How long does a highlight last once applied?",
+            "a": "Highlight duration varies. Check the listing options screen for current duration terms when applying."
+          },
+          {
+            "q": "Will highlighting guarantee that my item sells?",
+            "a": "Highlights increase visibility and views, but a sale still depends on competitive pricing, quality photos, and buyer demand. Fix any listing weaknesses before highlighting."
+          },
+          {
+            "q": "Can I remove a highlight once it's applied?",
+            "a": "Highlights are typically time-limited and expire automatically. They generally cannot be manually removed once applied."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      }
+    ]
+  },
+  {
+    "id": "swap-bucks",
+    "title": "Swap Bucks",
+    "emoji": "🪙",
+    "description": "Everything about Swap Bucks — Swapedly's virtual currency — including how to earn, spend, redeem, and manage them.",
+    "articles": [
+      {
+        "id": "what-is-sb",
+        "title": "What Are Swap Bucks?",
+        "slug": "what-is-sb",
+        "summary": "Swap Bucks (SB) are Swapedly's virtual currency — used to buy and sell items with a simple 1 SB = $1 USD value.",
+        "content": "<h2>The Currency That Powers Swapedly</h2><p>Swap Bucks (SB) are the virtual currency at the heart of the Swapedly marketplace. Every item is priced in SB, every sale pays out in SB, and the balance you accumulate is what you spend when you buy something new. The key rule to remember: <strong>1 SB = $1 USD in value</strong>. It's a straightforward, transparent system.</p><h2>Why Swap Bucks Instead of Cash?</h2><p>The SB system creates a self-sustaining community economy. When you sell an item, you don't cash out and leave — you earn SB that you spend on other items from fellow community members. This circular flow keeps value inside the Swapedly ecosystem, encourages active participation, and makes the platform feel more like a true swap community than a standard resale site.</p><h2>Key Facts About Swap Bucks</h2><ul><li><strong>Exchange rate:</strong> 1 SB = $1 USD in value</li><li><strong>How you earn SB:</strong> Selling items, referring friends (1 SB per sign-up), claiming the welcome gift card (40 SB), and periodic platform bonuses</li><li><strong>How you spend SB:</strong> Purchasing items from other sellers in the marketplace</li><li><strong>Marketplace unlock threshold:</strong> You need at least 60 SB in your wallet to access the marketplace and buy items</li><li><strong>Welcome gift:</strong> New users can claim 40 SB at <a href=\"https://www.swapedly.com/#/gift-card\">swapedly.com/#/gift-card</a></li><li><strong>Escrow:</strong> SB are held securely during transactions and released only after the buyer confirms delivery</li></ul><h2>Swap Bucks vs. Purchase Credits</h2><p>SB cover item prices. <a href=\"/#/help/purchase-credits\">Purchase Credits</a> are a separate, USD-denominated currency used only to pay the 10% transaction fee on purchases and sales. You'll need both to participate fully on Swapedly.</p><h2>Are Swap Bucks Refundable?</h2><p>SB earned through sales or bonuses are platform credits and are not redeemable for cash. However, if a transaction dispute is resolved in your favor as a buyer, your escrowed SB are returned to your wallet. See <a href=\"/#/help/dispute-resolution\">What to Do If Something Goes Wrong</a> for the dispute process.</p><div class=\"tip-box\">Tip: Think of your SB balance as a shopping budget earned through your own selling activity. The more you sell, the more you can buy — and with Swapedly Plus's 1.5x boost, that virtuous cycle works even faster. See <a href=\"/#/help/earn-sb\">Ways to Earn Swap Bucks</a>.</div>",
+        "faqs": [
+          {
+            "q": "Can I convert Swap Bucks into real money?",
+            "a": "No. Swap Bucks are a platform-specific virtual currency. They cannot be redeemed for cash, gift cards, or any other real-world value outside of Swapedly."
+          },
+          {
+            "q": "Do Swap Bucks expire?",
+            "a": "Once credited to your wallet, Swap Bucks generally do not expire. Check the platform terms for any specific conditions."
+          },
+          {
+            "q": "Can I transfer Swap Bucks to another user?",
+            "a": "SB can only move between users as part of a legitimate item transaction. Direct peer-to-peer SB transfers are not supported."
+          },
+          {
+            "q": "Where do I check my Swap Bucks balance?",
+            "a": "Your balance is shown in the Wallet section, accessible from the main navigation menu."
+          },
+          {
+            "q": "What happens to my SB during a transaction?",
+            "a": "When you buy, your SB move into escrow — held securely by Swapedly — until you confirm delivery. Then they're released to the seller."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "redeem-gift-card",
+        "title": "How to Redeem a Gift Card for Swap Bucks",
+        "slug": "redeem-gift-card",
+        "summary": "Redeem a Swapedly gift card to instantly add Swap Bucks to your wallet — including the $40 new-user welcome gift.",
+        "content": "<h2>Add Swap Bucks Instantly with a Gift Card</h2><p>Gift cards are one of the fastest ways to add Swap Bucks to your wallet. Whether you're a new user claiming the $40 welcome bonus or someone who received a Swapedly gift card from a friend, the redemption process is simple and takes less than a minute from start to finish.</p><h2>How to Redeem Your Gift Card</h2><ol><li><strong>Make sure you're logged in</strong> — Gift cards are redeemed into your account, so you need to be signed in before starting. If you don't have an account yet, see <a href=\"/#/help/create-account\">How to Create an Account</a> first.</li><li><strong>Navigate to the gift card page</strong> — Go to <a href=\"https://www.swapedly.com/#/gift-card\">swapedly.com/#/gift-card</a>. You can find this link in your welcome email, on the Swapedly homepage, or during the welcome tour.</li><li><strong>Enter your gift card code (if applicable)</strong> — If your card has a unique redemption code (e.g., a gift card given to you by another person), type it into the redemption field exactly as shown. For the new-user welcome bonus, the page will recognize your eligible account automatically — no code needed.</li><li><strong>Tap \"Redeem\"</strong> — Confirm the redemption on screen.</li><li><strong>Check your wallet</strong> — The Swap Bucks are credited to your wallet immediately. Navigate to <a href=\"/#/help/sb-wallet\">Understanding Your Wallet</a> to confirm they've appeared.</li></ol><h2>The New User Welcome Gift ($40 = 40 SB)</h2><p>Every new Swapedly account is eligible for a one-time welcome gift of <strong>40 Swap Bucks</strong> — equivalent to $40 in marketplace value. This gets you most of the way to the <strong>60 SB minimum</strong> required to unlock the marketplace. You only need 20 more SB to start buying.</p><p>Here's how to close that gap fast:</p><ul><li><strong>Refer 20 friends</strong> — 1 SB per sign-up. See <a href=\"/#/help/referrals\">Referring Friends for Swap Bucks</a>.</li><li><strong>List and sell one item</strong> — Even a small sale puts you over the threshold.</li><li><strong>Complete your profile</strong> — Bonus SB may be available for finishing your profile setup.</li></ul><div class=\"tip-box\">Tip: Claim your welcome gift card on the same day you sign up. Don't leave 40 free SB sitting unclaimed while you explore the platform.</div><div class=\"warning-box\">Warning: Only redeem gift cards through the official Swapedly page at swapedly.com/#/gift-card. Be skeptical of any third-party website or message claiming to offer Swapedly gift codes at a discount — these are almost always scams.</div>",
+        "faqs": [
+          {
+            "q": "Where do I redeem my Swapedly gift card?",
+            "a": "Visit swapedly.com/#/gift-card while logged into your account and follow the on-screen steps."
+          },
+          {
+            "q": "Can I redeem more than one gift card?",
+            "a": "The new-user welcome gift can only be claimed once per account. Additional gift cards with unique codes can be redeemed separately as long as each code is valid."
+          },
+          {
+            "q": "My gift card code isn't working — what should I do?",
+            "a": "Double-check that you've entered the code exactly as shown, including uppercase letters. If it still fails, contact Swapedly support with the code details."
+          },
+          {
+            "q": "How quickly do the Swap Bucks appear in my wallet?",
+            "a": "Gift card SB are credited to your wallet instantly upon successful redemption."
+          },
+          {
+            "q": "Can I give a Swapedly gift card to someone else?",
+            "a": "Unique gift card codes can be shared with others for redemption into their own accounts. The new-user welcome bonus is account-specific and cannot be transferred or used by another person."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": true
+      },
+      {
+        "id": "earn-sb",
+        "title": "Ways to Earn Swap Bucks",
+        "slug": "earn-sb",
+        "summary": "Discover every way to earn Swap Bucks on Swapedly — from selling items and referring friends to claiming bonuses.",
+        "content": "<h2>Building Your SB Balance</h2><p>There are multiple paths to earning Swap Bucks on Swapedly, and you don't need to sell a single item to get started. Whether you're a buyer trying to hit the 60 SB marketplace threshold or an active seller looking to maximize your earnings, here's every earning opportunity available to you.</p><h2>Primary Earning Methods</h2><ul><li><strong>Sell items</strong> — The most powerful way to earn SB. When a buyer purchases your listing and confirms delivery, the agreed SB price (minus nothing — the fee is separate in USD) is released from escrow into your wallet. List anything you no longer need and turn it into buying power.</li><li><strong>Welcome gift card (new users only)</strong> — Claim <strong>40 SB</strong> instantly at <a href=\"https://www.swapedly.com/#/gift-card\">swapedly.com/#/gift-card</a>. This is available once per account to all new users and requires no purchase. See <a href=\"/#/help/redeem-gift-card\">How to Redeem a Gift Card</a>.</li><li><strong>Refer friends</strong> — Earn <strong>1 SB for every friend who signs up</strong> using your unique referral link. There's no stated cap, so share widely. Twenty referrals gets you 20 SB, closing the gap to marketplace access from the welcome gift alone. See <a href=\"/#/help/referrals\">Referring Friends for Swap Bucks</a>.</li><li><strong>Promotional and seasonal bonuses</strong> — Swapedly periodically offers bonus SB for completing specific actions (finishing your profile, hitting a sales milestone, participating in a promotion). Keep notifications on so you don't miss these opportunities.</li></ul><h2>Swapedly Plus: The 1.5x Sales Boost</h2><p>Swapedly Plus subscribers earn <strong>1.5x Swap Bucks on every sale</strong>. That means a 40 SB sale becomes 60 SB in your wallet — a 50% bonus on top of your normal earnings. If you sell regularly, the $9.99/month subscription can easily pay for itself within a few transactions. See <a href=\"/#/help/plus-sb-boost\">How the 1.5x Swap Bucks Boost Works</a>.</p><h2>How Fast Can I Unlock the Marketplace?</h2><p>You need 60 SB to unlock marketplace access. With the 40 SB welcome gift, you're just 20 SB short. Here are your options:</p><ul><li>Refer 20 friends → 20 SB (instant, no selling required)</li><li>List one item and sell it for 20+ SB</li><li>Combine referrals and profile bonuses</li></ul><div class=\"tip-box\">Tip: If you're new and want to buy before selling anything, the welcome gift card plus referrals is the fastest path to 60 SB with zero investment.</div>",
+        "faqs": [
+          {
+            "q": "Can I earn Swap Bucks without listing or selling anything?",
+            "a": "Yes. The welcome gift card (40 SB) and referral bonuses (1 SB per sign-up) let you earn SB without listing a single item."
+          },
+          {
+            "q": "How many SB do I earn per referral?",
+            "a": "You earn 1 Swap Buck for each friend who creates a Swapedly account using your unique referral link."
+          },
+          {
+            "q": "When do I receive SB from a completed sale?",
+            "a": "SB are held in escrow during the transaction and released to your wallet once the buyer confirms delivery."
+          },
+          {
+            "q": "Are there limits on how many referrals I can make?",
+            "a": "There's no stated maximum for referral earnings. Refer as many friends as you like."
+          },
+          {
+            "q": "Does Swapedly Plus increase SB from referrals and bonuses, or just sales?",
+            "a": "The 1.5x boost applies specifically to SB earned from selling items. Referral and bonus SB are credited at the standard rate."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "spend-sb",
+        "title": "How to Spend Swap Bucks",
+        "slug": "spend-sb",
+        "summary": "Use your Swap Bucks to purchase items from other sellers in the Swapedly marketplace — here's exactly how it works.",
+        "content": "<h2>Putting Your SB to Work</h2><p>Once you've accumulated Swap Bucks, spending them is the rewarding half of the Swapedly experience. You browse the marketplace for items you want, pay with your SB balance, and wait for delivery. Here's a complete walkthrough of how spending works — and what to keep in mind to avoid common pitfalls.</p><h2>The Main Way to Spend SB: Buying Items</h2><p>The marketplace is where your Swap Bucks become real-world goods. Find an item you want, confirm the purchase, and your SB are committed. Here's the flow:</p><ol><li><strong>Browse the marketplace</strong> — Search, filter, and find something you want. Requires 60 SB in your wallet to access. See <a href=\"/#/help/search-filter\">Searching and Filtering Listings</a>.</li><li><strong>Review the listing carefully</strong> — Check the description, photos, condition, price, and seller profile before committing.</li><li><strong>Tap \"Buy Now\" or accept an offer</strong> — Your SB are immediately moved into escrow, secured by Swapedly.</li><li><strong>Receive and inspect the item</strong> — Once it arrives, check everything against the listing.</li><li><strong>Confirm delivery</strong> — If satisfied, confirm in the app to release the seller's SB. See <a href=\"/#/help/confirm-delivery\">Confirming Delivery and Releasing Swap Bucks</a>.</li></ol><h2>Don't Drop Below 60 SB</h2><p>The marketplace requires a minimum balance of <strong>60 SB</strong> in your wallet at all times to maintain access. If a purchase drops you below that threshold, you may temporarily lose the ability to browse and buy until your balance recovers through a new sale or referral bonus.</p><div class=\"tip-box\">Tip: Maintain a buffer above 60 SB so a single purchase doesn't lock you out of the marketplace. Sell an item before buying a more expensive one to keep your balance healthy.</div><h2>Remember: Two Currencies at Play</h2><p>Item prices are paid in SB, but the 10% transaction fee (capped at $20) is paid separately in USD via <a href=\"/#/help/purchase-credits\">Purchase Credits</a>. Make sure you have both ready before completing a purchase — you'll need enough SB for the item price and enough Purchase Credits for the fee.</p><div class=\"warning-box\">Warning: Only spend Swap Bucks through Swapedly's official purchase flow. Never send SB to another user outside of a formal transaction — off-platform transfers are not protected and may violate platform rules.</div>",
+        "faqs": [
+          {
+            "q": "Can I spend SB on anything outside of item purchases?",
+            "a": "Currently, Swap Bucks are used exclusively to purchase items listed by other sellers in the Swapedly marketplace."
+          },
+          {
+            "q": "What if I don't have enough SB to buy an item I want?",
+            "a": "You'll need to earn more SB through sales, referrals, or bonuses before completing that purchase."
+          },
+          {
+            "q": "Will buying something drop my balance below the 60 SB marketplace minimum?",
+            "a": "Yes, it's possible. If your balance falls below 60 SB, you may temporarily lose marketplace access until you earn more SB."
+          },
+          {
+            "q": "Can I split a purchase — paying part in SB and part in Purchase Credits?",
+            "a": "No. Item prices are paid fully in SB. Purchase Credits are only used for the transaction fee — they cannot supplement your SB balance for item costs."
+          },
+          {
+            "q": "Is there a maximum amount I can spend per transaction?",
+            "a": "There's no stated spending cap, but the transaction fee is capped at $20 regardless of the item price."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "sb-wallet",
+        "title": "Understanding Your Wallet",
+        "slug": "sb-wallet",
+        "summary": "Your Swapedly wallet is your financial hub — tracking your Swap Bucks balance, escrowed SB, Purchase Credits, and full transaction history.",
+        "content": "<h2>Your Financial Dashboard</h2><p>The Wallet section of your Swapedly account is the central place for all your financial activity on the platform. Whether you're checking what you've earned from a recent sale, buying more Purchase Credits, or reviewing your transaction history, everything lives here.</p><h2>What You'll Find in Your Wallet</h2><ul><li><strong>Available Swap Bucks balance</strong> — Your current SB that are free to spend on purchases. This is what counts toward the 60 SB marketplace access threshold.</li><li><strong>Escrowed Swap Bucks</strong> — SB that are tied up in active, in-progress transactions. These are committed but not yet finalized — they'll either be released to a seller when you confirm delivery, or returned to you if a transaction is cancelled or resolved in your favor via dispute. Escrowed SB do not count toward your available balance.</li><li><strong>Purchase Credits balance</strong> — Your remaining USD-denominated credits for paying transaction fees. Displayed separately from SB.</li><li><strong>Transaction history</strong> — A complete, chronological log of every SB movement in and out of your wallet: sales, purchases, referral bonuses, gift card redemptions, escrow holds, fee payments, and dispute resolutions.</li></ul><h2>How to Find Your Wallet</h2><ol><li>Log in to Swapedly.</li><li>Tap <strong>Wallet</strong> in the main navigation menu, or tap your balance display if it's shown in the header.</li><li>Your balances and history load immediately.</li></ol><h2>Reading Your Transaction History</h2><p>Each line item in your history shows the date, transaction type (sale, purchase, referral, fee, gift card, escrow release, etc.), the SB or credit amount, and your running balance after that transaction. This log is invaluable for tracking your overall activity and identifying any discrepancies.</p><h2>Topping Up Purchase Credits</h2><p>If your Purchase Credits are running low, tap <strong>\"Buy Credits\"</strong> within the wallet section. Each credit costs $0.49 with a minimum purchase of $5.00. See <a href=\"/#/help/purchase-credits\">What Are Purchase Credits?</a> for full details.</p><div class=\"tip-box\">Tip: Review your wallet after every transaction to confirm SB were credited or debited correctly. Catching discrepancies early makes them much easier to resolve through support.</div>",
+        "faqs": [
+          {
+            "q": "Why is my available SB balance lower than I expected?",
+            "a": "Check your transaction history for recent activity. SB tied up in active transactions appear as \"escrowed\" and aren't part of your available balance until the transaction completes."
+          },
+          {
+            "q": "Can I see a history of all my referral bonuses?",
+            "a": "Yes. Referral bonuses appear as individual line items in your transaction history with a \"referral\" label."
+          },
+          {
+            "q": "When does escrowed SB become available again?",
+            "a": "Escrowed SB are released once the buyer confirms delivery (moving to the seller's wallet) or when a transaction is cancelled or resolved in the buyer's favor."
+          },
+          {
+            "q": "Can I export or download my transaction history?",
+            "a": "Check wallet settings for an export option. If unavailable, contact Swapedly support to request a history report."
+          },
+          {
+            "q": "What's the difference between my total SB and my available SB?",
+            "a": "Available SB is what you can spend right now. Total SB includes both available and escrowed amounts. You can only spend available SB."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "referrals",
+        "title": "Referring Friends for Swap Bucks",
+        "slug": "referrals",
+        "summary": "Earn 1 Swap Buck for every friend who signs up via your referral link — one of the easiest ways to build your SB balance.",
+        "content": "<h2>Share Swapedly. Earn SB.</h2><p>The Swapedly referral program rewards you for growing the community. Every time a friend signs up for Swapedly using your unique referral link, you earn <strong>1 Swap Buck</strong> — automatically, no further action required. It might sound small, but it adds up: twenty referrals fills the 20 SB gap between your welcome gift (40 SB) and marketplace access (60 SB minimum), getting you buying access with zero selling required.</p><h2>How to Get Your Referral Link</h2><ol><li>Log in to your Swapedly account.</li><li>Navigate to your profile or look for a <strong>\"Refer a Friend\"</strong> section in the main menu or settings.</li><li><strong>Copy your unique referral link</strong> — This link is specific to your account and is what triggers the credit when a new user signs up through it.</li><li><strong>Share it</strong> — Send it via text, post it on social media, include it in an email, add it to your bio. The more places it lives, the more passive sign-ups you'll generate.</li></ol><h2>How the Referral Credit Works</h2><ol><li>Your friend clicks your link and lands on the Swapedly sign-up page.</li><li>They create and verify their account.</li><li>Your account is automatically credited with <strong>1 SB</strong>.</li><li>The credit appears in your wallet transaction history with a \"referral\" label.</li></ol><h2>Maximizing Your Referrals</h2><ul><li><strong>Mention the $40 welcome gift card</strong> — It's a strong incentive. New users get 40 free SB just for signing up — that's essentially free money in the marketplace.</li><li><strong>Share in relevant communities</strong> — Facebook Marketplace groups, local buy/sell groups, and thrift or resale communities are great audiences.</li><li><strong>Add your link to social media bios</strong> — Passive placement means referrals can trickle in over time without repeated effort.</li></ul><div class=\"tip-box\">Tip: Track your referral earnings in your wallet transaction history to see how many sign-ups your link has generated and how your balance is growing.</div><div class=\"warning-box\">Warning: Creating fake accounts or exploiting the referral system in any way (including referring yourself through alternate accounts) violates Swapedly's terms. Fraudulently earned referral SB will be reversed and your account may be suspended.</div>",
+        "faqs": [
+          {
+            "q": "How much do I earn per referral?",
+            "a": "You earn exactly 1 Swap Buck (1 SB = $1 USD in value) for each friend who creates a Swapedly account using your unique referral link."
+          },
+          {
+            "q": "Is there a limit on how many friends I can refer?",
+            "a": "There's no stated limit. Refer as many people as you like within the rules of the program."
+          },
+          {
+            "q": "When do my referral SB appear in my wallet?",
+            "a": "Referral SB are typically credited automatically once the referred person completes account sign-up and verification."
+          },
+          {
+            "q": "My friend signed up but I didn't receive my SB — what do I do?",
+            "a": "Make sure your friend used your exact referral link, not just the homepage URL. If the credit is still missing after a day, contact Swapedly support with details."
+          },
+          {
+            "q": "Does my referred friend get any bonus for signing up through my link?",
+            "a": "Your friend still gets the standard new-user welcome offer, including the $40 gift card at swapedly.com/#/gift-card. Your referral link doesn't reduce their benefits."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "marketplace-unlock",
+        "title": "Unlocking the Marketplace (60 SB Required)",
+        "slug": "marketplace-unlock",
+        "summary": "You need 60 Swap Bucks in your wallet to unlock the Swapedly marketplace — here's why it exists and the fastest ways to get there.",
+        "content": "<h2>Why Is the Marketplace Locked?</h2><p>New Swapedly accounts need a minimum of <strong>60 Swap Bucks</strong> in their wallet before they can browse and purchase items in the marketplace. This threshold exists for good reasons: it ensures that marketplace participants are genuinely engaged with the platform's SB economy, deters fraudulent and throwaway accounts from flooding the marketplace, and helps maintain the quality and trustworthiness of the buying pool.</p><h2>Where You Stand After the Welcome Gift</h2><p>If you've claimed your welcome gift card, you already have <strong>40 SB</strong> — meaning you're just <strong>20 SB short</strong> of marketplace access. Here are the fastest ways to close that gap:</p><ul><li><strong>Refer 20 friends</strong> — 1 SB per sign-up, no selling required. Share your link on social media, in a text chain, or anywhere else. See <a href=\"/#/help/referrals\">Referring Friends for Swap Bucks</a>.</li><li><strong>List and sell one item</strong> — Clear something out of your home for 20+ SB and you'll unlock access immediately upon delivery confirmation.</li><li><strong>Complete your profile for bonus SB</strong> — Swapedly may offer SB incentives for completing profile setup. Check your notifications for active offers.</li><li><strong>Watch for promotional bonuses</strong> — Swapedly runs limited-time SB promotions. Keep your notifications active so you don't miss them.</li></ul><h2>Important: 60 SB Is a Threshold, Not a Fee</h2><p>The 60 SB minimum is a <em>wallet balance requirement</em>, not a charge. Your SB are not deducted to unlock access — they simply need to be present in your wallet. You keep all 60 SB and can spend them freely on purchases.</p><div class=\"tip-box\">Tip: Once you unlock the marketplace, maintain a healthy SB buffer. If a purchase drops you below 60 SB, marketplace access is temporarily suspended until your balance recovers through a new sale or referral.</div><h2>Can't Claim the Gift Card?</h2><p>If you're having trouble with the gift card redemption, see <a href=\"/#/help/redeem-gift-card\">How to Redeem a Gift Card for Swap Bucks</a> or contact support directly.</p><div class=\"warning-box\">Warning: If your balance drops below 60 SB after a purchase, you'll temporarily lose marketplace browsing and buying access. Sell an item or earn referral SB to restore it.</div>",
+        "faqs": [
+          {
+            "q": "Is the 60 SB a fee, or just a minimum balance requirement?",
+            "a": "It's a minimum balance threshold — not a fee. Your SB stay in your wallet; you just need 60 SB present to have marketplace access."
+          },
+          {
+            "q": "What happens if my balance drops below 60 SB?",
+            "a": "Marketplace browsing and buying access is temporarily suspended until your balance returns to 60 SB or above."
+          },
+          {
+            "q": "I have the 40 SB from the gift card but still can't access the marketplace. Why?",
+            "a": "You need 60 SB total — the gift card gets you to 40. Earn the remaining 20 through referrals, a sale, or available bonuses."
+          },
+          {
+            "q": "Can I unlock the marketplace without selling or referring anyone?",
+            "a": "If there are no other bonus opportunities available, selling or referring friends are the two guaranteed paths. The welcome gift gets you most of the way there."
+          },
+          {
+            "q": "Does the 60 SB threshold ever change?",
+            "a": "The 60 SB requirement is the current platform standard. Check Swapedly's announcements for any future changes to this policy."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      }
+    ]
+  },
+  {
+    "id": "shipping-pickup",
+    "title": "Shipping & Pickup",
+    "emoji": "📦",
+    "description": "Everything about getting items from sellers to buyers — whether by mail or in-person local pickup.",
+    "articles": [
+      {
+        "id": "shipping-and-pickup",
+        "title": "Shipping vs. Local Pickup — Which Should I Choose?",
+        "slug": "shipping-and-pickup",
+        "summary": "Compare shipping and local pickup to understand which delivery method makes the most sense for your transaction.",
+        "content": "<h2>Two Ways to Exchange Items on Swapedly</h2><p>When a seller creates a listing, they choose the delivery method: shipping, local pickup, or both. As a buyer, you work within whatever the seller has made available. Understanding the pros and cons of each method helps you set expectations and choose listings that work for your situation.</p><h2>Shipping: Buy and Sell from Anywhere</h2><p>With shipping, the seller packages the item and sends it via a carrier (USPS, UPS, FedEx, etc.). Neither party needs to be in the same location.</p><ul><li><strong>Pros:</strong> No geographic restriction — buy from anyone in the country. Convenient — no need to coordinate schedules or meet in person. Suitable for small items that pack easily.</li><li><strong>Cons:</strong> Shipping costs add to the total (check whether the seller includes shipping in the SB price or charges separately). Delivery takes time. Items can be damaged in transit if not packed well. You can't physically inspect the item before it arrives.</li><li><strong>Best for:</strong> Small-to-medium items, buyers and sellers who aren't near each other, or when you prefer not to meet in person.</li></ul><h2>Local Pickup: Fast, Inspectable, No Shipping Cost</h2><p>Local pickup means you and the seller meet in person to complete the exchange. The Swapedly transaction still happens through the platform (your SB move into escrow when you purchase), but you physically collect the item at the agreed location.</p><ul><li><strong>Pros:</strong> No shipping cost. You inspect the item in person before confirming delivery. Faster — often same-day or next-day. Great for large or fragile items that would be risky to ship.</li><li><strong>Cons:</strong> Requires both parties to be in the same geographic area. Scheduling and coordinating a meetup takes some back-and-forth. Requires basic safety precautions for an in-person exchange.</li><li><strong>Best for:</strong> Furniture, large appliances, and other items that can't be shipped economically. Also ideal when you want to inspect the item hands-on before committing.</li></ul><h2>Who Decides the Delivery Method?</h2><p>The <strong>seller chooses</strong> the delivery method(s) when creating their listing. As a buyer, you'll see what's available on the listing page. If only one method is offered and it doesn't work for you, message the seller — they may be willing to accommodate.</p><div class=\"tip-box\">Tip: For local pickup, always meet in a public place. See <a href=\"/#/help/safe-meetup\">Tips for Safe Local Meetups</a> for a full safety guide.</div><div class=\"warning-box\">Warning: Regardless of the delivery method, always complete the transaction through Swapedly. Paying in cash or via any external method voids your transaction protection entirely.</div>",
+        "faqs": [
+          {
+            "q": "Can a listing offer both shipping and local pickup?",
+            "a": "Yes. Sellers can enable both options, giving buyers the flexibility to choose what works best for them."
+          },
+          {
+            "q": "Who pays for shipping — buyer or seller?",
+            "a": "This varies by listing. Check the listing description to see whether shipping is included in the SB price or charged as an additional amount."
+          },
+          {
+            "q": "What if I want local pickup but the seller only offers shipping?",
+            "a": "Message the seller and ask if they'd consider local pickup. It's their call, but many sellers are open to it if you're nearby."
+          },
+          {
+            "q": "Is local pickup safe?",
+            "a": "Local pickup is very safe when you take basic precautions — always meet in a public place during daylight. See our Safe Local Meetup guide."
+          },
+          {
+            "q": "Does Swapedly's transaction protection cover both delivery methods?",
+            "a": "Yes. Both shipping and local pickup transactions are fully covered by escrow protection, as long as the purchase is made through Swapedly."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": true
+      },
+      {
+        "id": "how-shipping-works",
+        "title": "How Shipping Works on Swapedly",
+        "slug": "how-shipping-works",
+        "summary": "A step-by-step guide to the shipping process on Swapedly — what both buyers and sellers need to do from purchase to delivery.",
+        "content": "<h2>Shipping from Start to Finish</h2><p>Shipped transactions on Swapedly follow a clear sequence that protects both parties. Here's the complete process from the moment a buyer clicks \"Buy Now\" to the moment the seller receives their Swap Bucks.</p><h2>For Sellers: What You Need to Do</h2><ol><li><strong>Receive the purchase notification</strong> — Once a buyer completes a purchase, you'll be notified immediately. The buyer's SB are now in escrow.</li><li><strong>Confirm the shipping address</strong> — Message the buyer through Swapedly to confirm their delivery address before packaging anything. Addresses change, and it's worth double-checking.</li><li><strong>Package the item carefully</strong> — Use appropriate materials to prevent damage in transit. See <a href=\"/#/help/packaging-tips\">Packaging Tips for Safe Shipping</a> for detailed guidance.</li><li><strong>Ship the item promptly</strong> — Use a carrier that provides tracking: USPS, UPS, FedEx, or similar. Tracking is strongly recommended — without it, proving delivery in a dispute is nearly impossible.</li><li><strong>Share the tracking number</strong> — Send the tracking number to the buyer via Swapedly messages as soon as you have it. Buyers appreciate being able to track their package.</li><li><strong>Wait for delivery confirmation</strong> — Once the buyer receives and confirms the item, your Swap Bucks are released from escrow into your wallet. You'll receive a notification when this happens.</li></ol><h2>For Buyers: What You Need to Do</h2><ol><li><strong>Check your messages</strong> — The seller may reach out to confirm your shipping address. Respond promptly.</li><li><strong>Track your package</strong> — Use the tracking number the seller provides to monitor your shipment's progress.</li><li><strong>Be available for delivery</strong> — If a signature is required, make sure someone is available or check with the carrier about alternative delivery options.</li><li><strong>Inspect on arrival</strong> — Open and check the item against the listing description and photos before confirming delivery.</li><li><strong>Confirm delivery in the app</strong> — If everything is as expected, confirm delivery to release the seller's SB. See <a href=\"/#/help/confirm-delivery\">Confirming Delivery and Releasing Swap Bucks</a>.</li></ol><div class=\"tip-box\">Tip: Sellers — ship within 1–3 business days of a sale. Slow shipping is a common source of negative reviews. A fast, communicative seller builds a reputation that leads to more future sales.</div><div class=\"warning-box\">Warning: Buyers — never confirm delivery before you have physically received and inspected the item. Confirming early releases the seller's SB and closes the dispute window.</div>",
+        "faqs": [
+          {
+            "q": "Who is responsible for paying shipping costs?",
+            "a": "Check the individual listing. Some sellers include shipping in the SB price; others charge separately. The listing description should clarify."
+          },
+          {
+            "q": "What if my item arrives damaged from shipping?",
+            "a": "Photograph the damage immediately and open a dispute through Swapedly before confirming delivery. Do not discard the original packaging."
+          },
+          {
+            "q": "How long should I wait for an item to arrive?",
+            "a": "Domestic shipping typically takes 3–10 business days. Check the tracking number provided by the seller for the most accurate estimate."
+          },
+          {
+            "q": "What if the seller never provides a tracking number?",
+            "a": "Message the seller to request it. If they don't respond or the item never arrives, open a dispute. Don't confirm delivery without receiving the item."
+          },
+          {
+            "q": "Can I change my shipping address after completing a purchase?",
+            "a": "Contact the seller via messages immediately if you need to change the address. If the item hasn't shipped yet, they may be able to update it."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "local-pickup-process",
+        "title": "The Local Pickup Process",
+        "slug": "local-pickup-process",
+        "summary": "How to coordinate and safely complete a local pickup on Swapedly — from purchase to in-person exchange.",
+        "content": "<h2>How Local Pickup Works on Swapedly</h2><p>Local pickup lets buyers and sellers complete a transaction by meeting in person, rather than shipping. It eliminates shipping costs and lets the buyer inspect the item hands-on before finalizing the deal. Even though the exchange is in-person, the transaction itself still runs through Swapedly to keep everyone protected.</p><h2>Step-by-Step: The Local Pickup Process</h2><ol><li><strong>Buyer completes the purchase</strong> — The buyer taps \"Buy Now\" in the app. Their Swap Bucks immediately move into escrow — secured by Swapedly before anyone meets up.</li><li><strong>Coordinate the meetup</strong> — Buyer and seller communicate via Swapedly messages to agree on a time and location. Always choose a public, populated place. See <a href=\"/#/help/safe-meetup\">Tips for Safe Local Meetups</a>.</li><li><strong>Meet at the agreed location</strong> — Show up at the arranged time. Both parties should arrive with the Swapedly app accessible on their phone.</li><li><strong>Seller presents the item</strong> — The seller brings the item in the condition described. The buyer inspects it thoroughly: check for described flaws, test functionality if applicable, and compare against the listing photos.</li><li><strong>Buyer confirms in the app</strong> — If the item meets expectations, the buyer opens the Swapedly app and confirms delivery right there at the meetup. This is important: don't wait until you get home to confirm.</li><li><strong>SB released to the seller</strong> — The moment the buyer confirms, Swapedly releases the escrowed Swap Bucks to the seller's wallet. Both parties receive confirmation.</li></ol><h2>If Something Isn't Right at the Meetup</h2><p>If the item doesn't match the listing description — different condition, missing parts, or other significant discrepancy — the buyer should <strong>not confirm delivery</strong>. Walk away, then open a dispute through the Swapedly app. The escrowed SB will remain frozen until the dispute is resolved.</p><div class=\"tip-box\">Tip: Confirm delivery in the app while you're still at the meetup location, not hours later from home. This creates a clean, time-stamped record of the transaction and resolves it properly for both parties.</div><div class=\"warning-box\">Warning: Never exchange cash or pay via any outside method during a local pickup. The entire transaction must go through Swapedly to maintain escrow protection for both parties.</div>",
+        "faqs": [
+          {
+            "q": "Can I inspect the item before confirming delivery?",
+            "a": "Absolutely — and you should. Inspect the item thoroughly at the meetup before tapping confirm in the app. That's the entire point of local pickup."
+          },
+          {
+            "q": "What if the item is significantly not as described when I see it in person?",
+            "a": "Do not confirm delivery. Leave the meetup and open a dispute through the Swapedly app. The escrowed SB will not be released to the seller until the dispute is resolved."
+          },
+          {
+            "q": "Is there a time limit for completing a local pickup after purchase?",
+            "a": "Try to schedule and complete the pickup within a few days. Prolonged delays can create complications and may be flagged by the platform."
+          },
+          {
+            "q": "Can I bring a friend to the local pickup?",
+            "a": "Yes, and it's encouraged — especially for higher-value items or if you're meeting someone you don't know. Having company improves safety."
+          },
+          {
+            "q": "What if the seller doesn't show up to the agreed meetup?",
+            "a": "Don't confirm delivery. Open a dispute and report the issue to Swapedly support. The seller's no-show will be taken into account."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "packaging-tips",
+        "title": "Packaging Tips for Safe Shipping",
+        "slug": "packaging-tips",
+        "summary": "Pack your items correctly to prevent damage in transit and ensure your buyer receives exactly what was listed.",
+        "content": "<h2>Why Packaging Is a Seller Responsibility</h2><p>When you ship an item, you're responsible for getting it to the buyer in the condition you described. Shipping carriers are not gentle — packages are stacked, dropped, and sorted by machines. A well-packed item survives the journey; a poorly packed one often doesn't. Damaged items are the most common trigger for disputes and negative seller reviews. Taking five extra minutes to pack correctly is always worth it.</p><h2>General Packaging Guidelines</h2><ul><li><strong>Choose the right box</strong> — Use a sturdy cardboard box appropriate for the item's size and weight. Double-wall boxes are best for heavy or fragile items. The item should fit with room for padding but not so much space that it shifts around excessively.</li><li><strong>Add generous padding</strong> — Bubble wrap, packing peanuts, crumpled newspaper, foam inserts, or even clean clothing all work as padding. The item should not be able to move or shift inside the box when you shake it.</li><li><strong>Wrap components separately</strong> — If the item has multiple parts (e.g., a camera with lenses, a console with controllers), wrap each component individually before placing them together in the box.</li><li><strong>Reinforce the box</strong> — Use quality packing tape — not masking tape or duct tape — to seal all seams. Apply tape in an H-pattern across the top and bottom flaps. Reinforce the bottom of any heavy box with extra strips of tape.</li><li><strong>Label clearly</strong> — Print or write the shipping address legibly on the outside of the box. Include your return address. Keep a copy of the label information in case the package needs to be traced.</li></ul><h2>Shipping Fragile Items</h2><p>For anything fragile — glassware, ceramics, electronics with screens, vintage items — use the <strong>double-box method</strong>: place the item in a smaller inner box with its own padding, then place that box inside a larger outer box with additional padding around it. This is the gold standard for fragile shipments and significantly reduces breakage rates.</p><h2>Document Before You Seal</h2><p>Take a clear photo of the item inside the packaging before you seal the box. If a dispute arises about damage in transit, this photo proves the item was properly packaged and in good condition when it left your hands.</p><div class=\"tip-box\">Tip: For high-value items, purchase shipping insurance from your carrier. It typically costs a few dollars and provides coverage if the package is lost or damaged in transit — worth it for anything over $50.</div>",
+        "faqs": [
+          {
+            "q": "Can I reuse old shipping boxes?",
+            "a": "Yes, as long as the box is structurally sound — no crushed corners, tears, or significant damage. Remove or black out any old labels and bar codes to avoid misdirection."
+          },
+          {
+            "q": "What if I don't have bubble wrap or packing peanuts?",
+            "a": "Crumpled newspaper, clean clothing, towels, or foam from product packaging all work as padding alternatives. The key is that the item can't move around inside the box."
+          },
+          {
+            "q": "Should I add shipping insurance for valuable items?",
+            "a": "Yes, strongly recommended for higher-value items. Shipping insurance covers you if the package is lost or arrives damaged and provides recourse with the carrier."
+          },
+          {
+            "q": "Do I need to include a packing slip inside the box?",
+            "a": "Not required, but a brief handwritten note or printed packing slip inside the box is a nice touch that buyers genuinely appreciate and can help with any package mix-up."
+          },
+          {
+            "q": "What if my item is too large or awkward to ship conventionally?",
+            "a": "For oversized items, explore freight shipping options or — better yet — set your listing to local pickup only when you create it."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "confirm-delivery",
+        "title": "Confirming Delivery and Releasing Swap Bucks",
+        "slug": "confirm-delivery",
+        "summary": "Confirming delivery is the final step of every Swapedly transaction — it releases the seller's escrowed Swap Bucks once you're satisfied.",
+        "content": "<h2>The Final Step That Completes a Transaction</h2><p>Every Swapedly transaction ends with the buyer confirming delivery. This single action signals to the platform that the exchange went as expected, releasing the seller's Swap Bucks from escrow into their wallet. Until you confirm, the SB remain frozen — protected for you in case something went wrong.</p><h2>How to Confirm Delivery</h2><ol><li><strong>Receive the item</strong> — Wait until you physically have the item in hand, whether it arrived by shipping or you picked it up in person.</li><li><strong>Inspect it carefully</strong> — Compare the item to the listing photos and description. Check the condition, functionality, and anything specifically mentioned in the listing. Look at all sides.</li><li><strong>Open the transaction in Swapedly</strong> — Go to your purchases or active transactions list in the app.</li><li><strong>Tap \"Confirm Delivery\"</strong> — This button appears within the transaction details. Tapping it signals that you received the item as described and are satisfied with the exchange.</li><li><strong>Leave a review (optional but encouraged)</strong> — After confirming, you'll have the opportunity to rate the seller and leave written feedback. Reviews help other buyers make informed decisions and reward good sellers.</li></ol><h2>Confirming for Local Pickup</h2><p>For local pickups, confirm delivery in the app while you're still at the meetup location — right after you've inspected the item and are satisfied. This creates a clean, timestamped record for both parties.</p><h2>What If Something Is Wrong?</h2><p>If the item doesn't match the listing description, arrives damaged, or is otherwise not what you paid for, <strong>do not confirm delivery</strong>. Open a dispute through the platform immediately. See <a href=\"/#/help/dispute-resolution\">What to Do If Something Goes Wrong</a> for the full process. Your escrowed SB remain protected until the dispute is resolved.</p><div class=\"tip-box\">Tip: Confirm delivery promptly once you're satisfied. Sellers depend on timely SB release to buy more items and continue selling. A quick confirmation builds goodwill and earns you good seller reciprocity over time.</div><div class=\"warning-box\">Warning: Confirming delivery is final. Once you confirm, the SB are transferred to the seller and the transaction is marked complete. It becomes significantly harder to resolve disputes after confirmation — only confirm when you are genuinely satisfied with the item.</div>",
+        "faqs": [
+          {
+            "q": "Do I have to confirm delivery immediately when the item arrives?",
+            "a": "Inspect the item first, then confirm. There's a deadline — check the transaction details for your specific window — so don't leave it too long."
+          },
+          {
+            "q": "What happens if I forget to confirm delivery?",
+            "a": "After a set period past the expected delivery date, Swapedly may automatically release the SB to the seller. Confirm promptly to control the timing yourself."
+          },
+          {
+            "q": "Can I undo a delivery confirmation?",
+            "a": "No. Confirmation is final. Only confirm when you're fully satisfied. If you confirm and then discover an issue, contact support immediately."
+          },
+          {
+            "q": "What if I confirmed delivery but the item turned out to be broken?",
+            "a": "Contact Swapedly support right away. Resolution after confirmation is harder but the team will still review the situation, especially with supporting evidence like photos."
+          },
+          {
+            "q": "Does confirming delivery also submit a rating for the seller?",
+            "a": "After confirming, you're given the option to leave a review. It's optional but strongly encouraged — it helps the entire community."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      }
+    ]
+  },
+  {
+    "id": "account-settings",
+    "title": "Account & Settings",
+    "emoji": "⚙️",
+    "description": "Manage every aspect of your Swapedly account — password, email, profile, notifications, and account closure.",
+    "articles": [
+      {
+        "id": "reset-password",
+        "title": "Resetting Your Password",
+        "slug": "reset-password",
+        "summary": "Forgot your Swapedly password? Reset it in a few steps and get back into your account quickly.",
+        "content": "<h2>Locked Out? Here's How to Get Back In</h2><p>Forgetting a password happens to everyone. Swapedly makes it easy to reset yours and regain access to your account in just a couple of minutes. The process is secure, straightforward, and entirely self-service — no need to contact support unless you've also lost access to your email.</p><h2>How to Reset Your Password</h2><ol><li><strong>Go to the forgot password page</strong> — Visit <a href=\"https://www.swapedly.com/#/forgot-password\">swapedly.com/#/forgot-password</a> directly, or click \"Forgot Password?\" on the Swapedly login screen.</li><li><strong>Enter your account email address</strong> — Type the email address associated with your Swapedly account and tap \"Submit\" or \"Send Reset Link.\"</li><li><strong>Check your inbox</strong> — A password reset email will arrive within a few minutes. Check your spam or junk folder if you don't see it in your primary inbox.</li><li><strong>Click the reset link</strong> — Open the email and click the secure link inside. This takes you to a page where you can create a new password.</li><li><strong>Create a strong new password</strong> — Use a mix of uppercase and lowercase letters, numbers, and symbols. Avoid using passwords you use on other sites — especially if those sites have ever had a data breach.</li><li><strong>Log in with your new password</strong> — Return to <a href=\"https://www.swapedly.com\" target=\"_blank\">swapedly.com</a> and sign in with your email and the new password.</li></ol><h2>If Your Reset Link Has Expired</h2><p>Reset links are time-limited for security reasons — typically valid for one hour. If yours has expired, simply return to <a href=\"https://www.swapedly.com/#/forgot-password\">swapedly.com/#/forgot-password</a> and request a fresh link.</p><h2>Lost Access to Your Email Too?</h2><p>If you no longer have access to the email address on your account, contact Swapedly support directly. Be prepared to verify your identity through alternative means — such as account details or prior transaction information.</p><div class=\"tip-box\">Tip: Use a password manager (like 1Password, Bitwarden, or your browser's built-in manager) to generate and store a strong, unique password for Swapedly. You'll never need to reset it again.</div><div class=\"warning-box\">Warning: If you receive a Swapedly password reset email that you didn't request, someone may have attempted to access your account. Change your password immediately and review your account for any unauthorized activity. Contact support if anything looks off.</div>",
+        "faqs": [
+          {
+            "q": "How long is the reset link valid?",
+            "a": "Reset links typically expire within one hour for security purposes. If yours has expired, request a new one at swapedly.com/#/forgot-password."
+          },
+          {
+            "q": "I didn't receive the reset email — what should I do?",
+            "a": "Check your spam or junk folder first. If it's not there, verify you entered the correct email address and try again. Still nothing? Contact Swapedly support."
+          },
+          {
+            "q": "Can I reset my password if I no longer have access to my email?",
+            "a": "Contact Swapedly support directly. They can help verify your identity through alternate means and assist with account recovery."
+          },
+          {
+            "q": "How often should I change my Swapedly password?",
+            "a": "Change your password if you suspect unauthorized access, if you've reused the same password from another breached site, or as part of a regular personal security routine."
+          },
+          {
+            "q": "Can I reuse my old password when resetting?",
+            "a": "Technically possible, but not recommended. Take the opportunity to create a fresh, strong, unique password for better security."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "edit-profile",
+        "title": "Editing Your Profile",
+        "slug": "edit-profile",
+        "summary": "Update your Swapedly profile — photo, name, bio, and location — at any time from your account settings.",
+        "content": "<h2>Keeping Your Profile Fresh</h2><p>Your Swapedly profile is visible to every user who views your listings or considers transacting with you. Keeping it current and complete is one of the easiest ways to maintain buyer and seller confidence on the platform. Fortunately, editing your profile is quick and can be done at any time.</p><h2>How to Edit Your Profile</h2><ol><li><strong>Log in to your Swapedly account.</strong></li><li><strong>Navigate to your profile</strong> — Tap your name or avatar in the top navigation bar to open your profile page.</li><li><strong>Tap \"Edit Profile\"</strong> — Look for this button near your profile photo, name, or in the three-dot menu on your profile page.</li><li><strong>Update your information:</strong><ul><li><strong>Profile photo</strong> — Tap your current photo to upload a new one. Use a clear, well-lit image of your face.</li><li><strong>Display name</strong> — The name shown publicly to other Swapedly users.</li><li><strong>Bio</strong> — Update your short description. Mention what you sell, your typical response time, and anything that helps others know what to expect when transacting with you.</li><li><strong>Location</strong> — Update your city or region if you've moved or want to change your local pickup area.</li></ul></li><li><strong>Save your changes</strong> — Tap \"Save\" or \"Done\" to apply the updates. Changes appear on your profile immediately.</li></ol><h2>What You Can't Edit in the Profile Section</h2><p>Email address and password changes are handled separately for security reasons:</p><ul><li>To change your email: see <a href=\"/#/help/change-email\">Changing Your Email Address</a></li><li>To change your password: see <a href=\"/#/help/reset-password\">Resetting Your Password</a></li></ul><h2>Profile Visibility Reminder</h2><p>Everything you enter in your profile — name, photo, bio, location — is visible to all Swapedly users. Never include personal contact information, phone numbers, or financial details in your bio. Your email address and wallet information are always kept private by the platform.</p><div class=\"tip-box\">Tip: Revisit your bio every few months and update it to reflect what you're currently selling or looking for. An up-to-date bio signals an active user and makes a better impression on potential buyers and sellers.</div>",
+        "faqs": [
+          {
+            "q": "Can I change my username?",
+            "a": "Username changes may be limited or restricted to certain conditions. Contact Swapedly support if you need to update your username specifically."
+          },
+          {
+            "q": "Will editing my profile affect my active listings?",
+            "a": "No. Your profile information is separate from listing details. Editing your profile doesn't change any listings."
+          },
+          {
+            "q": "Is there a limit on how often I can edit my profile?",
+            "a": "No — you can update your profile as frequently as you like. There's no cool-down period or edit limit."
+          },
+          {
+            "q": "Can other users see my location when I edit it?",
+            "a": "Only your general location (city or region) is publicly visible. Your specific address is never shown on your profile."
+          },
+          {
+            "q": "Do I need to re-verify anything after making profile changes?",
+            "a": "Standard profile edits (photo, bio, name, location) don't require re-verification. Email changes are the exception — those require email verification."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "change-email",
+        "title": "Changing Your Email Address",
+        "slug": "change-email",
+        "summary": "Update the email address on your Swapedly account securely — requires password confirmation and email verification.",
+        "content": "<h2>When You Need to Change Your Email</h2><p>Whether you're switching to a new email provider, correcting a typo from sign-up, or simply want a different address associated with your account, changing your Swapedly email is a secure, verified process. Because your email is both your login credential and your primary communication channel, Swapedly treats this change with extra care.</p><h2>How to Change Your Email Address</h2><ol><li><strong>Go to Account Settings</strong> — Tap your profile, then navigate to Settings from the menu.</li><li><strong>Find the Email section</strong> — Look for \"Email Address\" or \"Account Email\" under account or security settings.</li><li><strong>Enter your new email address</strong> — Type the new address carefully. A typo here means you won't receive the verification link.</li><li><strong>Confirm with your current password</strong> — For security, Swapedly requires you to enter your current password to authorize an email change. This prevents unauthorized changes if someone gains brief access to your device.</li><li><strong>Check the new inbox for a verification email</strong> — Swapedly sends a confirmation link to the new email address. Open that email and click the link to finalize the change.</li><li><strong>Log in with your new email</strong> — After verification, your new email is active and replaces the old one as your login credential.</li></ol><h2>Troubleshooting</h2><ul><li><strong>Verification email not arriving?</strong> — Check the spam/junk folder for the new email address. Verify you typed the new address correctly and try the process again.</li><li><strong>Forgot your current password?</strong> — Reset it first at <a href=\"https://www.swapedly.com/#/forgot-password\">swapedly.com/#/forgot-password</a>, then return to change your email.</li><li><strong>No longer have access to the old email?</strong> — Contact Swapedly support directly. They can help verify your identity and assist with the transition.</li></ul><div class=\"tip-box\">Tip: Before changing your email, make sure you have full access to the new inbox. Open it in a separate browser tab so you're ready to click the verification link the moment it arrives.</div><div class=\"warning-box\">Warning: If you receive an email saying your Swapedly email address was changed but you didn't initiate this, treat it as a potential security breach. Change your password immediately at swapedly.com/#/forgot-password and contact Swapedly support.</div>",
+        "faqs": [
+          {
+            "q": "Do I need to verify the new email address?",
+            "a": "Yes. Swapedly sends a verification link to the new email address. The change isn't finalized until you click that link."
+          },
+          {
+            "q": "Can two accounts share the same email address?",
+            "a": "No. Each email address can only be associated with one Swapedly account at a time."
+          },
+          {
+            "q": "What if I no longer have access to my old email?",
+            "a": "Contact Swapedly support. They can verify your identity through alternate means and help you regain access."
+          },
+          {
+            "q": "Will my old email address still work after the change?",
+            "a": "Once the new email is verified, your old email is disassociated from the account. Use only the new email to log in going forward."
+          },
+          {
+            "q": "Is there a limit on how often I can change my email address?",
+            "a": "Frequent email changes may trigger additional security verification. Contact support if you're experiencing issues with repeated changes."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "notifications",
+        "title": "Managing Notifications",
+        "slug": "notifications",
+        "summary": "Control which Swapedly notifications you receive — and how — to stay informed about offers and sales without the noise.",
+        "content": "<h2>Staying in the Loop Without Being Overwhelmed</h2><p>Swapedly sends notifications for a wide range of events — new offers on your listings, incoming messages, completed sales, delivery confirmations, and more. The good news: you're in full control of which notifications you receive and how they're delivered. Here's how to set them up so you stay informed about what matters without drowning in alerts.</p><h2>How to Access Notification Settings</h2><ol><li>Log in and navigate to <strong>Settings</strong> from your profile or main menu.</li><li>Tap <strong>\"Notifications\"</strong> or \"Notification Preferences.\"</li><li>Toggle individual notification types on or off.</li><li>For each type, set your preferred delivery method: in-app only, email, push notification, or a combination.</li><li>Save your preferences.</li></ol><h2>Notification Types Explained</h2><ul><li><strong>New offer received</strong> — When a buyer makes an offer on one of your listings. Time-sensitive — enable this one.</li><li><strong>New message</strong> — When another user sends you a message. Important for coordinating shipping, answering buyer questions, and handling offer negotiations.</li><li><strong>Item sold</strong> — When a buyer completes a purchase of one of your listings. Always worth knowing right away so you can prepare to ship or schedule a pickup.</li><li><strong>Delivery confirmed</strong> — When a buyer confirms receipt of your item, triggering your SB release. Great to have on so you know when your earnings hit your wallet.</li><li><strong>Offer accepted / declined</strong> — Updates on offers you've made as a buyer. Keep this on to know whether to move on or proceed with a purchase.</li><li><strong>Dispute update</strong> — Any update on an open dispute. Always keep this enabled if you have active disputes.</li><li><strong>Promotional and platform announcements</strong> — News about new features, bonus SB promotions, and platform updates. Optional, but useful for not missing earning opportunities.</li></ul><div class=\"tip-box\">Tip: At minimum, keep offer and message notifications active. Missing a time-limited offer window because notifications were off is a frustrating and avoidable situation.</div><div class=\"warning-box\">Warning: Turning off all notifications means you may miss accepted offers, incoming messages, and dispute updates. We recommend keeping transactional notifications enabled and only disabling purely promotional ones.</div>",
+        "faqs": [
+          {
+            "q": "Can I turn off all notifications completely?",
+            "a": "You can turn off most notification types, but we strongly recommend keeping offer, message, and dispute notifications enabled to avoid missing critical transaction events."
+          },
+          {
+            "q": "How do I stop receiving promotional emails?",
+            "a": "Toggle off promotional or marketing notifications in your notification settings. You can also use the unsubscribe link at the bottom of any Swapedly marketing email."
+          },
+          {
+            "q": "Can I receive notifications by email instead of push?",
+            "a": "Yes. For most notification types, you can choose between in-app, email, push notification, or a combination of delivery methods."
+          },
+          {
+            "q": "Why am I not receiving offer notifications even though they're enabled?",
+            "a": "Check that your device's system settings allow push notifications from the Swapedly app. Also verify your email notifications aren't being filtered to spam."
+          },
+          {
+            "q": "Can I set quiet hours so I'm not notified late at night?",
+            "a": "This depends on your device settings and app version. Check your device's \"Do Not Disturb\" or focus mode settings, or look for quiet-hours options in the Swapedly app's notification preferences."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "delete-account",
+        "title": "Deleting Your Account",
+        "slug": "delete-account",
+        "summary": "If you need to leave Swapedly permanently, here's how to delete your account and what you need to do first.",
+        "content": "<h2>Before You Delete: Consider Your Options</h2><p>Account deletion on Swapedly is <strong>permanent and irreversible</strong>. Before taking this step, consider whether you simply want a break from the platform — in which case pausing your listings or temporarily deactivating may be a better fit. Contact support if you'd like to explore those options. If you're certain you want to close your account permanently, here's everything you need to know.</p><h2>Required Steps Before Deleting</h2><p>You cannot delete your account while active obligations are outstanding. Take care of the following first:</p><ul><li><strong>Complete or cancel all active transactions</strong> — Any purchase or sale in progress must be fully resolved. You cannot delete while SB are sitting in escrow.</li><li><strong>Resolve any open disputes</strong> — Active disputes must be closed before deletion is possible.</li><li><strong>Spend or accept the loss of your Swap Bucks</strong> — All SB remaining in your wallet at the time of deletion are permanently forfeited. They cannot be transferred, refunded, or converted to cash. Use them to buy something before deleting if you have a meaningful balance.</li><li><strong>Cancel Swapedly Plus (if active)</strong> — Cancel your subscription to avoid future charges after your account is gone. See <a href=\"/#/help/cancel-plus\">Cancelling Swapedly Plus</a>.</li><li><strong>Remove all active listings</strong> — Take down or mark sold any listings currently live in the marketplace.</li></ul><h2>How to Delete Your Account</h2><ol><li>Go to <strong>Settings</strong> from your profile or main navigation.</li><li>Scroll to the bottom of settings and look for <strong>\"Delete Account\"</strong> or \"Close Account.\"</li><li>Read the confirmation prompt carefully — it will outline what will be permanently removed.</li><li>Confirm your decision by following the on-screen steps (usually entering your password).</li><li>Your account and all associated data — listings, transaction history, reviews, SB balance — are permanently deleted.</li></ol><div class=\"tip-box\">Tip: If you're deleting because of a frustrating experience, consider reaching out to Swapedly support first. Many common issues can be resolved quickly, and the team genuinely wants to help.</div><div class=\"warning-box\">Warning: Deletion is irreversible. Once your account is deleted, there is no recovery option. All your data, Swap Bucks, transaction history, and reviews are gone permanently.</div>",
+        "faqs": [
+          {
+            "q": "Can I recover my account after deleting it?",
+            "a": "No. Account deletion is permanent. Once processed, your data cannot be recovered under any circumstances."
+          },
+          {
+            "q": "What happens to my Swap Bucks when I delete my account?",
+            "a": "All remaining SB in your wallet are permanently forfeited at the time of deletion. There is no refund, transfer, or cash-out option."
+          },
+          {
+            "q": "Do I need to cancel Swapedly Plus before deleting my account?",
+            "a": "Yes. Cancel your Plus subscription first to prevent being charged after your account is deleted."
+          },
+          {
+            "q": "Can I temporarily deactivate my account instead of fully deleting it?",
+            "a": "Contact Swapedly support to ask about temporary deactivation options if you want a break without permanent deletion."
+          },
+          {
+            "q": "Will my reviews and transaction history disappear when I delete?",
+            "a": "Yes. All account data — including your reviews, transaction history, and listings — is permanently removed upon deletion."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      }
+    ]
+  },
+  {
+    "id": "swapedly-plus",
+    "title": "Swapedly Plus",
+    "emoji": "⭐",
+    "description": "Swapedly's premium subscription — 1.5x Swap Bucks on sales, 5 monthly listing highlights, and unlimited purchases for $9.99/month.",
+    "articles": [
+      {
+        "id": "what-is-plus",
+        "title": "What Is Swapedly Plus?",
+        "slug": "what-is-plus",
+        "summary": "Swapedly Plus is a $9.99/month subscription that boosts your SB earnings, gives you monthly listing highlights, and removes purchase limits.",
+        "content": "<h2>The Premium Swapedly Experience</h2><p>Swapedly Plus is a monthly subscription designed for users who want to get the maximum value out of the platform — whether that means earning more Swap Bucks on every sale, boosting the visibility of their listings, or buying as often as they want without restrictions. At <strong>$9.99 per month</strong>, it's built to pay for itself quickly for active sellers.</p><h2>What's Included in Swapedly Plus</h2><ul><li><strong>1.5x Swap Bucks on all sales</strong> — The most impactful benefit. Every sale you make earns 50% more SB than the standard rate. Sell an item listed at 20 SB and receive 30 SB instead. This compounds fast if you sell regularly. See <a href=\"/#/help/plus-sb-boost\">How the 1.5x Swap Bucks Boost Works</a> for detailed examples.</li><li><strong>5 free listing highlights per month</strong> — Boost the visibility of your top listings in the marketplace. Highlights increase placement in search results and add a visual badge that catches buyer attention. These refresh every billing cycle. See <a href=\"/#/help/listing-highlights\">Highlighting Your Listings</a>.</li><li><strong>Unlimited purchases</strong> — Buy as many items as you want with no purchase restrictions while your Plus subscription is active.</li></ul><h2>Is Swapedly Plus Worth It?</h2><p>For active sellers, the math works quickly. If you sell 70 SB worth of items in a month, the 1.5x boost generates an extra 35 SB — $35 in marketplace value — on top of your standard earnings. That alone exceeds the $9.99 subscription cost by a wide margin.</p><p>Even for moderate sellers, the combination of boosted SB earnings and 5 monthly highlights creates tangible, measurable value that compounds over time.</p><h2>How to Get Swapedly Plus</h2><p>Upgrading takes just a few minutes. See <a href=\"/#/help/upgrade-plus\">How to Upgrade to Swapedly Plus</a> for a step-by-step walkthrough.</p><div class=\"tip-box\">Tip: Upgrade to Plus right before you plan to list a batch of items. That way, the 1.5x SB boost applies from your very first sale after upgrading, and you can use all 5 highlights on your new listings immediately.</div>",
+        "faqs": [
+          {
+            "q": "How much does Swapedly Plus cost?",
+            "a": "$9.99 per month, billed on a recurring monthly basis."
+          },
+          {
+            "q": "Can I cancel Swapedly Plus anytime?",
+            "a": "Yes, you can cancel at any time with no cancellation fee. Your Plus benefits remain active through the end of your current billing period."
+          },
+          {
+            "q": "Does Swapedly Plus have a free trial?",
+            "a": "Check the Swapedly Plus upgrade page for any current trial offers — these may be available for new subscribers."
+          },
+          {
+            "q": "What happens to my earnings and listings if I cancel Plus?",
+            "a": "Your SB balance, listings, and account data are completely unaffected. You simply lose the Plus-specific benefits (1.5x boost, highlights, unlimited purchases) once the billing period ends."
+          },
+          {
+            "q": "Can I upgrade to Plus from the mobile app?",
+            "a": "Yes. Swapedly Plus can be upgraded from both the mobile app and the website through the Settings menu."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "plus-benefits",
+        "title": "Swapedly Plus Benefits Explained",
+        "slug": "plus-benefits",
+        "summary": "A detailed breakdown of every benefit included in Swapedly Plus and how to get the most out of each one.",
+        "content": "<h2>Getting the Most from Your Plus Subscription</h2><p>Understanding each Plus benefit in detail helps you use the subscription strategically — not just passively. Here's a deep dive into every benefit and how to maximize it.</p><h2>Benefit 1: 1.5x Swap Bucks on Sales</h2><p>This is the core financial benefit of Swapedly Plus. Every sale you complete while subscribed earns <strong>50% more Swap Bucks</strong> than it would at the standard rate.</p><ul><li>10 SB sale → 15 SB received (standard would be 10)</li><li>40 SB sale → 60 SB received (standard would be 40)</li><li>100 SB sale → 150 SB received (standard would be 100)</li></ul><p>The boost applies automatically to every completed sale — no action required on your end. It applies to the SB you receive, not to the price the buyer pays. Buyers always pay the listed price regardless of whether you're a Plus member.</p><p>See <a href=\"/#/help/plus-sb-boost\">How the 1.5x Swap Bucks Boost Works</a> for the full calculation guide and more examples.</p><h2>Benefit 2: 5 Monthly Listing Highlights</h2><p>Each billing cycle, you receive <strong>5 listing highlights</strong> to use however you like. Highlights boost listing placement in search results and the marketplace feed, and add a visual indicator that catches buyer attention at a glance.</p><p>Key points about highlights:</p><ul><li>They refresh at the start of every billing cycle</li><li>Unused highlights do <em>not</em> roll over to the next month</li><li>Use them on your highest-value, highest-urgency, or freshest listings for maximum impact</li><li>Highlights alone can meaningfully accelerate how fast your items sell</li></ul><p>See <a href=\"/#/help/listing-highlights\">Highlighting Your Listings</a> for the how-to guide.</p><h2>Benefit 3: Unlimited Purchases</h2><p>Swapedly Plus removes any standard purchase limits, giving you unrestricted access to buy as many items as you want while your subscription is active. This is particularly useful for high-volume buyers who shop the marketplace frequently.</p><h2>Standard vs. Plus at a Glance</h2><ul><li><strong>SB earned per sale:</strong> 1x (standard) vs. 1.5x (Plus)</li><li><strong>Free highlights/month:</strong> 0 (standard) vs. 5 (Plus)</li><li><strong>Purchase access:</strong> Standard limits vs. unlimited (Plus)</li><li><strong>Cost:</strong> Free vs. $9.99/month</li></ul><div class=\"tip-box\">Tip: Use all 5 monthly highlights before your billing cycle resets — they don't carry over. Set a reminder near your monthly renewal date to use any remaining highlights.</div>",
+        "faqs": [
+          {
+            "q": "Do my 5 monthly highlights reset every month?",
+            "a": "Yes. Your highlight allocation refreshes at the start of each new billing cycle."
+          },
+          {
+            "q": "Can I roll over unused highlights from one month to the next?",
+            "a": "No. Unused monthly highlights expire when your billing cycle resets. Use them before the cutoff."
+          },
+          {
+            "q": "Does the 1.5x SB boost apply to items I listed before subscribing?",
+            "a": "Yes. The boost applies to any sale completed while your Plus subscription is active, regardless of when you originally listed the item."
+          },
+          {
+            "q": "What happens to my benefits if I downgrade from Plus?",
+            "a": "Your Plus benefits (1.5x boost, highlights, unlimited purchases) remain active through the end of your current paid billing period, then revert to standard."
+          },
+          {
+            "q": "Are there any other Plus perks beyond the three listed here?",
+            "a": "Swapedly may add new Plus benefits over time. Check the Plus page in the app or on the website for the most current full list of included features."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "upgrade-plus",
+        "title": "How to Upgrade to Swapedly Plus",
+        "slug": "upgrade-plus",
+        "summary": "Upgrade to Swapedly Plus in a few taps to unlock the 1.5x SB boost, monthly highlights, and unlimited purchases.",
+        "content": "<h2>Ready to Go Plus?</h2><p>Upgrading to Swapedly Plus is fast — the whole process takes about two minutes and your benefits activate the moment your payment is confirmed. Here's the step-by-step.</p><h2>How to Upgrade</h2><ol><li><strong>Log in to your Swapedly account</strong> from the app or website.</li><li><strong>Go to Settings</strong> from your profile or main navigation menu.</li><li><strong>Find the Swapedly Plus section</strong> — Look for a \"Swapedly Plus,\" \"Upgrade,\" or \"Go Plus\" option in settings. On some versions, this may also appear as a prominent banner or button on the homepage.</li><li><strong>Review the subscription details</strong> — The upgrade page summarizes exactly what you get: 1.5x SB on sales, 5 highlights/month, and unlimited purchases, all for $9.99/month.</li><li><strong>Enter your payment information</strong> — Add a valid debit or credit card. Your card will be charged $9.99 immediately upon subscribing and on the same date each month going forward.</li><li><strong>Tap \"Subscribe\" or \"Start Plus\"</strong> — Confirm the subscription. Your benefits activate <em>immediately</em> — no waiting period.</li></ol><h2>What Happens Right After Upgrading</h2><ul><li>Your 1.5x SB boost is active on all new and existing listings right away</li><li>Your 5 monthly highlights become available to use immediately</li><li>Your account is marked as a Plus member, which may display a badge on your profile</li></ul><h2>Billing Details</h2><p>You're charged $9.99 on the day you subscribe. Subsequent charges happen on the same calendar date each month. If your payment fails, Swapedly will typically retry and may suspend Plus benefits until payment is successful. Cancel anytime — see <a href=\"/#/help/cancel-plus\">Cancelling Swapedly Plus</a>.</p><div class=\"tip-box\">Tip: The ideal time to upgrade is right before you plan to list several items for sale. You'll capture the 1.5x SB boost from the very first sale and can apply all 5 highlights to your newest listings immediately.</div><div class=\"warning-box\">Warning: Make sure your payment method is current and has sufficient funds on your billing date. A failed payment may cause an interruption in your Plus benefits until the charge goes through successfully.</div>",
+        "faqs": [
+          {
+            "q": "When do Plus benefits activate after I subscribe?",
+            "a": "Immediately — as soon as your payment is confirmed, all three Plus benefits are active on your account."
+          },
+          {
+            "q": "Can I cancel right after subscribing to avoid next month's charge?",
+            "a": "Yes. Cancelling after subscribing is allowed. Your Plus benefits stay active until the end of the current billing period."
+          },
+          {
+            "q": "What payment methods are accepted for Swapedly Plus?",
+            "a": "Major debit and credit cards are accepted. Check the upgrade page for the most current list of supported payment methods."
+          },
+          {
+            "q": "Will I be notified before my Plus subscription auto-renews?",
+            "a": "You may receive a renewal reminder notification. Enable billing alerts in your notification settings to stay informed."
+          },
+          {
+            "q": "Can I upgrade multiple accounts to Plus?",
+            "a": "Each account requires its own Plus subscription. One subscription covers one account."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "plus-sb-boost",
+        "title": "How the 1.5x Swap Bucks Boost Works",
+        "slug": "plus-sb-boost",
+        "summary": "Swapedly Plus members earn 1.5x Swap Bucks on every sale — here's exactly how it's calculated and when it applies.",
+        "content": "<h2>Earn 50% More on Every Sale</h2><p>The 1.5x Swap Bucks boost is the centerpiece financial benefit of Swapedly Plus. As a Plus subscriber, every item you sell earns <strong>50% more Swap Bucks</strong> than the standard rate — automatically, on every completed transaction, with no extra steps required.</p><h2>The Calculation</h2><p>The boost is simple to understand:</p><ul><li><strong>Standard rate:</strong> Item price in SB × 1.0 = SB earned</li><li><strong>Plus rate:</strong> Item price in SB × 1.5 = SB earned</li></ul><p>Real examples:</p><ul><li>Item priced at 10 SB → Standard earns <strong>10 SB</strong>, Plus earns <strong>15 SB</strong></li><li>Item priced at 30 SB → Standard earns <strong>30 SB</strong>, Plus earns <strong>45 SB</strong></li><li>Item priced at 60 SB → Standard earns <strong>60 SB</strong>, Plus earns <strong>90 SB</strong></li><li>Item priced at 100 SB → Standard earns <strong>100 SB</strong>, Plus earns <strong>150 SB</strong></li></ul><h2>When Is the Boost Applied?</h2><p>The boost is applied when SB are released from escrow into your wallet — which happens when the buyer confirms delivery. You'll see the boosted amount reflected in your wallet transaction history with the full SB credit showing your Plus earnings. Your wallet will display the actual SB credited, not the pre-boost amount.</p><h2>Important Details</h2><ul><li><strong>Buyers are unaffected</strong> — The boost is on what you <em>receive</em>, not what buyers pay. Buyers always pay the listed price in SB. The 1.5x happens on the seller side only.</li><li><strong>The boost is automatic</strong> — No codes to enter, no settings to toggle. Being a Plus subscriber is all it takes.</li><li><strong>It covers all item types</strong> — The boost applies to every sale across every category while your subscription is active.</li><li><strong>Transaction fee is unaffected</strong> — The 10% USD transaction fee (capped at $20) is calculated on the listed price, not the boosted SB amount. The boost only affects your SB earnings.</li><li><strong>Timing matters</strong> — The boost applies to sales <em>completed</em> while Plus is active. If your subscription lapses before a buyer confirms delivery, the boost may not apply to that transaction.</li></ul><div class=\"tip-box\">Tip: Use the boost strategically. Before a period of heavy selling, make sure your Plus subscription is active and current. The more you sell, the more the 1.5x multiplier compounds into meaningful extra SB.</div>",
+        "faqs": [
+          {
+            "q": "Does the 1.5x boost change the price buyers pay?",
+            "a": "No. Buyers always pay the listed SB price. The boost increases what you receive as the seller, not what the buyer is charged."
+          },
+          {
+            "q": "Is the boost automatic, or do I need to enable it?",
+            "a": "It's entirely automatic. Every sale completed while your Plus subscription is active earns the 1.5x rate — no action required on your part."
+          },
+          {
+            "q": "Does the 1.5x boost apply to referral bonuses or gift card SB?",
+            "a": "No. The boost applies specifically to SB earned from selling items. Referral bonuses and gift card credits are at the standard 1 SB per unit rate."
+          },
+          {
+            "q": "What if my Plus subscription lapses mid-transaction?",
+            "a": "If your subscription is no longer active when the buyer confirms delivery and SB are released, the boost may not apply to that sale. Keep your subscription current through active transactions."
+          },
+          {
+            "q": "Is there a monthly cap on boosted SB earnings?",
+            "a": "There's no stated monthly cap. The 1.5x boost applies to every eligible sale completed during your subscription period, regardless of total volume."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "cancel-plus",
+        "title": "Cancelling Swapedly Plus",
+        "slug": "cancel-plus",
+        "summary": "Cancel Swapedly Plus anytime with no fee — your benefits remain active through the end of your current billing period.",
+        "content": "<h2>Cancelling Is Easy and Penalty-Free</h2><p>Swapedly Plus has no cancellation fees and no lock-in commitment. You can cancel at any time, and your Plus benefits — the 1.5x SB boost, 5 monthly highlights, and unlimited purchases — stay active through the end of your current paid billing period. You're never cut off mid-month.</p><h2>How to Cancel Swapedly Plus</h2><ol><li><strong>Log in to your Swapedly account</strong> on the app or website.</li><li><strong>Go to Settings</strong> from your profile or main navigation.</li><li><strong>Find the Swapedly Plus section</strong> — Look for \"Swapedly Plus,\" \"Manage Subscription,\" or \"Subscription Settings.\"</li><li><strong>Tap \"Cancel Subscription\"</strong> or \"Cancel Plus.\"</li><li><strong>Follow the on-screen confirmation prompts</strong> — Swapedly may ask for a reason for cancelling (optional) before finalizing.</li><li><strong>Note your benefits end date</strong> — The confirmation screen will show you the date through which your Plus benefits remain active.</li></ol><h2>What Happens After You Cancel</h2><ul><li>Your Plus benefits (1.5x boost, highlights, unlimited purchases) remain fully active until the end of your current billing period</li><li>No further charges are made after the current period</li><li>Your account reverts to standard (non-Plus) status at the billing period's end</li><li>Unused highlights from the final month expire when the period ends</li><li>Your SB balance, listings, transaction history, and all other account data remain completely intact</li></ul><h2>Timing Your Cancellation</h2><p>Cancel a few days before your renewal date if you want to ensure you're not charged for another month. Your current-period benefits will still run their full course regardless of when within the period you cancel.</p><div class=\"tip-box\">Tip: If you're cancelling because of a temporary change in your selling activity, consider whether you might want to re-subscribe later. Re-subscribing is just as easy as the original upgrade — see <a href=\"/#/help/upgrade-plus\">How to Upgrade to Swapedly Plus</a>.</div><div class=\"warning-box\">Warning: If you believe you were charged after cancelling, contact Swapedly support immediately with your cancellation confirmation details. Keep the confirmation email or screenshot as proof of your cancellation date.</div>",
+        "faqs": [
+          {
+            "q": "Is there a cancellation fee for ending Swapedly Plus?",
+            "a": "No. Cancellation is completely free. You can cancel at any time with no penalty."
+          },
+          {
+            "q": "What happens to my Swap Bucks and listings after I cancel?",
+            "a": "Your SB balance, active listings, transaction history, and all account data are completely unaffected by cancelling Plus."
+          },
+          {
+            "q": "Can I re-subscribe to Swapedly Plus after cancelling?",
+            "a": "Yes, absolutely. You can re-subscribe at any time through Settings. Any trial offers may not be available to returning subscribers."
+          },
+          {
+            "q": "Will I get a prorated refund for cancelling mid-month?",
+            "a": "No. Swapedly Plus subscriptions are billed monthly and are non-refundable for the current period. Your benefits run through the end of the period you already paid for."
+          },
+          {
+            "q": "What if I was charged after I cancelled?",
+            "a": "Contact Swapedly support immediately with your cancellation confirmation. Provide the date you cancelled and the charge date as reference."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      }
+    ]
+  },
+  {
+    "id": "safety-trust",
+    "title": "Safety & Trust",
+    "emoji": "🔒",
+    "description": "Stay safe on Swapedly with escrow protection, dispute resolution tools, reporting features, and clear privacy controls.",
+    "articles": [
+      {
+        "id": "escrow-protection",
+        "title": "How Escrow Protection Works",
+        "slug": "escrow-protection",
+        "summary": "Swapedly holds Swap Bucks in escrow during every transaction so neither buyer nor seller risks losing out.",
+        "content": "<h2>What Is Escrow and Why Does It Matter?</h2><p>Escrow is a financial arrangement where a neutral third party — in this case, Swapedly — holds funds securely while two parties complete an exchange. The funds are only released when both parties have fulfilled their obligations. On Swapedly, this means your Swap Bucks are held safely from the moment of purchase until you confirm you received what you paid for. Neither party can access or move the SB while a transaction is in progress.</p><h2>The Escrow Flow, Step by Step</h2><ol><li><strong>Purchase initiated</strong> — The buyer taps \"Buy Now.\" Their Swap Bucks are immediately transferred from their available wallet balance into a secure escrow hold. The buyer can no longer spend those SB; the seller cannot access them yet.</li><li><strong>Seller fulfills the order</strong> — The seller ships the item or arranges a local pickup meetup. The escrowed SB remain frozen throughout this phase, providing assurance to the seller that payment is secured and assurance to the buyer that payment hasn't been lost.</li><li><strong>Buyer receives the item</strong> — The item arrives by shipping or is handed over at a local meetup. The buyer inspects it carefully.</li><li><strong>Buyer confirms delivery</strong> — Satisfied with the item, the buyer confirms delivery in the Swapedly app. This is the trigger that releases the escrow.</li><li><strong>SB released to the seller</strong> — Immediately upon buyer confirmation, Swapedly releases the Swap Bucks to the seller's wallet. Both parties receive a confirmation notification. The transaction is complete.</li></ol><h2>How Escrow Protects the Buyer</h2><p>As a buyer, escrow ensures that the seller cannot receive your Swap Bucks until you confirm you received the item as described. If a seller takes your payment and never ships, or ships something completely different, your SB remain frozen and protected while a dispute is investigated.</p><h2>How Escrow Protects the Seller</h2><p>As a seller, escrow assures you that the buyer's SB are committed from the moment of purchase. The buyer can't back out or claim they never paid. Before you ship or hand over the item, you know with certainty that the Swap Bucks are already secured.</p><div class=\"tip-box\">Tip: Never confirm delivery before you've physically inspected the item. Once you confirm, the SB are released and your protection window closes. If anything is wrong, open a dispute first. See <a href=\"/#/help/dispute-resolution\">What to Do If Something Goes Wrong</a>.</div><div class=\"warning-box\">Warning: Escrow protection only applies to transactions completed entirely within Swapedly. Any deal made outside the platform — paying in cash, Venmo, or any other external method — receives no escrow protection whatsoever.</div>",
+        "faqs": [
+          {
+            "q": "When are my Swap Bucks released to the seller?",
+            "a": "Only after you confirm delivery in the Swapedly app. Until then, the SB remain in escrow and neither party can access them."
+          },
+          {
+            "q": "What if the seller never ships the item and I never confirm?",
+            "a": "Open a dispute through the platform. Swapedly will investigate and the escrowed SB are not released to the seller until the case is resolved."
+          },
+          {
+            "q": "Is there a fee for escrow protection?",
+            "a": "No. Escrow protection is built into every Swapedly transaction at no additional charge."
+          },
+          {
+            "q": "What happens to escrowed SB during an open dispute?",
+            "a": "The SB remain completely frozen in escrow while Swapedly reviews the dispute. Neither party can access them until a resolution is reached."
+          },
+          {
+            "q": "Does escrow apply to local pickup transactions too?",
+            "a": "Yes. As long as the transaction was initiated through Swapedly, escrow applies to both shipped and local pickup transactions."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "report-user",
+        "title": "Reporting a User or Listing",
+        "slug": "report-user",
+        "summary": "If you encounter suspicious behavior or a policy-violating listing on Swapedly, here's how to report it and help keep the community safe.",
+        "content": "<h2>Your Role in Keeping Swapedly Safe</h2><p>Swapedly's moderation team works hard to maintain a trustworthy marketplace, but the community plays an equally important role. If you encounter behavior, a listing, or a user that seems suspicious, fraudulent, or in violation of platform rules, reporting it takes only a moment and genuinely helps protect other users from having a bad experience.</p><h2>What You Can and Should Report</h2><ul><li>Listings for counterfeit, stolen, prohibited, or illegal items</li><li>Misleading or fraudulent listing descriptions or photos (stock images passed off as real item photos)</li><li>Sellers or buyers requesting payment or communication outside of Swapedly</li><li>Harassment, threats, or abusive behavior in messages</li><li>Suspected scam attempts or phishing messages</li><li>Duplicate or fake accounts</li><li>Any other behavior that violates Swapedly's community guidelines</li></ul><h2>How to Report a Listing</h2><ol><li>Open the listing you want to report.</li><li>Tap the <strong>three-dot menu (⋮)</strong> or look for a <strong>\"Report\"</strong> button on the listing detail page.</li><li>Select the most accurate reason from the options provided (e.g., \"Prohibited item,\" \"Misleading description,\" \"Suspected scam\").</li><li>Add any additional context in the description field — specific details help the moderation team act faster.</li><li>Submit the report. You'll receive a confirmation that it was received.</li></ol><h2>How to Report a User</h2><ol><li>Navigate to the user's profile page by tapping their name or photo.</li><li>Tap the <strong>three-dot menu (⋮)</strong> or <strong>\"Report\"</strong> button on their profile.</li><li>Select the reason and provide context.</li><li>Submit.</li></ol><h2>After You Report</h2><p>Reports are reviewed by Swapedly's moderation team, typically within 24–48 hours for serious cases. You won't be notified of the specific action taken (for privacy), but all reports are reviewed and appropriate action is taken. Depending on severity, outcomes range from a warning to listing removal to account suspension.</p><div class=\"tip-box\">Tip: The more specific your report, the faster and more effectively the moderation team can respond. Include screenshots or reference specific messages when possible.</div><div class=\"warning-box\">Warning: If a user is harassing or threatening you, stop all communication, block them, and report immediately. Do not attempt to resolve threatening behavior through negotiation.</div>",
+        "faqs": [
+          {
+            "q": "Will the reported user know I filed a report?",
+            "a": "No. Reports are completely anonymous — the reported user will never be told who submitted the report."
+          },
+          {
+            "q": "How long does it take for a report to be reviewed?",
+            "a": "Swapedly's moderation team reviews reports as quickly as possible. Serious safety issues are typically prioritized. Complex policy cases may take longer."
+          },
+          {
+            "q": "What action does Swapedly take after I report someone?",
+            "a": "Actions range from warnings and listing removal to temporary suspension or permanent banning, depending on the severity and evidence of the violation."
+          },
+          {
+            "q": "Can I report a user I've never transacted with?",
+            "a": "Yes. You can report any user or listing on the platform that appears to violate Swapedly's policies, regardless of whether you've had a transaction with them."
+          },
+          {
+            "q": "What if I receive threatening or abusive messages from another user?",
+            "a": "Report the user immediately using the report feature on their profile, then block them to prevent further contact. If you feel physically threatened, contact local law enforcement."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "safe-meetup",
+        "title": "Tips for Safe Local Meetups",
+        "slug": "safe-meetup",
+        "summary": "When completing a local pickup in person, follow these safety tips to protect yourself every time.",
+        "content": "<h2>Local Meetups Are Safe — with the Right Precautions</h2><p>Thousands of Swapedly local pickup transactions happen every day without incident. Meeting a stranger to exchange goods is a normal part of community marketplace culture, and with a few sensible precautions, it's a very safe activity. Here's how to protect yourself every time.</p><h2>Choose the Right Meeting Location</h2><p>Where you meet is the single most important safety decision in a local pickup.</p><ul><li><strong>Meet in public, busy spaces</strong> — Coffee shops, shopping centers, grocery store parking lots, or any populated public area. The more foot traffic, the better.</li><li><strong>Police station parking lots</strong> — Many police stations explicitly welcome and encourage marketplace exchanges in their parking areas. This is widely considered the gold standard for safe in-person transactions, and most sellers have no objection to meeting there.</li><li><strong>Avoid private locations</strong> — Never meet at someone's home, a secluded area, or anywhere that isn't publicly visible. If a seller or buyer insists on a private location, that's a significant red flag.</li><li><strong>Daytime is better</strong> — Schedule meetups during daylight hours when possible, especially for your first few exchanges with new contacts.</li></ul><h2>During the Meetup</h2><ul><li><strong>Bring a friend or family member</strong> — Having company makes you safer and more confident. For high-value items especially, this is strongly recommended.</li><li><strong>Let someone know where you're going</strong> — Tell a trusted person the location, the time, and the name of who you're meeting before you leave.</li><li><strong>Keep your phone charged and accessible</strong> — You need it to confirm the transaction in the app, and you may need it in an emergency.</li><li><strong>Inspect the item thoroughly</strong> — Take your time. Check every detail against the listing description and photos before confirming in the app. You're under no obligation to rush.</li><li><strong>Confirm in the app before leaving</strong> — Complete the delivery confirmation while you're still at the meetup location. Don't leave and confirm later from home.</li><li><strong>Trust your instincts</strong> — If something feels wrong — the location, the person's behavior, anything — you are always allowed to leave. Your safety is more important than any transaction.</li></ul><h2>Red Flags to Walk Away From</h2><ul><li>Pressure to meet immediately or at an unusual hour</li><li>Insistence on meeting at a private address</li><li>Request to pay in cash instead of through the Swapedly app</li><li>Vague or evasive answers to reasonable questions about the item</li></ul><div class=\"warning-box\">Warning: All payments must be processed through Swapedly, not in cash or via any outside method. Off-platform payment voids your escrow protection and is a common element of scams.</div>",
+        "faqs": [
+          {
+            "q": "Can I insist on a specific meeting location?",
+            "a": "Absolutely. You have every right to suggest or require a public meeting place. A trustworthy seller will have no objection to meeting at a coffee shop or police station lot."
+          },
+          {
+            "q": "What if the seller asks me to pay in cash at the meetup?",
+            "a": "Decline firmly. All payments must go through Swapedly to maintain transaction protection. A seller requesting cash at a meetup should be reported."
+          },
+          {
+            "q": "What if the item looks different from the photos when I see it in person?",
+            "a": "Don't confirm delivery. You have the right to walk away from the transaction. Open a dispute through the app — your escrowed SB are protected until it's resolved."
+          },
+          {
+            "q": "Should I bring ID to a local pickup?",
+            "a": "It's not required, but in some situations it can help establish legitimacy and build mutual trust, especially for higher-value exchanges."
+          },
+          {
+            "q": "What are the safest types of places to meet?",
+            "a": "Police station parking lots are considered the safest option. Busy coffee shops, bank lobbies, and shopping center common areas are also excellent choices."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "dispute-resolution",
+        "title": "What to Do If Something Goes Wrong",
+        "slug": "dispute-resolution",
+        "summary": "If a transaction on Swapedly doesn't go as expected, here's exactly how to open and resolve a dispute to protect your Swap Bucks.",
+        "content": "<h2>When Things Don't Go as Planned</h2><p>The vast majority of Swapedly transactions complete smoothly, but occasionally something goes wrong — an item doesn't arrive, it's significantly different from the listing description, or a party fails to follow through on their commitment. When that happens, Swapedly's dispute process is how you get it resolved fairly, with your escrowed Swap Bucks protected throughout.</p><h2>Step 1: Try to Resolve Directly First</h2><p>Before opening a formal dispute, reach out to the other party via Swapedly messages. Explain the issue calmly and specifically. Many problems — a delayed shipment, a minor misunderstanding about condition, a missed meetup — can be resolved with a quick conversation. Give the other party a reasonable window (24–48 hours) to respond and address the issue.</p><h2>Step 2: Open a Dispute if Direct Resolution Fails</h2><p>If communication doesn't resolve the issue within a reasonable timeframe:</p><ol><li><strong>Navigate to the transaction</strong> — Find it in your purchases or sales history.</li><li><strong>Tap \"Open Dispute\" or \"Report an Issue\"</strong> — This option appears on the transaction detail page, usually within the action menu.</li><li><strong>Select the reason for your dispute</strong> — Choose from options like \"Item not received,\" \"Item not as described,\" \"Item arrived damaged,\" or other relevant categories.</li><li><strong>Provide supporting evidence</strong> — Include photos of what you received (vs. what was listed), screenshots of relevant messages, tracking information, and any other documentation that supports your case.</li><li><strong>Submit the dispute</strong> — Swapedly's moderation team is notified and begins reviewing.</li></ol><h2>What Happens During a Dispute</h2><ul><li>The escrowed Swap Bucks are <strong>frozen</strong> — neither party can access them while the dispute is under review.</li><li>Swapedly reviews evidence from both sides.</li><li>A resolution is reached: SB returned to the buyer, released to the seller, or a partial arrangement depending on the specifics of the case.</li><li>Both parties are notified of the outcome.</li></ul><div class=\"tip-box\">Tip: Keep all transaction communication within Swapedly messages. Off-platform communication (text, WhatsApp, etc.) cannot be reviewed by the moderation team and weakens your evidence in a dispute.</div><div class=\"warning-box\">Warning: Do not confirm delivery before opening a dispute. Confirming delivery releases the seller's SB and signals that the transaction is complete. Disputes opened after confirmation are significantly harder to resolve in the buyer's favor.</div>",
+        "faqs": [
+          {
+            "q": "How long do I have to open a dispute after a problem occurs?",
+            "a": "There's a window after the expected delivery date during which disputes can be opened. Check your specific transaction page for the exact deadline — act before it expires."
+          },
+          {
+            "q": "What evidence should I submit in a dispute?",
+            "a": "Photos of the item received, screenshots of the listing description and photos, your in-app messages with the other party, and any tracking or delivery documentation."
+          },
+          {
+            "q": "Can I open a dispute for a local pickup transaction?",
+            "a": "Yes. The dispute process applies equally to shipped and local pickup transactions, as long as both were processed through Swapedly."
+          },
+          {
+            "q": "How long does Swapedly take to resolve a dispute?",
+            "a": "Resolution time varies by case complexity. Clear-cut cases may be resolved in a few days; more complex situations may take longer as both sides are given time to respond."
+          },
+          {
+            "q": "What if I'm not satisfied with Swapedly's dispute resolution?",
+            "a": "Contact Swapedly support to request a re-review and provide any additional evidence you didn't include in the original dispute. The team will take a second look."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      },
+      {
+        "id": "privacy",
+        "title": "Your Privacy on Swapedly",
+        "slug": "privacy",
+        "summary": "Understand what Swapedly collects, what's visible to other users, and how your personal information is protected.",
+        "content": "<h2>Privacy Built into the Platform</h2><p>Swapedly is designed so that you can participate fully in the marketplace without exposing personal financial or contact information to other users. Here's a clear breakdown of what's public, what's private, and how your data is handled.</p><h2>What Other Swapedly Users Can See</h2><ul><li>Your display name and profile photo</li><li>Your public bio</li><li>Your general location (city or region — never your exact address)</li><li>Your active listings and their details</li><li>Your completed transaction count and star rating</li><li>Written reviews left by buyers or sellers you've transacted with</li><li>Your member-since date</li></ul><h2>What Is Always Private</h2><ul><li>Your email address — never shown to other users</li><li>Your payment information and credit card details</li><li>Your Swap Bucks balance and transaction history</li><li>Your Purchase Credits balance</li><li>Your private message conversations</li><li>Your exact home or pickup address</li></ul><h2>What Swapedly Collects</h2><p>Swapedly collects information necessary to operate the platform safely and effectively, including: account registration details, transaction history, device and browser information, usage data and activity on the platform, and payment processing data (handled by secure third-party payment processors — Swapedly does not store full card numbers). This data is used to provide the service, prevent fraud, resolve disputes, and improve the platform experience.</p><h2>Controlling Your Data</h2><ul><li><strong>Profile settings:</strong> Edit what appears publicly on your profile at any time via <a href=\"/#/help/edit-profile\">Edit Profile</a>.</li><li><strong>Notification preferences:</strong> Control how Swapedly contacts you via <a href=\"/#/help/notifications\">Notification Settings</a>.</li><li><strong>Account deletion:</strong> Request deletion of your account and associated data via <a href=\"/#/help/delete-account\">Delete Account</a>.</li><li><strong>Full privacy policy:</strong> Read Swapedly's complete privacy policy at <a href=\"https://www.swapedly.com\" target=\"_blank\">swapedly.com</a> for detailed information on data handling, third-party sharing, and your legal rights.</li></ul><div class=\"tip-box\">Tip: Never share personal financial information — bank account details, credit card numbers, or Social Security numbers — with other Swapedly users via messages. Swapedly will never ask for this information through chat.</div><div class=\"warning-box\">Warning: If you suspect your Swapedly account has been compromised or accessed without your permission, change your password immediately at swapedly.com/#/forgot-password and contact Swapedly support to report the incident.</div>",
+        "faqs": [
+          {
+            "q": "Can other users see my purchase history?",
+            "a": "No. Your individual purchase history is private. Other users can only see your total completed transaction count and any reviews left by your transaction partners."
+          },
+          {
+            "q": "Does Swapedly share my data with third parties?",
+            "a": "Review Swapedly's full Privacy Policy at swapedly.com for complete details on data sharing practices with third parties."
+          },
+          {
+            "q": "Can I request deletion of all my personal data?",
+            "a": "Deleting your account removes your data from the platform. For specific data requests, contact Swapedly support."
+          },
+          {
+            "q": "Are my messages on Swapedly private between me and the other user?",
+            "a": "Messages are private between the two parties. Swapedly may access messages if a dispute or safety concern is reported and investigation is required."
+          },
+          {
+            "q": "What should I do if I think my account has been hacked?",
+            "a": "Change your password immediately at swapedly.com/#/forgot-password, review your transaction history for unauthorized activity, and contact Swapedly support to report the incident."
+          }
+        ],
+        "videoPlaceholder": true,
+        "videoCoreFlow": false
+      }
+    ]
+  }
+] as const;
+
+export type HelpCluster = typeof HELP_KB[number];
+export type HelpArticle = HelpCluster['articles'][number];

@@ -3207,3 +3207,63 @@ export async function registerRoutes(
 
   return httpServer;
 }
+
+  // ── Help Center Chatbot ────────────────────────────────────────────────────
+  app.post("/api/help/chat", async (req, res) => {
+    const { question } = req.body as { question: string };
+    if (!question?.trim()) return res.status(400).json({ error: "No question" });
+
+    const fs = await import("fs");
+    const path = await import("path");
+    const kbPath = path.join(process.cwd(), "help-articles", "knowledge-base.json");
+    const kb: any[] = JSON.parse(fs.readFileSync(kbPath, "utf8"));
+
+    const q = question.toLowerCase();
+
+    // Score every article by keyword overlap
+    type Hit = { score: number; slug: string; title: string; cluster: string; content: string; faqs: any[] };
+    const hits: Hit[] = [];
+
+    for (const cluster of kb) {
+      for (const article of cluster.articles) {
+        const text = `${article.title} ${article.summary} ${article.content} ${article.faqs.map((f: any) => f.q + " " + f.a).join(" ")}`.toLowerCase();
+        const words = q.split(/\s+/).filter(w => w.length > 2);
+        const score = words.reduce((acc, w) => acc + (text.split(w).length - 1), 0);
+        if (score > 0) hits.push({ score, slug: article.slug, title: article.title, cluster: cluster.title, content: article.content, faqs: article.faqs });
+      }
+    }
+
+    hits.sort((a, b) => b.score - a.score);
+    const best = hits[0];
+
+    if (!best || best.score < 2) {
+      // Low confidence — try LLM fallback if RESEND_API_KEY is available (we reuse the env check as a proxy for "paid features enabled")
+      return res.json({
+        answer: "I'm not sure about that one. Try searching the help center, or browse by topic — I'm sure we have an article that covers it.",
+        articleSlug: null,
+        articleTitle: null,
+      });
+    }
+
+    // Build a concise answer from the best article's FAQs + summary
+    // Check if any FAQ directly matches
+    const matchedFaq = best.faqs.find((f: any) =>
+      f.q.toLowerCase().split(/\s+/).filter((w: string) => w.length > 3).some((w: string) => q.includes(w))
+    );
+
+    let answer: string;
+    if (matchedFaq) {
+      answer = matchedFaq.a;
+    } else {
+      // Strip HTML tags from content for a plain-text excerpt
+      const plain = best.content.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      answer = plain.slice(0, 280).trim();
+      if (plain.length > 280) answer += "…";
+    }
+
+    return res.json({
+      answer,
+      articleSlug: best.slug,
+      articleTitle: best.title,
+    });
+  });
