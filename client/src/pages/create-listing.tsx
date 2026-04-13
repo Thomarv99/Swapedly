@@ -293,35 +293,130 @@ export default function CreateEditListingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Form */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Basic Info */}
-            <Card className="rounded-xl">
+
+            {/* ── STEP 1: Photos (always first) ── */}
+            <Card className="rounded-xl border-2 border-[#5A45FF]/30">
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Basic Information</CardTitle>
+                <div className="flex items-center gap-3">
+                  <div className="h-7 w-7 rounded-full bg-[#5A45FF] text-white text-sm font-bold flex items-center justify-center shrink-0">1</div>
+                  <div>
+                    <CardTitle>Upload Photos</CardTitle>
+                    <p className="text-xs text-muted-foreground mt-0.5">AI will auto-fill your title, price, category and more</p>
+                  </div>
                   {aiLoading && (
-                    <div className="flex items-center gap-2 text-sm text-[#5A45FF] font-medium animate-pulse">
+                    <div className="ml-auto flex items-center gap-2 text-sm text-[#5A45FF] font-medium animate-pulse">
                       <Wand2 className="h-4 w-4" />
-                      AI analyzing your photo…
+                      Analyzing…
                     </div>
                   )}
                   {aiSuggested && !aiLoading && imageUrls.length > 0 && (
                     <button
                       type="button"
                       onClick={() => triggerAiSuggest(imageUrls[0])}
-                      className="flex items-center gap-1.5 text-xs text-[#5A45FF] hover:underline font-medium"
+                      className="ml-auto flex items-center gap-1.5 text-xs text-[#5A45FF] hover:underline font-medium"
                     >
                       <RefreshCw className="h-3 w-3" /> Re-analyze
                     </button>
                   )}
                 </div>
                 {aiSuggested && !aiLoading && (
-                  <div className="flex items-center gap-2 mt-1 text-xs bg-[#5A45FF]/8 text-[#5A45FF] px-3 py-2 rounded-lg">
+                  <div className="flex items-center gap-2 mt-2 text-xs bg-[#5A45FF]/8 text-[#5A45FF] px-3 py-2 rounded-lg">
                     <Wand2 className="h-3.5 w-3.5 shrink-0" />
-                    <span>AI filled these fields from your photo — review and edit anything before posting.</span>
+                    <span>AI filled the fields below from your photo — review and edit anything before posting.</span>
                   </div>
                 )}
               </CardHeader>
               <CardContent className="space-y-4">
+
+                {/* Image upload zone */}
+                <div>
+                  <p className="text-xs text-muted-foreground mb-3">Upload up to 10 images. First image will be the cover photo.</p>
+                  <div
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                    onClick={() => !uploading && fileInputRef.current?.click()}
+                    className={`relative flex flex-col items-center justify-center gap-2 p-10 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${
+                      dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50"
+                    } ${uploading ? "pointer-events-none opacity-60" : ""}`}
+                    data-testid="image-dropzone"
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      accept="image/jpeg,image/png,image/gif,image/webp"
+                      className="hidden"
+                      onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+                      data-testid="image-file-input"
+                    />
+                    {uploading ? (
+                      <>
+                        <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                        <span className="text-sm text-muted-foreground">Uploading…</span>
+                        {aiLoading && <span className="text-xs text-[#5A45FF] font-medium">AI is analyzing your photo…</span>}
+                      </>
+                    ) : (
+                      <>
+                        <div className="h-16 w-16 rounded-2xl bg-[#5A45FF]/10 flex items-center justify-center">
+                          <ImagePlus className="h-8 w-8 text-[#5A45FF]" />
+                        </div>
+                        <div className="text-center">
+                          <span className="text-sm font-semibold text-[#5A45FF]">Click to upload photos</span>
+                          <span className="text-sm text-muted-foreground"> or drag and drop</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">JPEG, PNG, GIF, WebP — AI will fill everything else in for you</span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* OR add by URL */}
+                  <div className="flex items-center gap-3 mt-4 mb-2">
+                    <Separator className="flex-1" />
+                    <span className="text-xs text-muted-foreground">or add by URL</span>
+                    <Separator className="flex-1" />
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Paste image URL..."
+                        value={newImageUrl}
+                        onChange={(e) => setNewImageUrl(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addImageUrl())}
+                        className="pl-10 rounded-xl"
+                        data-testid="image-url-input"
+                      />
+                    </div>
+                    <Button type="button" onClick={addImageUrl} variant="outline" className="rounded-xl" data-testid="add-image-btn">Add</Button>
+                  </div>
+
+                  {/* Thumbnails */}
+                  {imageUrls.length > 0 && (
+                    <div className="grid grid-cols-5 gap-2 mt-4">
+                      {imageUrls.map((url, i) => (
+                        <div key={i} className="relative aspect-square rounded-lg overflow-hidden border group">
+                          <img src={resolveImageUrl(url)} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
+                          {i === 0 && <span className="absolute bottom-1 left-1 text-[10px] font-medium bg-primary text-white px-1.5 py-0.5 rounded">Cover</span>}
+                          <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" data-testid={`remove-image-${i}`}>
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Video URL */}
+                  <div className="space-y-2 mt-4">
+                    <Label htmlFor="videoUrl">Video URL (optional)</Label>
+                    <div className="relative">
+                      <Video className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input id="videoUrl" placeholder="YouTube or video URL" className="pl-10 rounded-xl" data-testid="listing-video" {...register("videoUrl")} />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="title">Title</Label>
                   <Input
@@ -347,6 +442,20 @@ export default function CreateEditListingPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* ── STEP 2: Rest of form (locked until photo uploaded) ── */}
+            <div className={`relative space-y-6 transition-opacity duration-300 ${!isEdit && imageUrls.length === 0 ? "opacity-40 pointer-events-none select-none" : ""}`}>
+              {!isEdit && imageUrls.length === 0 && (
+                <div className="absolute inset-0 z-10 flex items-start justify-center pt-16">
+                  <div className="bg-white border border-gray-200 rounded-2xl shadow-lg px-6 py-4 flex items-center gap-3">
+                    <div className="text-2xl">📸</div>
+                    <div>
+                      <p className="font-bold text-sm text-gray-800">Upload a photo first</p>
+                      <p className="text-xs text-gray-500">AI will fill in the details automatically</p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
             {/* Pricing */}
             <Card className="rounded-xl">
@@ -430,109 +539,6 @@ export default function CreateEditListingPage() {
                     </RadioGroup>
                   )}
                 />
-              </CardContent>
-            </Card>
-
-            {/* Media */}
-            <Card className="rounded-xl">
-              <CardHeader><CardTitle>Media</CardTitle></CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label>Images</Label>
-                  <p className="text-xs text-muted-foreground mt-1 mb-3">Upload up to 10 images. First image will be the cover photo.</p>
-
-                  {/* Upload from computer - drag & drop zone */}
-                  <div
-                    onDragEnter={handleDrag}
-                    onDragLeave={handleDrag}
-                    onDragOver={handleDrag}
-                    onDrop={handleDrop}
-                    onClick={() => !uploading && fileInputRef.current?.click()}
-                    className={`relative flex flex-col items-center justify-center gap-2 p-8 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${
-                      dragActive
-                        ? "border-primary bg-primary/5"
-                        : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50"
-                    } ${uploading ? "pointer-events-none opacity-60" : ""}`}
-                    data-testid="image-dropzone"
-                  >
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      multiple
-                      accept="image/jpeg,image/png,image/gif,image/webp"
-                      className="hidden"
-                      onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
-                      data-testid="image-file-input"
-                    />
-                    {uploading ? (
-                      <>
-                        <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                        <span className="text-sm text-muted-foreground">Uploading...</span>
-                      </>
-                    ) : (
-                      <>
-                        <ImagePlus className="h-8 w-8 text-muted-foreground" />
-                        <div className="text-center">
-                          <span className="text-sm font-medium text-primary">Click to upload</span>
-                          <span className="text-sm text-muted-foreground"> or drag and drop</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">JPEG, PNG, GIF, WebP (max 10 MB each)</span>
-                      </>
-                    )}
-                  </div>
-
-                  {/* OR add by URL */}
-                  <div className="flex items-center gap-3 mt-4 mb-2">
-                    <Separator className="flex-1" />
-                    <span className="text-xs text-muted-foreground">or add by URL</span>
-                    <Separator className="flex-1" />
-                  </div>
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Paste image URL..."
-                        value={newImageUrl}
-                        onChange={(e) => setNewImageUrl(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addImageUrl())}
-                        className="pl-10 rounded-xl"
-                        data-testid="image-url-input"
-                      />
-                    </div>
-                    <Button type="button" onClick={addImageUrl} variant="outline" className="rounded-xl" data-testid="add-image-btn">
-                      Add
-                    </Button>
-                  </div>
-
-                  {/* Image thumbnails */}
-                  {imageUrls.length > 0 && (
-                    <div className="grid grid-cols-5 gap-2 mt-4">
-                      {imageUrls.map((url, i) => (
-                        <div key={i} className="relative aspect-square rounded-lg overflow-hidden border group">
-                          <img src={resolveImageUrl(url)} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
-                          {i === 0 && (
-                            <span className="absolute bottom-1 left-1 text-[10px] font-medium bg-primary text-white px-1.5 py-0.5 rounded">Cover</span>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => removeImage(i)}
-                            className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                            data-testid={`remove-image-${i}`}
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="videoUrl">Video URL (optional)</Label>
-                  <div className="relative">
-                    <Video className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="videoUrl" placeholder="YouTube or video URL" className="pl-10 rounded-xl" data-testid="listing-video" {...register("videoUrl")} />
-                  </div>
-                </div>
               </CardContent>
             </Card>
 
@@ -626,6 +632,7 @@ export default function CreateEditListingPage() {
                 {isEdit ? "Update Listing" : "Publish Listing"}
               </Button>
             </div>
+            </div> {/* end step-2 wrapper */}
           </div>
 
           {/* Mini Preview */}
