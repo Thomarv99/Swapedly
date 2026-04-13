@@ -312,6 +312,9 @@ export async function initializeDatabase() {
 
 
 export interface IStorage {
+  // Auth tokens
+  getAuthToken(token: string): Promise<{ token: string; userId: number } | null>;
+  createAuthToken(token: string, userId: number): Promise<void>;
   // Users
   createUser(user: InsertUser): Promise<User>;
   getUserById(id: number): Promise<User | undefined>;
@@ -464,6 +467,16 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  // ===== AUTH TOKENS =====
+  async getAuthToken(token: string): Promise<{ token: string; userId: number } | null> {
+    const result = await db.select().from(authTokens).where(eq(authTokens.token, token)).limit(1);
+    if (!result[0]) return null;
+    return { token: result[0].token, userId: result[0].userId };
+  }
+  async createAuthToken(token: string, userId: number): Promise<void> {
+    await db.insert(authTokens).values({ token, userId, createdAt: new Date().toISOString() }).onConflictDoNothing();
+  }
+
   // ===== USERS =====
   async createUser(insertUser: InsertUser): Promise<User> {
     const referralCode = "SWAP-" + Math.random().toString(36).slice(2, 7).toUpperCase();

@@ -112,7 +112,22 @@ function isPlus(user: any): boolean {
 // ============================================================
 // TOKEN-BASED AUTH (works in proxy/iframe environments where cookies are stripped)
 // ============================================================
+// In-memory cache for speed, but DB is the source of truth
 const tokenStore = new Map<string, number>(); // token -> userId
+
+async function resolveToken(token: string): Promise<number | undefined> {
+  // Check memory cache first
+  if (tokenStore.has(token)) return tokenStore.get(token);
+  // Fall back to DB
+  try {
+    const dbToken = await storage.getAuthToken(token);
+    if (dbToken) {
+      tokenStore.set(token, dbToken.userId); // warm the cache
+      return dbToken.userId;
+    }
+  } catch {}
+  return undefined;
+}
 
 function generateToken(): string {
   return crypto.randomBytes(32).toString("hex");
@@ -123,20 +138,23 @@ function requireAuth(req: Request, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
   if (authHeader?.startsWith("Bearer ")) {
     const token = authHeader.slice(7);
-    const userId = tokenStore.get(token);
-    if (userId) {
-      // Attach user to request
-      storage.getUserById(userId).then(user => {
-        if (user) {
-          (req as any).user = user;
-          return next();
-        }
-        res.status(401).json({ message: "Authentication required" });
-      }).catch(() => {
-        res.status(401).json({ message: "Authentication required" });
-      });
-      return;
-    }
+    resolveToken(token).then(userId => {
+      if (userId) {
+        return storage.getUserById(userId).then(user => {
+          if (user) {
+            (req as any).user = user;
+            return next();
+          }
+          res.status(401).json({ message: "Authentication required" });
+        });
+      }
+      // Fall back to session
+      if (req.isAuthenticated && req.isAuthenticated()) {
+        return next();
+      }
+      res.status(401).json({ message: "Authentication required" });
+    }).catch(() => res.status(401).json({ message: "Authentication required" }));
+    return;
   }
   // Fall back to session
   if (req.isAuthenticated && req.isAuthenticated()) {
@@ -377,7 +395,7 @@ export async function registerRoutes(
 
       // Issue token
       const token = crypto.randomBytes(32).toString("hex");
-      await tokenStore.set(token, newUser.id);
+      tokenStore.set(token, newUser.id); await storage.createAuthToken(token, newUser.id);
 
       return res.json({
         token,
@@ -839,7 +857,7 @@ export async function registerRoutes(
       async (err: any, user: any) => {
         if (err || !user) return res.redirect("/#/login?error=google_failed");
         const token = crypto.randomBytes(32).toString("hex");
-        await tokenStore.set(token, user.id);
+        tokenStore.set(token, user.id); await storage.createAuthToken(token, user.id);
           // Redirect to the frontend domain (custom domain if set, otherwise APP_URL)
         const frontendBase = process.env.FRONTEND_URL || process.env.APP_URL || "https://www.swapedly.com";
         res.redirect(`${frontendBase}/#/oauth-callback?token=${token}&userId=${user.id}`);
@@ -944,7 +962,7 @@ export async function registerRoutes(
         if (err) return res.status(500).json({ message: "Login failed after registration" });
         const { password: _, ...safeUser } = user;
         const token = generateToken();
-        await tokenStore.set(token, user.id);
+        tokenStore.set(token, user.id); await storage.createAuthToken(token, user.id);
         return res.status(201).json({ ...safeUser, token });
       });
     } catch (err: any) {
@@ -962,7 +980,7 @@ export async function registerRoutes(
         const { password: _, ...safeUser } = user;
         // Generate auth token for proxy/iframe environments where cookies don't work
         const token = generateToken();
-        await tokenStore.set(token, user.id);
+        tokenStore.set(token, user.id); await storage.createAuthToken(token, user.id);
         return res.json({ ...safeUser, token });
       });
     })(req, res, next);
@@ -980,17 +998,25 @@ export async function registerRoutes(
     const authHeader = req.headers.authorization;
     if (authHeader?.startsWith("Bearer ")) {
       const token = authHeader.slice(7);
-      const userId = tokenStore.get(token);
-      if (userId) {
-        return storage.getUserById(userId).then(user => {
-          if (user) {
-            const { password: _, ...safeUser } = user as any;
-            // Return token so client can restore it on refresh
-            return res.json({ ...safeUser, token });
-          }
+      resolveToken(token).then(userId => {
+        if (userId) {
+          return storage.getUserById(userId).then(user => {
+            if (user) {
+              const { password: _, ...safeUser } = user as any;
+              return res.json({ ...safeUser, token });
+            }
+            return res.status(401).json({ message: "Not authenticated" });
+          });
+        }
+        // Fall back to session below
+        if (!req.isAuthenticated || !req.isAuthenticated()) {
           return res.status(401).json({ message: "Not authenticated" });
-        }).catch(() => res.status(401).json({ message: "Not authenticated" }));
-      }
+        }
+        const user = req.user as any;
+        const { password: _, ...safeUser } = user;
+        return res.json(safeUser);
+      }).catch(() => res.status(401).json({ message: "Not authenticated" }));
+      return;
     }
     // Fall back to session
     if (!req.isAuthenticated || !req.isAuthenticated()) {
