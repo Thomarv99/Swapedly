@@ -474,7 +474,10 @@ export class DatabaseStorage implements IStorage {
     return { token: result[0].token, userId: result[0].userId };
   }
   async createAuthToken(token: string, userId: number): Promise<void> {
-    await db.insert(authTokens).values({ token, userId, createdAt: new Date().toISOString() }).onConflictDoNothing();
+    try {
+      const expiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(); // 90 days
+      await db.insert(authTokens).values({ token, userId, createdAt: new Date().toISOString(), expiresAt });
+    } catch { /* ignore duplicate token */ }
   }
 
   // ===== USERS =====
