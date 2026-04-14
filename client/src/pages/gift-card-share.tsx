@@ -143,7 +143,7 @@ export default function GiftCardSharePage() {
   const [showProof, setShowProof] = useState<string | null>(null);
 
   const referralCode = (user as any)?.referralCode || "SWAP-XXXXX";
-  const giftLink = `https://www.swapedly.com/#/gift-card?ref=${referralCode}`;
+  const giftLink = `https://www.swapedly.com/join/${referralCode}`;
   const shareText = `🎁 I'm giving you a FREE $40 Swapedly Gift Card!\n\nUse my link to claim 40 Swap Bucks and start trading:\n${giftLink}\n\nSwapedly lets you swap your stuff for Swap Bucks — no cash needed! 🔄`;
 
   const fbShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(giftLink)}&quote=${encodeURIComponent(shareText)}`;

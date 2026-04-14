@@ -435,7 +435,9 @@ export async function registerRoutes(
         invite = { inviter_id: user.id, invite_code: inviteCode, click_count: 0, unlocked: 0 };
       }
 
-      const inviteLink = `${process.env.FRONTEND_URL || "https://www.swapedly.com"}/#/gift-card?ref=${(user as any).referralCode || ""}&invite=${invite?.invite_code || ""}`;
+      const refCode = (user as any).referralCode || "";
+      const inviteCode = invite?.invite_code || "";
+      const inviteLink = `https://www.swapedly.com/join/${refCode}${inviteCode ? `?invite=${inviteCode}` : ""}`;
 
       return res.json({
         inviteCode: invite?.invite_code,
@@ -3605,7 +3607,8 @@ Be specific and accurate. Base price on realistic secondhand market value.`,
   // Vanity URL redirect
   app.get("/join/:code", (req: Request, res: Response) => {
     const { code } = req.params;
-    res.redirect(`/#/gift-card?ref=${encodeURIComponent(code)}`);
+    const invite = req.query.invite ? `&invite=${encodeURIComponent(req.query.invite as string)}` : "";
+    res.redirect(`/#/gift-card?ref=${encodeURIComponent(code)}${invite}`);
   });
 
   // Check if affiliate code is available
