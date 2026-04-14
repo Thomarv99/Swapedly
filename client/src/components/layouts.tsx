@@ -34,6 +34,8 @@ import {
   Crown,
   Trophy,
   Gift,
+  Plus,
+  ChevronDown,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -223,6 +225,82 @@ function SidebarNav({ onNavClick }: { onNavClick?: () => void }) {
 }
 
 // ============================
+// Mobile Bottom Nav
+// ============================
+function MobileBottomNav() {
+  const [location] = useLocation();
+  const { data: onboarding } = useOnboarding();
+  const canAccessMarketplace = !!onboarding?.canAccessMarketplace;
+
+  const { data: unreadCount } = useQuery<number>({
+    queryKey: ["/api/messages/unread-count"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+    refetchInterval: 30000,
+  });
+
+  const items = [
+    { href: "/marketplace", label: "Marketplace", icon: ShoppingBag, locked: !canAccessMarketplace },
+    { href: "/my-listings", label: "My Listings", icon: Package },
+    { href: "/create-listing", label: "", icon: Plus, isCenter: true },
+    { href: "/earn", label: "Earn", icon: Coins },
+    { href: "/messages", label: "Messages", icon: Mail, badge: unreadCount },
+  ];
+
+  return (
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 safe-area-pb">
+      <div className="flex items-center justify-around h-16 px-2">
+        {items.map((item) => {
+          const Icon = item.icon;
+          const isActive = location === item.href || location.startsWith(item.href + "/");
+
+          if (item.isCenter) {
+            return (
+              <Link key={item.href} href={item.href}>
+                <div className="flex flex-col items-center justify-center -mt-5">
+                  <div className="h-14 w-14 rounded-full bg-primary shadow-lg flex items-center justify-center transition-transform active:scale-95">
+                    <Plus className="h-7 w-7 text-white" strokeWidth={2.5} />
+                  </div>
+                </div>
+              </Link>
+            );
+          }
+
+          return (
+            <Link key={item.href} href={item.locked ? "/earn" : item.href}>
+              <div className="flex flex-col items-center gap-0.5 px-3 py-1 relative">
+                <div className={cn(
+                  "flex items-center justify-center h-8 w-8 rounded-xl transition-colors",
+                  isActive ? "bg-primary/10" : ""
+                )}>
+                  <Icon className={cn(
+                    "h-5 w-5 transition-colors",
+                    isActive ? "text-primary" : "text-gray-400"
+                  )} />
+                  {item.badge !== undefined && item.badge > 0 && (
+                    <span className="absolute top-0 right-1 h-4 min-w-[16px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                      {item.badge}
+                    </span>
+                  )}
+                  {item.locked && (
+                    <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-amber-400 rounded-full border border-white" />
+                  )}
+                </div>
+                <span className={cn(
+                  "text-[10px] font-medium leading-none",
+                  isActive ? "text-primary" : "text-gray-400"
+                )}>
+                  {item.label}
+                </span>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
+// ============================
 // Authenticated Layout
 // ============================
 export function AuthenticatedLayout({ children }: { children: ReactNode }) {
@@ -248,10 +326,15 @@ export function AuthenticatedLayout({ children }: { children: ReactNode }) {
       {/* Top bar */}
       <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
         <div className="flex items-center h-16 px-4 gap-4">
-          {/* Mobile menu */}
+          {/* Mobile: logo only — bottom nav handles navigation */}
+          <div className="lg:hidden">
+            <Logo />
+          </div>
+
+          {/* Desktop: hamburger sheet for overflow items */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden" data-testid="mobile-menu-btn">
+              <Button variant="ghost" size="icon" className="hidden lg:flex" data-testid="mobile-menu-btn">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
@@ -369,7 +452,7 @@ export function AuthenticatedLayout({ children }: { children: ReactNode }) {
 
         {/* Main content */}
         <main className="flex-1 overflow-auto">
-          <div className="container mx-auto p-4 md:p-6 max-w-7xl">
+          <div className="container mx-auto p-4 md:p-6 max-w-7xl pb-24 lg:pb-6">
             {children}
           </div>
           <div className="lg:hidden">
@@ -377,6 +460,9 @@ export function AuthenticatedLayout({ children }: { children: ReactNode }) {
           </div>
         </main>
       </div>
+
+      {/* Mobile bottom navigation */}
+      <MobileBottomNav />
     </div>
   );
 }

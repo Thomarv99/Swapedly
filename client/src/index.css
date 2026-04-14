@@ -279,3 +279,8 @@
 .help-article-body .tip-box::before { content: "💡 Tip: "; font-weight: 700; }
 .help-article-body .warning-box { background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 0.5rem; padding: 0.875rem 1.25rem; margin: 1.25rem 0; font-size: 0.875rem; color: #92400e; }
 .help-article-body .warning-box::before { content: "⚠️ Note: "; font-weight: 700; }
+
+/* PWA safe area for iPhone home indicator */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
